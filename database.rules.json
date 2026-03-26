@@ -1,0 +1,94 @@
+{
+    "rules": {
+        "users": {
+            ".indexOn": [
+                "email",
+                "ownerId"
+            ],
+            ".read": "auth != null && (query.orderByChild == 'email' || (query.orderByChild == 'ownerId' && (query.equalTo == auth.uid || query.equalTo == root.child('users').child(auth.uid).child('ownerId').val())))",
+            "$uid": {
+                ".read": "auth != null",
+                ".write": "auth != null && (auth.uid == $uid || root.child('users').child(auth.uid).child('role').val() == 'owner' || (root.child('users').child(auth.uid).child('role').val() == 'Admin' && ( (data.exists() && data.child('ownerId').val() == root.child('users').child(auth.uid).child('ownerId').val()) || (newData.exists() && newData.child('ownerId').val() == root.child('users').child(auth.uid).child('ownerId').val()) ) ) || (!newData.exists() && data.child('email').val() == auth.token.email))"
+            }
+        },
+        "shops": {
+            ".indexOn": [
+                "ownerId"
+            ],
+            ".read": "auth != null && (query.equalTo == auth.uid || (query.equalTo != null && root.child('users').child(auth.uid).child('ownerId').val() == query.equalTo))",
+            "$shopId": {
+                ".read": "auth != null && (data.child('ownerId').val() == auth.uid || root.child('users').child(auth.uid).child('ownerId').val() == data.child('ownerId').val())",
+                ".write": "auth != null && ( (!data.exists() && (newData.child('ownerId').val() == auth.uid || root.child('users').child(auth.uid).child('ownerId').val() == newData.child('ownerId').val())) || (data.exists() && (data.child('ownerId').val() == auth.uid || root.child('users').child(auth.uid).child('ownerId').val() == data.child('ownerId').val())) )"
+            }
+        },
+        "notifications": {
+            "$ownerId": {
+                ".read": "auth != null && (auth.uid == $ownerId || root.child('users').child(auth.uid).child('ownerId').val() == $ownerId)",
+                ".write": "auth != null"
+            }
+        },
+        "customers": {
+            ".indexOn": [
+                "shopId",
+                "ownerId",
+                "owner_createdAt"
+            ],
+            ".read": "auth != null && ((query.orderByChild == 'ownerId' && (query.equalTo == auth.uid || query.equalTo == root.child('users').child(auth.uid).child('ownerId').val())) || (query.orderByChild == 'owner_createdAt' && ((query.startAt >= auth.uid && query.startAt <= auth.uid + '\uf8ff') || (query.endAt >= auth.uid && query.endAt <= auth.uid + '\uf8ff') || (query.startAt >= root.child('users').child(auth.uid).child('ownerId').val() && query.startAt <= root.child('users').child(auth.uid).child('ownerId').val() + '\uf8ff') || (query.endAt >= root.child('users').child(auth.uid).child('ownerId').val() && query.endAt <= root.child('users').child(auth.uid).child('ownerId').val() + '\uf8ff'))))",
+            "$customerId": {
+                ".read": "auth != null && (data.child('ownerId').val() == auth.uid || root.child('users').child(auth.uid).child('ownerId').val() == data.child('ownerId').val())",
+                ".write": "auth != null && ( (!data.exists() && (newData.child('ownerId').val() == auth.uid || root.child('users').child(auth.uid).child('ownerId').val() == newData.child('ownerId').val())) || (data.exists() && (data.child('ownerId').val() == auth.uid || root.child('users').child(auth.uid).child('ownerId').val() == data.child('ownerId').val())) )"
+            }
+        },
+        "products": {
+            ".indexOn": [
+                "shopId",
+                "ownerId"
+            ],
+            ".read": "auth != null && (query.equalTo == auth.uid || (query.equalTo != null && root.child('users').child(auth.uid).child('ownerId').val() == query.equalTo))",
+            "$productId": {
+                ".read": "auth != null && (data.child('ownerId').val() == auth.uid || root.child('users').child(auth.uid).child('ownerId').val() == data.child('ownerId').val())",
+                ".write": "auth != null && ( (!data.exists() && (newData.child('ownerId').val() == auth.uid || root.child('users').child(auth.uid).child('ownerId').val() == newData.child('ownerId').val())) || (data.exists() && (data.child('ownerId').val() == auth.uid || root.child('users').child(auth.uid).child('ownerId').val() == data.child('ownerId').val())) )"
+            }
+        },
+        "subscriptions": {
+            ".indexOn": [
+                "customerId",
+                "shopId",
+                "ownerId"
+            ],
+            ".read": "auth != null && (query.equalTo == auth.uid || (query.equalTo != null && root.child('users').child(auth.uid).child('ownerId').val() == query.equalTo))",
+            "$subId": {
+                ".read": "auth != null && (data.child('ownerId').val() == auth.uid || root.child('users').child(auth.uid).child('ownerId').val() == data.child('ownerId').val())",
+                ".write": "auth != null && ( (!data.exists() && (newData.child('ownerId').val() == auth.uid || root.child('users').child(auth.uid).child('ownerId').val() == newData.child('ownerId').val())) || (data.exists() && (data.child('ownerId').val() == auth.uid || root.child('users').child(auth.uid).child('ownerId').val() == data.child('ownerId').val())) )"
+            }
+        },
+        "subscription_logs": {
+            "$shopId": {
+                ".read": "auth != null",
+                "$logId": {
+                    ".write": "auth != null && (root.child('shops').child($shopId).child('ownerId').val() == auth.uid || root.child('users').child(auth.uid).child('ownerId').val() == root.child('shops').child($shopId).child('ownerId').val() || (root.child('users').child(auth.uid).child('role').val() == 'owner' && auth.uid == root.child('shops').child($shopId).child('ownerId').val()))"
+                }
+            }
+        },
+        "shop_subscriptions": {
+            "$shopId": {
+                ".read": "auth != null && (root.child('admins').child(auth.uid).exists() || root.child('shops').child($shopId).child('ownerId').val() == auth.uid || root.child('users').child(auth.uid).child('ownerId').val() == root.child('shops').child($shopId).child('ownerId').val())",
+                ".write": "auth != null && root.child('admins').child(auth.uid).exists()"
+            }
+        },
+        "shop_subscription_logs": {
+            ".indexOn": [
+                "shopId"
+            ],
+            ".read": "auth != null && (root.child('admins').child(auth.uid).exists() || (query.orderByChild == 'shopId' && (root.child('shops').child(query.equalTo).child('ownerId').val() == auth.uid || root.child('users').child(auth.uid).child('ownerId').val() == root.child('shops').child(query.equalTo).child('ownerId').val())))",
+            "$logId": {
+                ".read": "auth != null && (root.child('admins').child(auth.uid).exists() || root.child('shops').child(data.child('shopId').val()).child('ownerId').val() == auth.uid || root.child('users').child(auth.uid).child('ownerId').val() == root.child('shops').child(data.child('shopId').val()).child('ownerId').val())",
+                ".write": "auth != null && root.child('admins').child(auth.uid).exists()"
+            }
+        },
+        "app_config": {
+            ".read": true,
+            ".write": "auth != null && root.child('admins').child(auth.uid).exists()"
+        }
+    }
+}

@@ -1,0 +1,335 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/theme/app_colors.dart';
+import 'package:csms/features/customer/domain/entities/customer_entity.dart';
+import 'package:csms/features/subscription/domain/entities/subscription_entity.dart';
+import 'package:csms/features/product/domain/entities/product_entity.dart';
+import 'package:csms/features/customer/presentation/bloc/customer_bloc.dart';
+import 'package:csms/core/utils/loading_overlay.dart';
+import 'package:csms/core/utils/terminology_helper.dart';
+
+class EditCustomerPage extends StatefulWidget {
+  final CustomerEntity customer;
+  final List<ProductEntity> products;
+  final String shopCategory;
+
+  const EditCustomerPage({
+    super.key,
+    required this.customer,
+    required this.products,
+    required this.shopCategory,
+  });
+
+  @override
+  State<EditCustomerPage> createState() => _EditCustomerPageState();
+}
+
+class _EditCustomerPageState extends State<EditCustomerPage> {
+  final _formKey = GlobalKey<FormState>();
+  late TextEditingController _nameController;
+  late TextEditingController _phoneController;
+  late String _selectedStatus;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.customer.name);
+    _phoneController = TextEditingController(text: widget.customer.mobileNumber);
+    _selectedStatus = widget.customer.status;
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  String _fmt(DateTime? d) {
+    if (d == null) return 'N/A';
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return '${months[d.month - 1]} ${d.day}, ${d.year}';
+  }
+
+  void _submit() {
+    if (_formKey.currentState!.validate()) {
+      _showConfirmDialog();
+    }
+  }
+
+  void _showConfirmDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Confirm Changes'),
+        content: Text(
+          'Are you sure you want to save the changes for "${_nameController.text.trim()}"?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.textLight)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              final updated = widget.customer.copyWith(
+                name: _nameController.text.trim(),
+                mobileNumber: _phoneController.text.trim(),
+                status: _selectedStatus,
+                updatedAt: DateTime.now(),
+              );
+
+              context.read<CustomerBloc>().add(UpdateCustomerInfo(customer: updated));
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: const Text('Confirm', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leadingWidth: 48,
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
+        ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Edit ${TerminologyHelper.getTerminology(widget.shopCategory).customerLabel}',
+              style: TextStyle(
+                color: AppColors.textDark,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+            Text(
+              'Update ${TerminologyHelper.getTerminology(widget.shopCategory).customerLabel.toLowerCase()} details',
+              style: TextStyle(
+                color: AppColors.textLight.withOpacity(0.8),
+                fontSize: 13,
+                fontWeight: FontWeight.normal,
+              ),
+            ),
+          ],
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1.0),
+          child: Container(color: AppColors.border, height: 1.0),
+        ),
+      ),
+      body: BlocConsumer<CustomerBloc, CustomerState>(
+        listener: (context, state) {
+          if (state is CustomerLoading) {
+            LoadingOverlay.show(context);
+          } else if (state is CustomerSuccess) {
+            LoadingOverlay.hide();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('${TerminologyHelper.getTerminology(widget.shopCategory).customerLabel} updated successfully!'),
+                backgroundColor: Colors.green,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+            Navigator.pop(context);
+          } else if (state is CustomerError) {
+            LoadingOverlay.hide();
+            if (state.message.contains('already used')) {
+              showDialog(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  title: const Text('Number Already Used'),
+                  content: Text(state.message),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      child: const Text('OK', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('${state.message}'), 
+                  backgroundColor: Colors.red,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            }
+          }
+        },
+        builder: (context, state) {
+          return SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildLabel('${TerminologyHelper.getTerminology(widget.shopCategory).customerLabel} Name *'),
+                  TextFormField(
+                    controller: _nameController,
+                    maxLength: 20,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9\s]')),
+                    ],
+                    decoration: InputDecoration(
+                      hintText: 'Enter ${TerminologyHelper.getTerminology(widget.shopCategory).customerLabel.toLowerCase()} name',
+                      prefixIcon: const Icon(Icons.person_outline),
+                      counterText: '',
+                    ),
+                    validator: (v) {
+                      if (v == null || v.trim().isEmpty) return 'Name is required';
+                      if (v.length > 20) return 'Maximum 20 characters';
+                      if (RegExp(r'[!@#<>?":_`~;[\]\\|=+)(*&^%/-]').hasMatch(v)) {
+                         return 'Special characters not allowed';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 20),
+
+                  _buildLabel('Phone Number *'),
+                  TextFormField(
+                    controller: _phoneController,
+                    keyboardType: TextInputType.number,
+                    maxLength: 10,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                    ],
+                    decoration: const InputDecoration(
+                      hintText: 'Enter 10-digit phone number',
+                      prefixIcon: Icon(Icons.phone_outlined),
+                      counterText: '',
+                    ),
+                    validator: (v) {
+                      if (v == null || v.isEmpty) return 'Phone is required';
+                      if (v.length != 10) return 'Must be exactly 10 digits';
+                      if (!RegExp(r'^[0-9]+$').hasMatch(v)) return 'Numbers only';
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Customer Status
+                  _buildLabel('Account Status'),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _statusButton(
+                          label: 'Active',
+                          isActive: _selectedStatus.toLowerCase() == 'active',
+                          onPressed: () => setState(() => _selectedStatus = 'active'),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _statusButton(
+                          label: 'Inactive',
+                          isActive: _selectedStatus.toLowerCase() == 'inactive',
+                          onPressed: () => setState(() => _selectedStatus = 'inactive'),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton(
+                      onPressed: _submit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        'Save Changes',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _statusButton({
+    required String label,
+    required bool isActive,
+    required VoidCallback onPressed,
+  }) {
+    return InkWell(
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: isActive 
+              ? (label == 'Active' ? AppColors.success.withOpacity(0.1) : Colors.red.withOpacity(0.1))
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isActive 
+                ? (label == 'Active' ? AppColors.success : Colors.red)
+                : AppColors.border,
+            width: 1.5,
+          ),
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isActive 
+                  ? (label == 'Active' ? AppColors.success : Colors.red)
+                  : AppColors.textLight,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLabel(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontWeight: FontWeight.w600,
+          color: AppColors.textDark,
+          fontSize: 14,
+        ),
+      ),
+    );
+  }
+}

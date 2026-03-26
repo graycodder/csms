@@ -1,0 +1,222 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:csms/core/theme/app_colors.dart';
+import 'package:csms/features/shop/domain/entities/shop_entity.dart';
+
+class ShopEditCard extends StatefulWidget {
+  final ShopEntity shop;
+  final Function(String name, String shopAddress, String category, String phone) onSave;
+  final VoidCallback onCancel;
+
+  const ShopEditCard({
+    super.key,
+    required this.shop,
+    required this.onSave,
+    required this.onCancel,
+  });
+
+  @override
+  State<ShopEditCard> createState() => _ShopEditCardState();
+}
+
+class _ShopEditCardState extends State<ShopEditCard> {
+  final _formKey = GlobalKey<FormState>();
+  late TextEditingController _nameController;
+  late TextEditingController _addressController;
+  late TextEditingController _categoryController;
+  late TextEditingController _phoneController;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.shop.shopName);
+    _addressController = TextEditingController(text: widget.shop.shopAddress);
+    _categoryController = TextEditingController(text: widget.shop.category);
+    _phoneController = TextEditingController(text: widget.shop.phone ?? '');
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _addressController.dispose();
+    _categoryController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border.withOpacity(0.5)),
+      ),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Business Information',
+                  style: TextStyle(
+                    color: AppColors.textDark,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        if (_formKey.currentState?.validate() ?? false) {
+                          widget.onSave(
+                            _nameController.text.trim(),
+                            _addressController.text.trim(),
+                            _categoryController.text.trim(),
+                            _phoneController.text.trim(),
+                          );
+                        }
+                      },
+                      child: Row(
+                        children: const [
+                          Icon(Icons.check, size: 16, color: AppColors.success),
+                          SizedBox(width: 4),
+                          Text(
+                            'Save',
+                            style: TextStyle(
+                              color: AppColors.success,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    GestureDetector(
+                      onTap: widget.onCancel,
+                      child: Row(
+                        children: const [
+                          Icon(Icons.close, size: 16, color: AppColors.textLight),
+                          SizedBox(width: 4),
+                          Text(
+                            'Cancel',
+                            style: TextStyle(
+                              color: AppColors.textLight,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            _buildEditField(
+              title: 'Business Name',
+              controller: _nameController,
+              maxLength: 20,
+              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9\s]'))],
+              validator: (v) {
+                if (v == null || v.trim().isEmpty) return 'Required';
+                if (v.length > 20) return 'Max 20 characters';
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            _buildEditField(
+              title: 'Business Address',
+              controller: _addressController,
+              maxLength: 40,
+              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9\s,.-]'))],
+              validator: (v) {
+                if (v == null || v.trim().isEmpty) return 'Required';
+                if (v.length > 40) return 'Max 40 characters';
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            _buildEditField(
+              title: 'Category',
+              controller: _categoryController,
+              maxLength: 20,
+              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9\s]'))],
+              validator: (v) {
+                if (v == null || v.trim().isEmpty) return 'Required';
+                if (v.length > 20) return 'Max 20 characters';
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            _buildEditField(
+              title: 'Contact Phone',
+              controller: _phoneController,
+              maxLength: 10,
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              validator: (v) {
+                if (v == null || v.isEmpty) return 'Required';
+                if (v.length != 10) return 'Must be 10 digits';
+                return null;
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEditField({
+    required String title,
+    required TextEditingController controller,
+    int? maxLength,
+    List<TextInputFormatter>? inputFormatters,
+    String? Function(String?)? validator,
+    TextInputType? keyboardType,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            color: AppColors.textLight,
+            fontWeight: FontWeight.w600,
+            fontSize: 13,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          maxLength: maxLength,
+          inputFormatters: inputFormatters,
+          validator: validator,
+          keyboardType: keyboardType,
+          style: const TextStyle(fontSize: 15, color: AppColors.textDark),
+          decoration: InputDecoration(
+            counterText: '',
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: AppColors.border),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: AppColors.border),
+            ),
+            errorStyle: const TextStyle(fontSize: 11),
+          ),
+        ),
+      ],
+    );
+  }
+}

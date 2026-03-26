@@ -1,0 +1,73 @@
+00:00 +0: loading /Users/vimaldas/Desktop/csms/test/features/dashboard/presentation/widgets/customer_card_test.dart                                                                                    00:01 +0: loading /Users/vimaldas/Desktop/csms/test/features/dashboard/presentation/widgets/customer_card_test.dart                                                                                    test/features/dashboard/presentation/widgets/customer_card_test.dart:34:33: Error: Required named parameter 'autoArchiveExpired' must be provided.
+    settings: const ShopSettings(
+                                ^
+lib/features/shop/domain/entities/shop_entity.dart:11:9: Context: Found this candidate, but the arguments don't match.
+  const ShopSettings({
+        ^^^^^^^^^^^^
+test/features/dashboard/presentation/widgets/customer_card_test.dart:26:27: Error: Required named parameter 'updatedById' must be provided.
+  final tShop = ShopEntity(
+                          ^
+lib/features/shop/domain/entities/shop_entity.dart:65:9: Context: Found this candidate, but the arguments don't match.
+  const ShopEntity({
+        ^^^^^^^^^^
+test/features/dashboard/presentation/widgets/customer_card_test.dart:73:7: Error: No named parameter with the name 'subscriptions'.
+      subscriptions: [activeSub],
+      ^^^^^^^^^^^^^
+lib/features/dashboard/presentation/bloc/dashboard_bloc.dart:61:9: Context: Found this candidate, but the arguments don't match.
+  const DashboardLoaded({
+        ^^^^^^^^^^^^^^^
+test/features/dashboard/presentation/widgets/customer_card_test.dart:108:7: Error: No named parameter with the name 'subscriptions'.
+      subscriptions: [expiringSub],
+      ^^^^^^^^^^^^^
+lib/features/dashboard/presentation/bloc/dashboard_bloc.dart:61:9: Context: Found this candidate, but the arguments don't match.
+  const DashboardLoaded({
+        ^^^^^^^^^^^^^^^
+00:02 +0: loading /Users/vimaldas/Desktop/csms/test/features/dashboard/presentation/widgets/customer_card_test.dart                                                                                    00:03 +0: loading /Users/vimaldas/Desktop/csms/test/features/dashboard/presentation/widgets/customer_card_test.dart                                                                                    00:03 +0 -1: loading /Users/vimaldas/Desktop/csms/test/features/dashboard/presentation/widgets/customer_card_test.dart [E]                                                                             
+  Failed to load "/Users/vimaldas/Desktop/csms/test/features/dashboard/presentation/widgets/customer_card_test.dart":
+  Compilation failed for testPath=/Users/vimaldas/Desktop/csms/test/features/dashboard/presentation/widgets/customer_card_test.dart: test/features/dashboard/presentation/widgets/customer_card_test.dart:34:33: Error: Required named parameter 'autoArchiveExpired' must be provided.
+      settings: const ShopSettings(
+                                  ^
+  lib/features/shop/domain/entities/shop_entity.dart:11:9: Context: Found this candidate, but the arguments don't match.
+    const ShopSettings({
+          ^^^^^^^^^^^^
+  test/features/dashboard/presentation/widgets/customer_card_test.dart:26:27: Error: Required named parameter 'updatedById' must be provided.
+    final tShop = ShopEntity(
+                            ^
+  lib/features/shop/domain/entities/shop_entity.dart:65:9: Context: Found this candidate, but the arguments don't match.
+    const ShopEntity({
+          ^^^^^^^^^^
+  test/features/dashboard/presentation/widgets/customer_card_test.dart:73:7: Error: No named parameter with the name 'subscriptions'.
+        subscriptions: [activeSub],
+        ^^^^^^^^^^^^^
+  lib/features/dashboard/presentation/bloc/dashboard_bloc.dart:61:9: Context: Found this candidate, but the arguments don't match.
+    const DashboardLoaded({
+          ^^^^^^^^^^^^^^^
+  test/features/dashboard/presentation/widgets/customer_card_test.dart:108:7: Error: No named parameter with the name 'subscriptions'.
+        subscriptions: [expiringSub],
+        ^^^^^^^^^^^^^
+  lib/features/dashboard/presentation/bloc/dashboard_bloc.dart:61:9: Context: Found this candidate, but the arguments don't match.
+    const DashboardLoaded({
+          ^^^^^^^^^^^^^^^
+  .
+
+To run this test again: /Users/vimaldas/Developement/flutter/bin/cache/dart-sdk/bin/dart test /Users/vimaldas/Desktop/csms/test/features/dashboard/presentation/widgets/customer_card_test.dart -p vm --plain-name 'loading /Users/vimaldas/Desktop/csms/test/features/dashboard/presentation/widgets/customer_card_test.dart'
+  Error: The Dart compiler exited unexpectedly.
+  package:flutter_tools/src/base/common.dart 34:3  throwToolExit
+  package:flutter_tools/src/compile.dart 914:11    DefaultResidentCompiler._compile.<fn>
+  dart:async/zone_root.dart 48:47                  _rootRunUnary
+  dart:async/zone.dart 733:19                      _CustomZone.runUnary
+  dart:async/future_impl.dart 948:45               Future._propagateToListeners.handleValueCallback
+  dart:async/future_impl.dart 977:13               Future._propagateToListeners
+  dart:async/future_impl.dart 862:9                Future._propagateToListeners
+  dart:async/future_impl.dart 720:5                Future._completeWithValue
+  dart:async/future_impl.dart 804:7                Future._asyncCompleteWithValue.<fn>
+  dart:async/zone_root.dart 35:13                  _rootRun
+  dart:async/zone.dart 726:19                      _CustomZone.run
+  dart:async/zone.dart 625:7                       _CustomZone.runGuarded
+  dart:async/zone.dart 666:23                      _CustomZone.bindCallbackGuarded.<fn>
+  dart:async/schedule_microtask.dart 40:35         _microtaskLoop
+  dart:async/schedule_microtask.dart 49:5          _startMicrotaskLoop
+  dart:isolate-patch/isolate_patch.dart 127:13     _runPendingImmediateCallback
+  dart:isolate-patch/isolate_patch.dart 194:5      _RawReceivePort._handleMessage
+  
+00:04 +0 -1: loading /Users/vimaldas/Desktop/csms/test/features/customer/data/repositories/customer_repository_impl_test.dart                                                                          00:04 +0 -1: /Users/vimaldas/Desktop/csms/test/features/customer/data/repositories/customer_repository_impl_test.dart: CustomerRepositoryImpl getCustomers should build the correct paginated query    00:04 +1 -1: /Users/vimaldas/Desktop/csms/test/features/customer/data/repositories/customer_repository_impl_test.dart: CustomerRepositoryImpl getCustomers should build the correct paginated query    00:04 +1 -1: /Users/vimaldas/Desktop/csms/test/features/customer/data/repositories/customer_repository_impl_test.dart: ... getCustomers should trigger legacy fallback if first page is empty          00:04 +2 -1: /Users/vimaldas/Desktop/csms/test/features/customer/data/repositories/customer_repository_impl_test.dart: ... getCustomers should trigger legacy fallback if first page is empty          00:04 +2 -1: loading /Users/vimaldas/Desktop/csms/test/features/customer/data/models/customer_model_test.dart                                                                                          00:04 +2 -1: /Users/vimaldas/Desktop/csms/test/features/customer/data/models/customer_model_test.dart: CustomerModel should be a subclass of CustomerEntity                                            00:04 +3 -1: /Users/vimaldas/Desktop/csms/test/features/customer/data/models/customer_model_test.dart: CustomerModel should be a subclass of CustomerEntity                                            00:04 +3 -1: /Users/vimaldas/Desktop/csms/test/features/customer/data/models/customer_model_test.dart: CustomerModel fromJson should return a valid model when JSON has int dates                      00:04 +4 -1: /Users/vimaldas/Desktop/csms/test/features/customer/data/models/customer_model_test.dart: CustomerModel fromJson should return a valid model when JSON has int dates                      00:04 +4 -1: /Users/vimaldas/Desktop/csms/test/features/customer/data/models/customer_model_test.dart: CustomerModel toJson should return a JSON map containing proper data                            00:04 +5 -1: /Users/vimaldas/Desktop/csms/test/features/customer/data/models/customer_model_test.dart: CustomerModel toJson should return a JSON map containing proper data                            00:04 +5 -1: /Users/vimaldas/Desktop/csms/test/features/customer/data/models/customer_model_test.dart: CustomerModel toJson should auto-generate owner_createdAt if it is empty                        00:04 +6 -1: /Users/vimaldas/Desktop/csms/test/features/customer/data/models/customer_model_test.dart: CustomerModel toJson should auto-generate owner_createdAt if it is empty                        00:05 +6 -1: /Users/vimaldas/Desktop/csms/test/features/customer/data/models/customer_model_test.dart: CustomerModel toJson should auto-generate owner_createdAt if it is empty                        00:05 +6 -1: loading /Users/vimaldas/Desktop/csms/test/features/customer/presentation/bloc/customer_bloc_test.dart                                                                                     00:05 +6 -1: /Users/vimaldas/Desktop/csms/test/features/customer/presentation/bloc/customer_bloc_test.dart: (setUpAll)                                                                                 00:05 +6 -1: /Users/vimaldas/Desktop/csms/test/features/customer/presentation/bloc/customer_bloc_test.dart: CustomerBloc initial state should be CustomerInitial                                       00:05 +7 -1: /Users/vimaldas/Desktop/csms/test/features/customer/presentation/bloc/customer_bloc_test.dart: CustomerBloc initial state should be CustomerInitial                                       00:05 +7 -1: /Users/vimaldas/Desktop/csms/test/features/customer/presentation/bloc/customer_bloc_test.dart: CustomerBloc emits [CustomerLoading, CustomerSuccess] when UpdateCustomerInfo is successful00:05 +8 -1: /Users/vimaldas/Desktop/csms/test/features/customer/presentation/bloc/customer_bloc_test.dart: CustomerBloc emits [CustomerLoading, CustomerSuccess] when UpdateCustomerInfo is successful00:05 +8 -1: /Users/vimaldas/Desktop/csms/test/features/customer/presentation/bloc/customer_bloc_test.dart: CustomerBloc emits [CustomerLoading, CustomerError] when UpdateCustomerInfo fails          00:05 +9 -1: /Users/vimaldas/Desktop/csms/test/features/customer/presentation/bloc/customer_bloc_test.dart: CustomerBloc emits [CustomerLoading, CustomerError] when UpdateCustomerInfo fails          00:05 +9 -1: /Users/vimaldas/Desktop/csms/test/features/customer/presentation/bloc/customer_bloc_test.dart: ... CustomerSuccess] when RenewCustomerSubscription is successful and triggers notification00:05 +10 -1: /Users/vimaldas/Desktop/csms/test/features/customer/presentation/bloc/customer_bloc_test.dart: ... when RenewCustomerSubscription is successful and triggers notification                00:05 +10 -1: /Users/vimaldas/Desktop/csms/test/features/customer/presentation/bloc/customer_bloc_test.dart: (tearDownAll)                                                                             00:05 +10 -1: Some tests failed.                                                                                                                                                                       
