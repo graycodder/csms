@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'package:csms/features/customer/presentation/bloc/customer_bloc.dart';
@@ -283,6 +284,10 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
                   TextField(
                     controller: _priceController,
                     keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      FilteringTextInputFormatter.deny(RegExp(r'^0')),
+                    ],
                     decoration: const InputDecoration(
                       hintText: 'Enter price',
                     ),
@@ -304,6 +309,10 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
                             TextField(
                               controller: _validityController,
                               keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                                FilteringTextInputFormatter.deny(RegExp(r'^0')),
+                              ],
                               onChanged: (v) {
                                 setState(() {
                                   _selectedValue = int.tryParse(v);

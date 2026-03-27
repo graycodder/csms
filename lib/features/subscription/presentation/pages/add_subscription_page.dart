@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'package:csms/features/product/domain/entities/product_entity.dart';
@@ -6,37 +7,7 @@ import 'package:csms/features/customer/presentation/bloc/customer_bloc.dart';
 import 'package:csms/core/utils/loading_overlay.dart';
 import 'package:csms/core/utils/terminology_helper.dart';
 
-void showAddSubscriptionSheet(
-  BuildContext context, {
-  required String customerId,
-  required String customerName,
-  required String shopId,
-  required String ownerId,
-  required String updatedById,
-  required String updatedByName,
-  required List<ProductEntity> products,
-  required String shopCategory,
-  List<String> existingProductIds = const [],
-}) {
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    builder: (context) => _AddSubscriptionSheet(
-      customerId: customerId,
-      customerName: customerName,
-      shopId: shopId,
-      ownerId: ownerId,
-      updatedById: updatedById,
-      updatedByName: updatedByName,
-      products: products,
-      shopCategory: shopCategory,
-      existingProductIds: existingProductIds,
-    ),
-  );
-}
-
-class _AddSubscriptionSheet extends StatefulWidget {
+class AddSubscriptionPage extends StatefulWidget {
   final String customerId;
   final String customerName;
   final String shopId;
@@ -47,7 +18,8 @@ class _AddSubscriptionSheet extends StatefulWidget {
   final String shopCategory;
   final List<String> existingProductIds;
 
-  const _AddSubscriptionSheet({
+  const AddSubscriptionPage({
+    super.key,
     required this.customerId,
     required this.customerName,
     required this.shopId,
@@ -60,10 +32,10 @@ class _AddSubscriptionSheet extends StatefulWidget {
   });
 
   @override
-  State<_AddSubscriptionSheet> createState() => _AddSubscriptionSheetState();
+  State<AddSubscriptionPage> createState() => _AddSubscriptionPageState();
 }
 
-class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
+class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
   ProductEntity? _selectedProduct;
   final List<String> _units = ['days', 'months', 'years'];
   late String _selectedUnit;
@@ -95,44 +67,38 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
   }
 
   @override
+  void dispose() {
+    _validityController.dispose();
+    _priceController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(30),
-          topRight: Radius.circular(30),
+    final terminology = TerminologyHelper.getTerminology(widget.shopCategory);
+    
+    return Scaffold(
+      backgroundColor: const Color(0xFFF2F4F7),
+      appBar: AppBar(
+        title: Text(
+          'Add New ${terminology.planLabel}',
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: AppColors.textDark,
+          ),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
+          onPressed: () => Navigator.pop(context),
         ),
       ),
-      padding: EdgeInsets.only(
-        left: 24,
-        right: 24,
-        top: 32,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 32,
-      ),
-      child: SingleChildScrollView(
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Add New ${TerminologyHelper.getTerminology(widget.shopCategory).planLabel}',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textDark,
-                  ),
-                ),
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
             Text(
               'Assign a new product to ${widget.customerName}',
               style: const TextStyle(color: AppColors.textLight, fontSize: 15),
@@ -172,8 +138,11 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
               TextField(
                 controller: _priceController,
                 keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  FilteringTextInputFormatter.deny(RegExp(r'^0')),
+                ],
                 decoration: const InputDecoration(
-                  prefixIcon: Icon(Icons.attach_money),
                   hintText: 'Enter price',
                 ),
               ),
@@ -182,6 +151,7 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
 
             if (_selectedProduct?.validityType == 'flexible') ...[
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
                     flex: 2,
@@ -193,8 +163,12 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
                         TextField(
                           controller: _validityController,
                           keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            FilteringTextInputFormatter.deny(RegExp(r'^0')),
+                          ],
                           decoration: const InputDecoration(
-                            prefixIcon: Icon(Icons.timer_outlined),
+                            hintText: 'Validity',
                           ),
                         ),
                       ],
@@ -236,7 +210,7 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'This ${TerminologyHelper.getTerminology(widget.shopCategory).planLabel.toLowerCase()} is fixed at ₹${_selectedProduct!.price.toStringAsFixed(0)} for ${_selectedProduct!.validityValue} ${_selectedProduct!.validityUnit}.',
+                        'This ${terminology.planLabel.toLowerCase()} is fixed at ₹${_selectedProduct!.price.toStringAsFixed(0)} for ${_selectedProduct!.validityValue} ${_selectedProduct!.validityUnit}.',
                         style: const TextStyle(color: AppColors.textDark, fontSize: 14),
                       ),
                     ),
@@ -250,16 +224,13 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
               width: double.infinity,
               height: 56,
               child: ElevatedButton(
-                onPressed: () {
-                  if (_selectedProduct == null) return;
-                  _showConfirmDialog();
-                },
+                onPressed: _onAddPlanPressed,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
                 child: Text(
-                  'Add ${TerminologyHelper.getTerminology(widget.shopCategory).planLabel}',
+                  'Add ${terminology.planLabel}',
                   style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
               ),
@@ -270,14 +241,44 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
     );
   }
 
+  void _onAddPlanPressed() {
+    if (_selectedProduct == null) return;
+    
+    // Check flexible price
+    if (_selectedProduct!.priceType == 'flexible') {
+      final p = double.tryParse(_priceController.text.trim()) ?? 0;
+      if (p <= 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please enter a price greater than 0')),
+        );
+        return;
+      }
+    }
+    
+    // Check flexible validity
+    if (_selectedProduct!.validityType == 'flexible') {
+      final v = int.tryParse(_validityController.text.trim()) ?? 0;
+      if (v <= 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please enter a validity greater than 0')),
+        );
+        return;
+      }
+    }
+    
+    _showConfirmDialog();
+  }
+
   void _showConfirmDialog() {
+    final terminology = TerminologyHelper.getTerminology(widget.shopCategory);
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Confirm New ${TerminologyHelper.getTerminology(widget.shopCategory).planLabel}'),
+        title: Text('Confirm New ${terminology.planLabel}'),
         content: Text(
-          'Are you sure you want to add the "${_selectedProduct?.name}" ${TerminologyHelper.getTerminology(widget.shopCategory).planLabel.toLowerCase()} to ${widget.customerName}?',
+          'Are you sure you want to add the "${_selectedProduct?.name}" ${terminology.planLabel.toLowerCase()} to ${widget.customerName}?',
         ),
         actions: [
           TextButton(
@@ -287,7 +288,6 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context); // Close dialog
-              Navigator.pop(context); // Close bottom sheet
               
               final val = int.tryParse(_validityController.text) ?? 1;
               context.read<CustomerBloc>().add(AddSubscription(
@@ -304,6 +304,8 @@ class _AddSubscriptionSheetState extends State<_AddSubscriptionSheet> {
                     customerName: widget.customerName,
                     productName: _selectedProduct!.name,
                   ));
+              
+              Navigator.pop(context); // Close page
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,

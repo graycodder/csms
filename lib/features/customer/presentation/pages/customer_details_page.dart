@@ -5,7 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import 'edit_customer_page.dart';
 import 'package:csms/features/subscription/presentation/pages/renew_subscription_page.dart';
 import 'package:csms/features/subscription/presentation/pages/edit_subscription_page.dart';
-import 'package:csms/features/subscription/presentation/widgets/add_subscription_sheet.dart';
+import 'package:csms/features/subscription/presentation/pages/add_subscription_page.dart';
 import 'package:csms/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:csms/features/customer/domain/entities/customer_entity.dart';
 import 'package:csms/features/subscription/domain/entities/subscription_entity.dart';
@@ -135,17 +135,24 @@ class CustomerDetailsPage extends StatelessWidget {
                                       if (availableProducts.isEmpty) return const SizedBox.shrink();
 
                                       return TextButton.icon(
-                                        onPressed: () => showAddSubscriptionSheet(
+                                        onPressed: () => Navigator.push(
                                           context,
-                                          customerId: customer.customerId,
-                                          customerName: customer.name,
-                                          shopId: customer.shopId,
-                                          ownerId: customer.ownerId,
-                                          updatedById: authState is AuthAuthenticated ? authState.userId : '',
-                                          updatedByName: authState is AuthAuthenticated ? authState.name : 'Staff',
-                                          products: state.products,
-                                          shopCategory: state.shop.category,
-                                          existingProductIds: existingProductIds,
+                                          MaterialPageRoute(
+                                            builder: (_) => BlocProvider.value(
+                                              value: context.read<CustomerBloc>(),
+                                              child: AddSubscriptionPage(
+                                                customerId: customer.customerId,
+                                                customerName: customer.name,
+                                                shopId: customer.shopId,
+                                                ownerId: customer.ownerId,
+                                                updatedById: authState is AuthAuthenticated ? authState.userId : '',
+                                                updatedByName: authState is AuthAuthenticated ? authState.name : 'Staff',
+                                                products: state.products,
+                                                shopCategory: state.shop.category,
+                                                existingProductIds: existingProductIds,
+                                              ),
+                                            ),
+                                          ),
                                         ),
                                         icon: const Icon(Icons.add, color: Colors.white),
                                         label: Text('Add New ${term.planLabel}', style: TextStyle(color: Colors.white)),
