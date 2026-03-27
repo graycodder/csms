@@ -59,7 +59,7 @@ class StaffItemCard extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      staff.name,
+                      staff.name[0].toUpperCase() + staff.name.substring(1).toLowerCase(),
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 15.sp,

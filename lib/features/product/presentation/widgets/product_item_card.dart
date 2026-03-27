@@ -57,7 +57,7 @@ class ProductItemCard extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        product.name,
+                        product.name[0].toUpperCase() + product.name.substring(1).toLowerCase(),
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 15.sp,
