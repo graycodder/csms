@@ -21,7 +21,7 @@ class TerminologyHelper {
       planLabel: 'Plan',
       renewActionLabel: 'Renew Membership',
       customerLabel: 'Member',
-      reminderMessageTemplate: "Dear {customer_name},\n\nThis is a friendly reminder from {shop_name} regarding your {sub_label}. Your {plan_label} for {product_name} is scheduled to expire in {days_left} days, on {end_date}.\n\nTo ensure uninterrupted access to our facilities, please {renew_label} at your earliest convenience.\n\nThank you!",
+      reminderMessageTemplate: "Dear {customer_name},\n\nThis is a friendly reminder from {shop_name} regarding your {sub_label}. Your {plan_label} for {product_name} is scheduled to expire in {days_left} days, on {end_date}.\n\nTo ensure uninterrupted access to our facilities, please {renew_label} at your earliest convenience.\n\nThank you for being a valued member!",
     ),
     'Automobile Shop': BusinessTerminology(
       subscriptionLabel: 'Service/AMC',
