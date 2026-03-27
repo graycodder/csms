@@ -35,23 +35,51 @@ class ShopEditPage extends StatelessWidget {
         child: ShopEditCard(
           shop: shop,
           onSave: (name, shopAddress, category, phone) {
-            final updatedShop = ShopEntity(
-              shopId: shop.shopId,
-              ownerId: shop.ownerId,
-              shopName: name,
-              shopAddress: shopAddress,
-              category: category,
-              phone: phone,
-              settings: shop.settings,
-              createdAt: shop.createdAt,
-              updatedAt: DateTime.now(),
-              updatedById: shop.updatedById,
-            );
-            _updateShop(context, updatedShop);
-            Navigator.pop(context);
+            _showConfirmDialog(context, name, shopAddress, category, phone);
           },
           onCancel: () => Navigator.pop(context),
         ),
+      ),
+    );
+  }
+
+  void _showConfirmDialog(BuildContext context, String name, String address, String category, String phone) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Confirm Changes', style: TextStyle(fontWeight: FontWeight.bold)),
+        content: const Text('Are you sure you want to update the business information?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.textLight)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx); // Close dialog
+              final updatedShop = ShopEntity(
+                shopId: shop.shopId,
+                ownerId: shop.ownerId,
+                shopName: name,
+                shopAddress: address,
+                category: category,
+                phone: phone,
+                settings: shop.settings,
+                createdAt: shop.createdAt,
+                updatedAt: DateTime.now(),
+                updatedById: shop.updatedById,
+              );
+              _updateShop(context, updatedShop);
+              Navigator.pop(context); // Close page
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: const Text('Confirm', style: TextStyle(color: Colors.white)),
+          ),
+        ],
       ),
     );
   }
