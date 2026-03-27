@@ -6,8 +6,7 @@ import 'package:csms/features/product/presentation/pages/product_management_page
 import 'package:csms/features/product/presentation/bloc/product_bloc.dart';
 import 'package:csms/features/staff/presentation/pages/staff_management_page.dart';
 import 'package:csms/features/staff/presentation/bloc/staff_bloc.dart';
-import 'package:csms/features/settings/presentation/terms_and_conditions_page.dart';
-import 'package:csms/features/settings/presentation/privacy_policy_page.dart';
+import 'package:csms/core/presentation/pages/webview_page.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_event.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_state.dart';
@@ -193,7 +192,12 @@ class SettingsPage extends StatelessWidget {
         subtitle: 'View terms of service',
         onTap: () => Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const TermsAndConditionsPage()),
+          MaterialPageRoute(
+            builder: (_) => const WebViewPage(
+              title: 'Terms & Conditions',
+              url: 'https://csms-saas-platform.web.app/legal/terms',
+            ),
+          ),
         ),
       ),
       _SettingItem(
@@ -204,7 +208,12 @@ class SettingsPage extends StatelessWidget {
         subtitle: 'View privacy policy',
         onTap: () => Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const PrivacyPolicyPage()),
+          MaterialPageRoute(
+            builder: (_) => const WebViewPage(
+              title: 'Privacy Policy',
+              url: 'https://csms-saas-platform.web.app/legal/privacy',
+            ),
+          ),
         ),
       ),
       _SettingItem(
