@@ -14,6 +14,7 @@ import 'package:csms/features/auth/presentation/pages/login_page.dart';
 import 'package:csms/features/profile/presentation/pages/profile_page.dart';
 import 'package:csms/features/shop_subscription/presentation/pages/shop_subscription_page.dart';
 import 'package:csms/injection_container.dart' as di;
+import 'package:package_info_plus/package_info_plus.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -216,16 +217,16 @@ class SettingsPage extends StatelessWidget {
           ),
         ),
       ),
-      _SettingItem(
-        icon: Icons.logout,
-        iconBg: const Color(0xFFFFEBEE),
-        iconColor: const Color(0xFFE53935),
-        title: 'Log Out',
-        subtitle: 'Sign out of your account',
-        titleColor: const Color(0xFFE53935),
-        onTap: () => _confirmLogout(context),
-        isLast: true,
-      ),
+      // _SettingItem(
+      //   icon: Icons.logout,
+      //   iconBg: const Color(0xFFFFEBEE),
+      //   iconColor: const Color(0xFFE53935),
+      //   title: 'Log Out',
+      //   subtitle: 'Sign out of your account',
+      //   titleColor: const Color(0xFFE53935),
+      //   onTap: () => _confirmLogout(context),
+      //   isLast: true,
+      // ),
     ];
 
     return Container(
@@ -319,24 +320,32 @@ class SettingsPage extends StatelessWidget {
   }
 
   Widget _buildVersionFooter() {
-    return const Column(
-      children: [
-        Text(
-          'Version 1.0.0',
-          style: TextStyle(
-            fontSize: 13,
-            color: Color(0xFFBDBDBD),
-          ),
-        ),
-        SizedBox(height: 4),
-        Text(
-          '© 2026 Business Manager',
-          style: TextStyle(
-            fontSize: 12,
-            color: Color(0xFFBDBDBD),
-          ),
-        ),
-      ],
+    return FutureBuilder<PackageInfo>(
+      future: PackageInfo.fromPlatform(),
+      builder: (context, snapshot) {
+        final version = snapshot.data?.version ?? '1.0.0';
+        final buildNumber = snapshot.data?.buildNumber ?? '1';
+        
+        return Column(
+          children: [
+            Text(
+              'Version $version',
+              style: const TextStyle(
+                fontSize: 13,
+                color: Color(0xFFBDBDBD),
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              '© 2026 Business Manager',
+              style: TextStyle(
+                fontSize: 12,
+                color: Color(0xFFBDBDBD),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
