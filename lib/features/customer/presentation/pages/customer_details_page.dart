@@ -36,13 +36,6 @@ class CustomerDetailsPage extends StatelessWidget {
       body: BlocListener<CustomerBloc, CustomerState>(
         listener: (context, state) {
           if (state is CustomerSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Action completed successfully!'),
-                backgroundColor: Colors.green,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
             final shopState = context.read<ShopContextBloc>().state;
             final authState = context.read<AuthBloc>().state;
             if (shopState is ShopSelected && authState is AuthAuthenticated) {
