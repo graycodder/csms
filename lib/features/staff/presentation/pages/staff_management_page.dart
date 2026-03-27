@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:csms/core/theme/app_colors.dart';
 import 'package:csms/features/shop/presentation/bloc/shop_context_bloc.dart';
 import 'package:csms/features/staff/domain/entities/staff_entity.dart';
@@ -54,7 +55,7 @@ class _StaffManagementPageState extends State<StaffManagementPage> {
                   LoadingOverlay.hide();
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(state.message),
+                      content: Text(state.message, style: TextStyle(fontSize: 14.sp)),
                       backgroundColor: Colors.redAccent,
                       behavior: SnackBarBehavior.floating,
                     ),
@@ -79,18 +80,19 @@ class _StaffManagementPageState extends State<StaffManagementPage> {
                 }
 
                 return ListView(
-                  padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
+                  padding: EdgeInsets.fromLTRB(16.w, 20.h, 16.w, 24.h),
                   children: [
-                    // ── Top row ──
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'Team Members',
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF1A1A2E),
+                        Expanded(
+                          child: Text(
+                            'Team Members',
+                            style: TextStyle(
+                              fontSize: 17.sp,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF1A1A2E),
+                            ),
                           ),
                         ),
                         GestureDetector(
@@ -115,14 +117,14 @@ class _StaffManagementPageState extends State<StaffManagementPage> {
                           child: Row(
                             children: [
                               Icon(Icons.person_add_alt_1_outlined,
-                                  size: 16, color: AppColors.primary),
-                              const SizedBox(width: 4),
+                                  size: 16.sp, color: AppColors.primary),
+                              SizedBox(width: 4.w),
                               Text(
                                 'Add Staff',
                                 style: TextStyle(
                                   color: AppColors.primary,
                                   fontWeight: FontWeight.w600,
-                                  fontSize: 14,
+                                  fontSize: 14.sp,
                                 ),
                               ),
                             ],
@@ -130,17 +132,16 @@ class _StaffManagementPageState extends State<StaffManagementPage> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16.h),
 
-                    // ── State-driven list ──
                     if (state is StaffLoading)
                       Center(
                         child: Padding(
-                          padding: const EdgeInsets.all(32),
+                          padding: EdgeInsets.all(32.r),
                           child: Lottie.asset(
                             'assets/animations/loading.json',
-                            width: 80,
-                            height: 80,
+                            width: 80.w,
+                            height: 80.w,
                           ),
                         ),
                       )
@@ -185,51 +186,53 @@ class _StaffManagementPageState extends State<StaffManagementPage> {
   Widget _buildHeader(BuildContext context) {
     return Container(
       padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 16,
-        left: 20,
-        right: 20,
-        bottom: 28,
+        top: MediaQuery.of(context).padding.top + 16.h,
+        left: 20.w,
+        right: 20.w,
+        bottom: 28.h,
       ),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.primary,
         borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(28),
-          bottomRight: Radius.circular(28),
+          bottomLeft: Radius.circular(28.r),
+          bottomRight: Radius.circular(28.r),
         ),
       ),
       child: Row(
         children: [
           InkWell(
             onTap: () => Navigator.pop(context),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(20.r),
             child: Container(
-              padding: const EdgeInsets.all(8),
+              padding: EdgeInsets.all(8.r),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.2),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.arrow_back, color: Colors.white, size: 22),
+              child: Icon(Icons.arrow_back, color: Colors.white, size: 22.sp),
             ),
           ),
-          const SizedBox(width: 16),
-          const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Staff Management',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.2,
+          SizedBox(width: 16.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Staff Management',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22.sp,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.2,
+                  ),
                 ),
-              ),
-              SizedBox(height: 2),
-              Text(
-                'Configure and manage',
-                style: TextStyle(color: Colors.white70, fontSize: 13),
-              ),
-            ],
+                SizedBox(height: 2.h),
+                Text(
+                  'Configure and manage',
+                  style: TextStyle(color: Colors.white70, fontSize: 13.sp),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -238,30 +241,30 @@ class _StaffManagementPageState extends State<StaffManagementPage> {
 
   Widget _buildEmptyState() {
     return Container(
-      margin: const EdgeInsets.only(top: 4),
-      padding: const EdgeInsets.symmetric(vertical: 40),
+      margin: EdgeInsets.only(top: 4.h),
+      padding: EdgeInsets.symmetric(vertical: 40.h),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.r),
         border: Border.all(color: const Color(0xFFE0E0E0).withOpacity(0.6)),
       ),
-      child: const Column(
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.group_outlined, size: 52, color: Color(0xFFBDBDBD)),
-          SizedBox(height: 12),
+          Icon(Icons.group_outlined, size: 52.sp, color: const Color(0xFFBDBDBD)),
+          SizedBox(height: 12.h),
           Text(
             'No staff members yet',
             style: TextStyle(
-              fontSize: 15,
-              color: Color(0xFF9E9E9E),
+              fontSize: 15.sp,
+              color: const Color(0xFF9E9E9E),
               fontWeight: FontWeight.w500,
             ),
           ),
-          SizedBox(height: 4),
+          SizedBox(height: 4.h),
           Text(
             'Add your first team member to get started',
-            style: TextStyle(fontSize: 13, color: Color(0xFFBDBDBD)),
+            style: TextStyle(fontSize: 13.sp, color: const Color(0xFFBDBDBD)),
           ),
         ],
       ),
@@ -270,15 +273,15 @@ class _StaffManagementPageState extends State<StaffManagementPage> {
 
   Widget _buildError(String message) {
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(24.r),
       child: Column(
         children: [
-          const Icon(Icons.cloud_off_outlined, size: 48, color: Colors.grey),
-          const SizedBox(height: 12),
+          Icon(Icons.cloud_off_outlined, size: 48.sp, color: Colors.grey),
+          SizedBox(height: 12.h),
           Text(message,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.grey)),
-          const SizedBox(height: 12),
+              style: TextStyle(color: Colors.grey, fontSize: 14.sp)),
+          SizedBox(height: 12.h),
           TextButton.icon(
             onPressed: () {
               final shop = _shopContext(context);
@@ -289,7 +292,7 @@ class _StaffManagementPageState extends State<StaffManagementPage> {
               }
             },
             icon: const Icon(Icons.refresh),
-            label: const Text('Retry'),
+            label: Text('Retry', style: TextStyle(fontSize: 14.sp)),
           ),
         ],
       ),
@@ -305,16 +308,16 @@ class _StaffManagementPageState extends State<StaffManagementPage> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
         title: Text(
           '$actionText Staff Member?',
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp),
         ),
         content: Text(
           'Are you sure you want to ${actionText.toLowerCase()} ${staff.name}?',
-          style: const TextStyle(color: AppColors.textLight),
+          style: TextStyle(color: AppColors.textLight, fontSize: 14.sp),
         ),
-        actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        actionsPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
         actions: [
           Row(
             children: [
@@ -323,21 +326,22 @@ class _StaffManagementPageState extends State<StaffManagementPage> {
                   onPressed: () => Navigator.pop(context),
                   style: TextButton.styleFrom(
                     backgroundColor: const Color(0xFFF2F4F7),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    padding: EdgeInsets.symmetric(vertical: 16.h),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Cancel',
                     style: TextStyle(
-                      color: Color(0xFF1F2937),
+                      color: const Color(0xFF1F2937),
                       fontWeight: FontWeight.bold,
+                      fontSize: 14.sp,
                     ),
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {
@@ -355,16 +359,16 @@ class _StaffManagementPageState extends State<StaffManagementPage> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: color,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    padding: EdgeInsets.symmetric(vertical: 16.h),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
                     elevation: 0,
                   ),
                   child: Text(
                     actionText,
-                    style: const TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14.sp),
                   ),
                 ),
               ),

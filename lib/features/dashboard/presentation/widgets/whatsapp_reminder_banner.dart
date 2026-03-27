@@ -60,7 +60,7 @@ class WhatsappReminderBanner extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(Icons.error_outline, color: const Color(0xFFE67E22), size: 18.w),
+            Icon(Icons.error_outline, color: const Color(0xFFE67E22), size: 18.sp),
             SizedBox(width: 8.w),
             Expanded(
               child: Text(
@@ -74,7 +74,7 @@ class WhatsappReminderBanner extends StatelessWidget {
               ),
             ),
             if (shop.settings.whatsappReminderEnabled) ...[
-              Icon(Icons.share_outlined, color: const Color(0xFFE67E22), size: 16.w),
+              Icon(Icons.share_outlined, color: const Color(0xFFE67E22), size: 16.sp),
               SizedBox(width: 4.w),
             ],
           ],

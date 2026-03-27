@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:csms/core/theme/app_colors.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_event.dart';
@@ -83,14 +84,14 @@ class _SplashScreenState extends State<SplashScreen> {
             children: [
               Image.asset(
                 'assets/images/app_icon.png',
-                width: 140,
-                height: 140,
+                width: 140.w,
+                height: 140.w,
               ),
-              const SizedBox(height: 32),
+              SizedBox(height: 32.h),
               Lottie.asset(
                 'assets/animations/loading.json',
-                width: 120,
-                height: 120,
+                width: 120.w,
+                height: 120.w,
               ),
             ],
           ),

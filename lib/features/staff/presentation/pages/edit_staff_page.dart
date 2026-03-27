@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:csms/core/theme/app_colors.dart';
 import 'package:csms/features/staff/domain/entities/staff_entity.dart';
 import 'package:csms/features/staff/presentation/bloc/staff_bloc.dart';
@@ -62,13 +63,13 @@ class _EditStaffPageState extends State<EditStaffPage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Confirm Changes', style: TextStyle(fontWeight: FontWeight.bold)),
-        content: const Text('Are you sure you want to save the changes to this staff member?'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+        title: Text('Confirm Changes', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp)),
+        content: Text('Are you sure you want to save the changes to this staff member?', style: TextStyle(fontSize: 14.sp)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel', style: TextStyle(color: AppColors.textLight)),
+            child: Text('Cancel', style: TextStyle(color: AppColors.textLight, fontSize: 14.sp)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -93,32 +94,11 @@ class _EditStaffPageState extends State<EditStaffPage> {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
             ),
-            child: const Text('Confirm', style: TextStyle(color: Colors.white)),
+            child: Text('Confirm', style: TextStyle(color: Colors.white, fontSize: 14.sp)),
           ),
         ],
-      ),
-    );
-  }
-
-  InputDecoration _inputDecoration(String hint) {
-    return InputDecoration(
-      hintText: hint,
-      counterText: '',
-      hintStyle: const TextStyle(color: Color(0xFFBDBDBD), fontSize: 14),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: AppColors.primary, width: 1.5),
       ),
     );
   }
@@ -126,56 +106,51 @@ class _EditStaffPageState extends State<EditStaffPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F4F7),
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text(
-          'Edit Staff Member',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: AppColors.textDark,
-          ),
-        ),
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
           onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
+        ),
+        title: Text(
+          'Edit Staff Member',
+          style: TextStyle(
+            color: AppColors.textDark,
+            fontWeight: FontWeight.bold,
+            fontSize: 18.sp,
+          ),
         ),
       ),
       body: BlocConsumer<StaffBloc, StaffState>(
         listener: (context, state) {
-          if (state is StaffOperationInProgress) {
+          if (state is StaffLoading) {
             LoadingOverlay.show(context);
           } else if (state is StaffLoaded) {
             LoadingOverlay.hide();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Staff updated successfully!', style: TextStyle(fontSize: 14.sp)),
+                backgroundColor: Colors.green,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
             Navigator.pop(context);
           } else if (state is StaffError) {
             LoadingOverlay.hide();
-            if (state.message.contains('already used')) {
-              showDialog(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  title: const Text('Number Already Used'),
-                  content: Text(state.message),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(ctx),
-                      child: const Text('OK', style: TextStyle(fontWeight: FontWeight.bold)),
-                    ),
-                  ],
-                ),
-              );
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-              );
-            }
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message, style: TextStyle(fontSize: 14.sp)),
+                backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
           }
         },
         builder: (context, state) {
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(24.r),
             child: Form(
               key: _formKey,
               child: Column(
@@ -184,78 +159,48 @@ class _EditStaffPageState extends State<EditStaffPage> {
                   _buildLabel('Full Name *'),
                   TextFormField(
                     controller: _nameController,
-                    decoration: _inputDecoration('Full name'),
-                    maxLength: 20,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')),
-                    ],
-                    validator: (v) {
-                      if (v == null || v.trim().isEmpty) return 'Required';
-                      if (v.trim().length > 20) return 'Max 20 chars';
-                      return null;
-                    },
+                    decoration: _inputDecoration('Enter full name'),
+                    validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
                   ),
-                  const SizedBox(height: 20),
-                  
+                  SizedBox(height: 16.h),
                   _buildLabel('Phone Number *'),
                   TextFormField(
                     controller: _phoneController,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    maxLength: 10,
-                    decoration: _inputDecoration('Phone number'),
-                    validator: (v) {
-                      if (v == null || v.trim().isEmpty) return 'Required';
-                      if (v.trim().length != 10) return 'Must be 10 digits';
-                      return null;
-                    },
+                    keyboardType: TextInputType.phone,
+                    decoration: _inputDecoration('Enter phone number'),
+                    validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
                   ),
-                  const SizedBox(height: 20),
-                  
-                  _buildLabel('Email *'),
+                  SizedBox(height: 16.h),
+                  _buildLabel('Email Address *'),
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: _inputDecoration('Email address'),
-                    validator: (v) {
-                      if (v == null || v.trim().isEmpty) return 'Required';
-                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(v.trim())) return 'Invalid email';
-                      return null;
-                    },
+                    decoration: _inputDecoration('Enter email address'),
+                    validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
                   ),
-                  const SizedBox(height: 20),
-                  
+                  SizedBox(height: 16.h),
                   _buildLabel('Role *'),
                   DropdownButtonFormField<String>(
                     value: _selectedRole,
+                    items: _roles.map((r) => DropdownMenuItem(value: r, child: Text(r, style: TextStyle(fontSize: 14.sp)))).toList(),
+                    onChanged: (v) => setState(() => _selectedRole = v),
                     decoration: _inputDecoration('Select role'),
-                    items: _roles.map((role) {
-                      return DropdownMenuItem<String>(
-                        value: role,
-                        child: Text(role),
-                      );
-                    }).toList(),
-                    onChanged: (val) {
-                      setState(() {
-                        _selectedRole = val;
-                      });
-                    },
                     validator: (v) => v == null ? 'Required' : null,
                   ),
-                  const SizedBox(height: 40),
-                  
+                  SizedBox(height: 32.h),
                   SizedBox(
                     width: double.infinity,
-                    height: 56,
+                    height: 52.h,
                     child: ElevatedButton(
                       onPressed: _submit,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                        elevation: 0,
                       ),
-                      child: const Text(
+                      child: Text(
                         'Save Changes',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                        style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.white),
                       ),
                     ),
                   ),
@@ -270,14 +215,35 @@ class _EditStaffPageState extends State<EditStaffPage> {
 
   Widget _buildLabel(String label) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: EdgeInsets.only(bottom: 8.h),
       child: Text(
         label,
-        style: const TextStyle(
+        style: TextStyle(
           fontWeight: FontWeight.bold,
-          fontSize: 14,
+          fontSize: 14.sp,
           color: AppColors.textDark,
         ),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      counterText: '',
+      hintStyle: TextStyle(color: const Color(0xFFBDBDBD), fontSize: 14.sp),
+      contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12.r),
+        borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12.r),
+        borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12.r),
+        borderSide: BorderSide(color: AppColors.primary, width: 1.5.w),
       ),
     );
   }

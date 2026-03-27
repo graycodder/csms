@@ -110,7 +110,7 @@ class CustomerCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8.w),
                 if (sub != null)
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
@@ -129,25 +129,27 @@ class CustomerCard extends StatelessWidget {
                   ),
               ],
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: 4.h),
             // Phone + Multiple Products
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                InkWell(
-                  onTap: () => AppLauncherUtils.makePhoneCall(customer.mobileNumber),
-                  child: Row(
-                    children: [
-                      Icon(Icons.call, size: 14.sp, color: Colors.grey[400]),
-                      SizedBox(width: 4.w),
-                      Text(
-                        customer.mobileNumber,
-                        style: TextStyle(
-                          color: Colors.grey[400],
-                          fontSize: 13.sp,
+                Expanded(
+                  child: InkWell(
+                    onTap: () => AppLauncherUtils.makePhoneCall(customer.mobileNumber),
+                    child: Row(
+                      children: [
+                        Icon(Icons.call, size: 14.sp, color: Colors.grey[400]),
+                        SizedBox(width: 4.w),
+                        Text(
+                          customer.mobileNumber,
+                          style: TextStyle(
+                            color: Colors.grey[400],
+                            fontSize: 13.sp,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 if (uniqueSubs.length > 1)
@@ -174,17 +176,20 @@ class CustomerCard extends StatelessWidget {
                 ),
               ),
             ],
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             const Divider(height: 1, color: Color(0xFFF0F0F0)),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             // Expiry + price
             Row(
               children: [
-                Icon(Icons.calendar_today_outlined, size: 15.w, color: Colors.grey[400]),
+                Icon(Icons.calendar_today_outlined, size: 15.sp, color: Colors.grey[400]),
                 SizedBox(width: 8.w),
-                Text(
-                  sub != null ? 'Expires: ${formatDate(sub.endDate)}' : 'No active subscription',
-                  style: TextStyle(color: Colors.grey[500], fontSize: 13.sp),
+                Expanded(
+                  child: Text(
+                    sub != null ? 'Expires: ${formatDate(sub.endDate)}' : 'No active subscription',
+                    style: TextStyle(color: Colors.grey[500], fontSize: 13.sp),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
                 const Spacer(),
                 Text(

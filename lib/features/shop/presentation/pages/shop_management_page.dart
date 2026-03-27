@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:csms/core/theme/app_colors.dart';
 import 'package:csms/features/shop/domain/entities/shop_entity.dart';
 import 'package:csms/features/shop/presentation/bloc/shop_context_bloc.dart';
@@ -39,7 +40,7 @@ class _ShopManagementPageState extends State<ShopManagementPage> {
                 if (state is ShopSelected) {
                   final shop = state.selectedShop;
                   return SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(16.r),
                     child: Column(
                       children: [
                         ShopInfoCard(
@@ -56,7 +57,7 @@ class _ShopManagementPageState extends State<ShopManagementPage> {
                             );
                           },
                         ),
-                        const SizedBox(height: 20),
+                        SizedBox(height: 20.h),
                         ShopSettingsCard(
                           settings: shop.settings,
                           onEdit: () {
@@ -68,7 +69,7 @@ class _ShopManagementPageState extends State<ShopManagementPage> {
                             );
                           },
                         ),
-                        const SizedBox(height: 20),
+                        SizedBox(height: 20.h),
                       ],
                     ),
                   );
@@ -76,8 +77,8 @@ class _ShopManagementPageState extends State<ShopManagementPage> {
                   return Center(
                     child: Lottie.asset(
                       'assets/animations/loading.json',
-                      width: 80,
-                      height: 80,
+                      width: 80.w,
+                      height: 80.w,
                     ),
                   );
                 } else if (state is ShopContextError) {
@@ -102,58 +103,60 @@ class _ShopManagementPageState extends State<ShopManagementPage> {
   Widget _buildHeader(BuildContext context) {
     return Container(
       padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 16,
-        left: 20,
-        right: 20,
-        bottom: 28,
+        top: MediaQuery.of(context).padding.top + 16.h,
+        left: 20.w,
+        right: 20.w,
+        bottom: 28.h,
       ),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.primary,
         borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(28),
-          bottomRight: Radius.circular(28),
+          bottomLeft: Radius.circular(28.r),
+          bottomRight: Radius.circular(28.r),
         ),
       ),
       child: Row(
         children: [
           InkWell(
             onTap: () => Navigator.pop(context),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(20.r),
             child: Container(
-              padding: const EdgeInsets.all(8),
+              padding: EdgeInsets.all(8.r),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.2),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.arrow_back,
                 color: Colors.white,
-                size: 22,
+                size: 22.sp,
               ),
             ),
           ),
-          const SizedBox(width: 16),
-          const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Business Management',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.2,
+          SizedBox(width: 16.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Business Management',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22.sp,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.2,
+                  ),
                 ),
-              ),
-              SizedBox(height: 2),
-              Text(
-                'Configure and manage',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 13,
+                SizedBox(height: 2.h),
+                Text(
+                  'Configure and manage',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 13.sp,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),

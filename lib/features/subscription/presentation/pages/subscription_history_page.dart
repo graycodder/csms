@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'package:csms/injection_container.dart' as di;
 import '../bloc/subscription_bloc.dart';
@@ -35,7 +36,7 @@ class SubscriptionHistoryPage extends StatelessWidget {
         backgroundColor: Colors.grey[50],
         appBar: AppBar(
           title: Text('${TerminologyHelper.getTerminology(shopCategory).subscriptionLabel} History',
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp),
           ),
           centerTitle: true,
           elevation: 0,
@@ -47,18 +48,18 @@ class SubscriptionHistoryPage extends StatelessWidget {
             if (state is SubscriptionLoading) {
               return const Center(child: CircularProgressIndicator());
             } else if (state is SubscriptionError) {
-              return Center(child: Text('Error: ${state.message}'));
+              return Center(child: Text('Error: ${state.message}', style: TextStyle(fontSize: 14.sp)));
             } else if (state is SubscriptionHistoryLoaded) {
               if (state.logs.isEmpty) {
                 return Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.history_outlined, size: 64, color: Colors.grey[300]),
-                      const SizedBox(height: 16),
+                      Icon(Icons.history_outlined, size: 64.sp, color: Colors.grey[300]),
+                      SizedBox(height: 16.h),
                       Text(
                         'No history found',
-                        style: TextStyle(color: Colors.grey[500], fontSize: 16),
+                        style: TextStyle(color: Colors.grey[500], fontSize: 16.sp),
                       ),
                     ],
                   ),
@@ -66,9 +67,9 @@ class SubscriptionHistoryPage extends StatelessWidget {
               }
 
               return ListView.separated(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(16.r),
                 itemCount: state.logs.length,
-                separatorBuilder: (context, index) => const SizedBox(height: 12),
+                separatorBuilder: (context, index) => SizedBox(height: 12.h),
                 itemBuilder: (context, index) {
                   final log = state.logs[index];
                   return _buildLogCard(log);
@@ -88,15 +89,15 @@ class SubscriptionHistoryPage extends StatelessWidget {
     final IconData icon = isRenewal ? Icons.refresh : Icons.add_circle_outline;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            blurRadius: 10.r,
+            offset: Offset(0, 4.h),
           ),
         ],
       ),
@@ -104,14 +105,14 @@ class SubscriptionHistoryPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: EdgeInsets.all(10.r),
             decoration: BoxDecoration(
               color: accentColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.r),
             ),
-            child: Icon(icon, color: accentColor, size: 24),
+            child: Icon(icon, color: accentColor, size: 24.sp),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: 16.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -122,49 +123,49 @@ class SubscriptionHistoryPage extends StatelessWidget {
                     Text(
                       log.action.toUpperCase(),
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 12.sp,
                         fontWeight: FontWeight.bold,
                         color: accentColor,
-                        letterSpacing: 0.5,
+                        letterSpacing: 0.5.w,
                       ),
                     ),
                     Text(
                       DateFormat('MMM dd, yyyy • hh:mm a').format(log.createdAt),
-                      style: TextStyle(fontSize: 12, color: Colors.grey[400]),
+                      style: TextStyle(fontSize: 12.sp, color: Colors.grey[400]),
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
+                SizedBox(height: 10.h),
                 if (log.productName != null) ...[
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                         decoration: BoxDecoration(
                           color: AppColors.primary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(6),
+                          borderRadius: BorderRadius.circular(6.r),
                         ),
                         child: Text(
                           log.productName!,
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 12.sp,
                             fontWeight: FontWeight.bold,
                             color: AppColors.primary,
                           ),
                         ),
                       ),
                       if (log.status != null) ...[
-                        const SizedBox(width: 8),
+                        SizedBox(width: 8.w),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                           decoration: BoxDecoration(
                             color: log.status == 'active' ? Colors.green.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(6),
+                            borderRadius: BorderRadius.circular(6.r),
                           ),
                           child: Text(
                             log.status!.toUpperCase(),
                             style: TextStyle(
-                              fontSize: 10,
+                              fontSize: 10.sp,
                               fontWeight: FontWeight.bold,
                               color: log.status == 'active' ? Colors.green : Colors.grey,
                             ),
@@ -173,46 +174,46 @@ class SubscriptionHistoryPage extends StatelessWidget {
                       ],
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8.h),
                 ],
                 Text(
                   log.description,
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 15.sp,
                     fontWeight: FontWeight.w500,
                     color: AppColors.textDark,
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8.h),
                 if (log.startDate != null && log.endDate != null) ...[
                   Row(
                     children: [
-                      Icon(Icons.calendar_today, size: 14, color: Colors.grey[500]),
-                      const SizedBox(width: 4),
+                      Icon(Icons.calendar_today, size: 14.sp, color: Colors.grey[500]),
+                      SizedBox(width: 4.w),
                       Text(
                         '${DateFormat('MMM dd, yyyy').format(log.startDate!)} - ${DateFormat('MMM dd, yyyy').format(log.endDate!)}',
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                        style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4.h),
                 ],
                 if (log.price != null && log.price! > 0) ...[
                   Row(
                     children: [
-                      Icon(Icons.payments_outlined, size: 14, color: Colors.grey[500]),
-                      const SizedBox(width: 4),
+                      Icon(Icons.payments_outlined, size: 14.sp, color: Colors.grey[500]),
+                      SizedBox(width: 4.w),
                       Text(
                         'Price: ₹${log.price!.toStringAsFixed(0)}',
                         style: TextStyle(
-                          fontSize: 12, 
+                          fontSize: 12.sp, 
                           color: const Color(0xFF27AE60),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4.h),
                 ],
               ],
             ),

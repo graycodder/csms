@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../injection_container.dart' as di;
 import '../bloc/profile_bloc.dart';
@@ -61,18 +62,18 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
                 onPressed: () => Navigator.pop(context),
               ),
-              title: const Text(
+              title: Text(
                 'Edit Profile',
-                style: TextStyle(color: AppColors.textDark, fontWeight: FontWeight.bold),
+                style: TextStyle(color: AppColors.textDark, fontWeight: FontWeight.bold, fontSize: 18.sp),
               ),
             ),
             body: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
+              padding: EdgeInsets.all(24.r),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Full Name', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                  const SizedBox(height: 12),
+                  Text('Full Name', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.sp)),
+                  SizedBox(height: 12.h),
                   TextField(
                     controller: _nameController,
                     decoration: const InputDecoration(
@@ -81,8 +82,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  const Text('Phone Number', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                  const SizedBox(height: 12),
+                  Text('Phone Number', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.sp)),
+                  SizedBox(height: 12.h),
                   TextField(
                     controller: _phoneController,
                     keyboardType: TextInputType.phone,
@@ -94,7 +95,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   const SizedBox(height: 48),
                   SizedBox(
                     width: double.infinity,
-                    height: 56,
+                    height: 56.h,
                     child: ElevatedButton(
                       onPressed: state is ProfileLoading ? null : () {
                         final updatedProfile = widget.profile.copyWith(
@@ -106,13 +107,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
                       ),
                       child: state is ProfileLoading
                           ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text(
+                          : Text(
                               'Save Changes',
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: Colors.white),
                             ),
                     ),
                   ),

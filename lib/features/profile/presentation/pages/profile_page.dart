@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../injection_container.dart' as di;
 import '../bloc/profile_bloc.dart';
@@ -25,9 +26,9 @@ class ProfilePage extends StatelessWidget {
             icon: const Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () => Navigator.pop(context),
           ),
-          title: const Text(
+          title: Text(
             'My Profile',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18.sp),
           ),
           actions: [
             BlocBuilder<ProfileBloc, ProfileState>(
@@ -62,15 +63,15 @@ class ProfilePage extends StatelessWidget {
             } else if (state is ProfileLoaded) {
               final p = state.profile;
               return SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
+                padding: EdgeInsets.all(24.r),
                 child: Column(
                   children: [
                     _buildAvatar(p.fullName),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16.h),
                     Text(
                       p.fullName,
-                      style: const TextStyle(
-                        fontSize: 22,
+                      style: TextStyle(
+                        fontSize: 22.sp,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textDark,
                       ),
@@ -78,13 +79,13 @@ class ProfilePage extends StatelessWidget {
                     Text(
                       p.role.toUpperCase(),
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 14.sp,
                         color: AppColors.primary.withOpacity(0.8),
                         fontWeight: FontWeight.w600,
-                        letterSpacing: 1.2,
+                        letterSpacing: 1.2.w,
                       ),
                     ),
-                    const SizedBox(height: 32),
+                      SizedBox(height: 32.h),
                     _buildInfoCard(p),
                   ],
                 ),
@@ -102,8 +103,8 @@ class ProfilePage extends StatelessWidget {
   Widget _buildAvatar(String name) {
     final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
     return Container(
-      width: 100,
-      height: 100,
+      width: 100.w,
+      height: 100.w,
       decoration: BoxDecoration(
         color: AppColors.primary.withOpacity(0.1),
         shape: BoxShape.circle,
@@ -112,8 +113,8 @@ class ProfilePage extends StatelessWidget {
       child: Center(
         child: Text(
           initial,
-          style: const TextStyle(
-            fontSize: 40,
+          style: TextStyle(
+            fontSize: 40.sp,
             fontWeight: FontWeight.bold,
             color: AppColors.primary,
           ),
@@ -124,26 +125,26 @@ class ProfilePage extends StatelessWidget {
 
   Widget _buildInfoCard(dynamic p) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(20.r),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            blurRadius: 10.r,
+            offset: Offset(0, 4.h),
           ),
         ],
       ),
       child: Column(
         children: [
            _buildInfoRow(Icons.email_outlined, 'Name', p.fullName),
-          const Divider(height: 32),
+          Divider(height: 32.h),
           _buildInfoRow(Icons.email_outlined, 'Email', p.email),
-          const Divider(height: 32),
+          Divider(height: 32.h),
           _buildInfoRow(Icons.phone_outlined, 'Phone', p.phone.isEmpty ? 'Not set' : p.phone),
-          const Divider(height: 32),
+          Divider(height: 32.h),
           _buildInfoRow(Icons.calendar_today_outlined, 'Member Since', 
               '${p.createdAt.day}/${p.createdAt.month}/${p.createdAt.year}'),
         ],
@@ -154,14 +155,14 @@ class ProfilePage extends StatelessWidget {
   Widget _buildInfoRow(IconData icon, String label, String value) {
     return Row(
       children: [
-        Icon(icon, color: AppColors.textLight, size: 22),
-        const SizedBox(width: 16),
+        Icon(icon, color: AppColors.textLight, size: 22.sp),
+        SizedBox(width: 16.w),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label, style: const TextStyle(color: AppColors.textLight, fontSize: 13)),
-            const SizedBox(height: 2),
-            Text(value, style: const TextStyle(color: AppColors.textDark, fontSize: 15, fontWeight: FontWeight.w600)),
+            Text(label, style: TextStyle(color: AppColors.textLight, fontSize: 13.sp)),
+            SizedBox(height: 2.h),
+            Text(value, style: TextStyle(color: AppColors.textDark, fontSize: 15.sp, fontWeight: FontWeight.w600)),
           ],
         ),
       ],

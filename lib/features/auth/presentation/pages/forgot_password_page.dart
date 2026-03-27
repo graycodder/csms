@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:csms/core/theme/app_colors.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_event.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_state.dart';
-import 'package:lottie/lottie.dart';
 import 'package:csms/core/utils/loading_overlay.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
@@ -54,151 +54,151 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         ),
       ),
       body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            // Top Section
-            Expanded(
-              flex: 4,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              // Top Section
+              Container(
+                height: 0.4.sh,
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(16.r),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20.r),
+                        ),
+                        child: Icon(
+                          Icons.lock_reset_rounded,
+                          size: 48.w,
+                          color: AppColors.primary,
+                        ),
                       ),
-                      child: const Icon(
-                        Icons.lock_reset_rounded,
-                        size: 48,
-                        color: AppColors.primary,
+                      SizedBox(height: 24.h),
+                      Text(
+                        'Reset Password',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 28.sp,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      'Reset Password',
-                      style: Theme.of(context).textTheme.headlineMedium
-                          ?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Enter your email to receive a reset link',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white.withOpacity(0.9),
+                      SizedBox(height: 8.h),
+                      Text(
+                        'Enter your email to receive a reset link',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.9),
+                          fontSize: 14.sp,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-            // Bottom White Area
-            Expanded(
-              flex: 6,
-              child: Container(
-                decoration: const BoxDecoration(
+              // Bottom White Area
+              Container(
+                constraints: BoxConstraints(minHeight: 0.6.sh),
+                decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30),
-                    topRight: Radius.circular(30),
+                    topLeft: Radius.circular(30.r),
+                    topRight: Radius.circular(30.r),
                   ),
                 ),
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(32),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const Text(
-                          'Email Address',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textDark,
-                          ),
+                padding: EdgeInsets.all(32.r),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'Email Address',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textDark,
+                          fontSize: 14.sp,
                         ),
-                        const SizedBox(height: 8),
-                        TextFormField(
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          decoration: const InputDecoration(
-                            hintText: 'Enter your email',
-                            prefixIcon: Icon(Icons.email_outlined),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your email';
-                            }
-                            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                              return 'Enter a valid email';
-                            }
-                            return null;
-                          },
+                      ),
+                      SizedBox(height: 8.h),
+                      TextFormField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: const InputDecoration(
+                          hintText: 'Enter your email',
+                          prefixIcon: Icon(Icons.email_outlined),
                         ),
-                        const SizedBox(height: 32),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your email';
+                          }
+                          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                            return 'Enter a valid email';
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 32.h),
 
-                          BlocConsumer<AuthBloc, AuthState>(
-                           listener: (context, state) {
-                             if (state is AuthLoading) {
-                               LoadingOverlay.show(context);
-                             } else if (state is AuthPasswordResetSent) {
-                               LoadingOverlay.hide();
-                               if (!mounted) return;
-                               
-                               showDialog(
-                                 context: context,
-                                 barrierDismissible: false,
-                                 builder: (ctx) => AlertDialog(
-                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                   title: const Row(
-                                     children: [
-                                       Icon(Icons.check_circle, color: Colors.green),
-                                       SizedBox(width: 8),
-                                       Text('Success'),
-                                     ],
-                                   ),
-                                   content: const Text('If an account exists with this email, you will receive a password reset link shortly.'),
-                                   actions: [
-                                     TextButton(
-                                       onPressed: () {
-                                         Navigator.pop(ctx); // Pop dialog
-                                         Navigator.pop(context); // Pop ForgotPasswordPage
-                                       },
-                                       child: const Text('OK'),
-                                     ),
-                                   ],
-                                 ),
-                               );
-                             } else if (state is AuthError) {
-                               LoadingOverlay.hide();
-                               if (!mounted) return;
-                               
-                               ScaffoldMessenger.of(context).showSnackBar(
-                                 SnackBar(
-                                   content: Text(state.message),
-                                   backgroundColor: Colors.red,
-                                 ),
-                               );
-                             }
-                           },
-                           builder: (context, state) {
-                             return ElevatedButton(
-                               onPressed: state is AuthLoading ? null : _onResetPressed,
-                               child: const Text('Send Reset Link'),
-                             );
-                           },
-                         ),
-                      ],
-                    ),
+                      BlocConsumer<AuthBloc, AuthState>(
+                        listener: (context, state) {
+                          if (state is AuthLoading) {
+                            LoadingOverlay.show(context);
+                          } else if (state is AuthPasswordResetSent) {
+                            LoadingOverlay.hide();
+                            if (!mounted) return;
+
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (ctx) => AlertDialog(
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+                                title: Row(
+                                  children: [
+                                    Icon(Icons.check_circle, color: Colors.green, size: 24.sp),
+                                    SizedBox(width: 8.w),
+                                    const Text('Success'),
+                                  ],
+                                ),
+                                content: Text(
+                                  'If an account exists with this email, you will receive a password reset link shortly.',
+                                  style: TextStyle(fontSize: 14.sp),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(ctx);
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text('OK'),
+                                  ),
+                                ],
+                              ),
+                            );
+                          } else if (state is AuthError) {
+                            LoadingOverlay.hide();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(state.message),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        },
+                        builder: (context, state) {
+                          return ElevatedButton(
+                            onPressed: _onResetPressed,
+                            child: const Text('Send Reset Link'),
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

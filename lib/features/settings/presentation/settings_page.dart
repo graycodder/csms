@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:csms/core/theme/app_colors.dart';
 import 'package:csms/features/shop/presentation/pages/shop_management_page.dart';
 import 'package:csms/features/product/presentation/pages/product_management_page.dart';
@@ -28,11 +29,11 @@ class SettingsPage extends StatelessWidget {
           _buildHeader(context),
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
               child: Column(
                 children: [
                   _buildMenuCard(context),
-                  const SizedBox(height: 32),
+                  SizedBox(height: 32.h),
                   _buildVersionFooter(),
                 ],
               ),
@@ -46,55 +47,55 @@ class SettingsPage extends StatelessWidget {
   Widget _buildHeader(BuildContext context) {
     return Container(
       padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 16,
-        left: 20,
-        right: 20,
-        bottom: 28,
+        top: MediaQuery.of(context).padding.top + 16.h,
+        left: 20.w,
+        right: 20.w,
+        bottom: 28.h,
       ),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.primary,
         borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(28),
-          bottomRight: Radius.circular(28),
-        ),
+        bottomLeft: Radius.circular(28.r),
+        bottomRight: Radius.circular(28.r),
+      ),
       ),
       child: Row(
         children: [
           InkWell(
             onTap: () => Navigator.pop(context),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(20.r),
             child: Container(
-              padding: const EdgeInsets.all(8),
+              padding: EdgeInsets.all(8.r),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.2),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.arrow_back,
                 color: Colors.white,
-                size: 22,
+                size: 22.sp,
               ),
             ),
           ),
-          const SizedBox(width: 16),
-          const Column(
+          SizedBox(width: 16.w),
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'Settings',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 24,
+                  fontSize: 24.sp,
                   fontWeight: FontWeight.bold,
-                  letterSpacing: 0.2,
+                  letterSpacing: 0.2.w,
                 ),
               ),
-              SizedBox(height: 2),
+              SizedBox(height: 2.h),
               Text(
                 'Manage your app settings',
                 style: TextStyle(
                   color: Colors.white70,
-                  fontSize: 13,
+                  fontSize: 13.sp,
                 ),
               ),
             ],
@@ -232,12 +233,12 @@ class SettingsPage extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            blurRadius: 12.r,
+            offset: Offset(0, 4.h),
           ),
         ],
       ),
@@ -266,15 +267,15 @@ class SettingsPage extends StatelessWidget {
             child: Row(
               children: [
                 Container(
-                  width: 44,
-                  height: 44,
+                  width: 44.w,
+                  height: 44.w,
                   decoration: BoxDecoration(
                     color: item.iconBg,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(item.icon, color: item.iconColor, size: 22),
+                  child: Icon(item.icon, color: item.iconColor, size: 22.sp),
                 ),
-                const SizedBox(width: 14),
+                SizedBox(width: 14.w),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -290,18 +291,18 @@ class SettingsPage extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         item.subtitle,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF9E9E9E),
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          color: const Color(0xFF9E9E9E),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const Icon(
+                Icon(
                   Icons.chevron_right,
-                  color: Color(0xFFBDBDBD),
-                  size: 22,
+                  color: const Color(0xFFBDBDBD),
+                  size: 22.sp,
                 ),
               ],
             ),
@@ -330,17 +331,17 @@ class SettingsPage extends StatelessWidget {
           children: [
             Text(
               'Version $version',
-              style: const TextStyle(
-                fontSize: 13,
-                color: Color(0xFFBDBDBD),
+              style: TextStyle(
+                fontSize: 13.sp,
+                color: const Color(0xFFBDBDBD),
               ),
             ),
-            const SizedBox(height: 4),
-            const Text(
+            SizedBox(height: 4.h),
+            Text(
               '© 2026 Business Manager',
               style: TextStyle(
-                fontSize: 12,
-                color: Color(0xFFBDBDBD),
+                fontSize: 12.sp,
+                color: const Color(0xFFBDBDBD),
               ),
             ),
           ],

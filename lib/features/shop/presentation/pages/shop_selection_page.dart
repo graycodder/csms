@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:csms/core/theme/app_colors.dart';
 import 'package:csms/features/shop/presentation/bloc/shop_context_bloc.dart';
 import 'package:csms/features/dashboard/presentation/pages/dashboard_page.dart';
@@ -14,7 +15,7 @@ class ShopSelectionPage extends StatelessWidget {
       child: Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text("Select Business"),
+        title: Text("Select Business", style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
         elevation: 0,
         backgroundColor: Colors.white,
         foregroundColor: AppColors.textDark,
@@ -35,19 +36,19 @@ class ShopSelectionPage extends StatelessWidget {
 
           if (state is ShopContextLoaded) {
             return ListView.separated(
-              padding: const EdgeInsets.all(24),
+              padding: EdgeInsets.all(24.r),
               itemCount: state.shops.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 16),
+              separatorBuilder: (_, __) => SizedBox(height: 16.h),
               itemBuilder: (context, index) {
                 final shop = state.shops[index];
                 return ListTile(
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 24.w,
+                    vertical: 12.h,
                   ),
                   tileColor: AppColors.primary.withOpacity(0.05),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(16.r),
                   ),
                   leading: const CircleAvatar(
                     backgroundColor: AppColors.primary,
@@ -55,14 +56,15 @@ class ShopSelectionPage extends StatelessWidget {
                   ),
                   title: Text(
                     shop.shopName,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp),
                   ),
                   subtitle: Text(
                     shop.settings.notificationDaysBefore > 0
                         ? "Alerts: ${shop.settings.notificationDaysBefore} days before"
                         : "No alerts",
+                    style: TextStyle(fontSize: 13.sp),
                   ),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  trailing: Icon(Icons.arrow_forward_ios, size: 16.sp),
                   onTap: () {
                     context.read<ShopContextBloc>().add(SelectShop(shop, state.shops));
                   },
@@ -72,8 +74,15 @@ class ShopSelectionPage extends StatelessWidget {
           }
 
           if (state is ShopContextEmpty) {
-            return const Center(
-              child: Text("No business accounts found. Please complete onboarding."),
+            return Center(
+              child: Padding(
+                padding: EdgeInsets.all(32.r),
+                child: Text(
+                  "No business accounts found. Please complete onboarding.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16.sp, color: AppColors.textLight),
+                ),
+              ),
             );
           }
 

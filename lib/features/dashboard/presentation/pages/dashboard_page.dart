@@ -89,7 +89,6 @@ class _DashboardPageState extends State<DashboardPage> {
         ListenToShopSubscriptionStatus(shopState.selectedShop.shopId),
       );
     } else if (authState is AuthAuthenticated && shopState is! ShopSelected) {
-       // Load shops for the ownerId
        context.read<ShopContextBloc>().add(
              LoadShops(
                ownerId: authState.ownerId,
@@ -127,7 +126,7 @@ class _DashboardPageState extends State<DashboardPage> {
           listener: (context, state) {
             if (state is CustomerError) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+                SnackBar(content: Text(state.message, style: TextStyle(fontSize: 14.sp)), backgroundColor: Colors.red),
               );
             }
           },
@@ -156,7 +155,6 @@ class _DashboardPageState extends State<DashboardPage> {
               backgroundColor: const Color(0xFFF0F2F5),
               body: Stack(
                 children: [
-                  // ── Blue pill header background ──
                   Container(
                     height: 210.h,
                     width: double.infinity,
@@ -177,22 +175,22 @@ class _DashboardPageState extends State<DashboardPage> {
                         _searchBar(term),
                         SizedBox(height: 15.h),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          padding: EdgeInsets.symmetric(horizontal: 16.w),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               _statsRow(state, term),
                               state.products.where((p) => p.status == 'active').length <= 1
-                                  ? const SizedBox(height: 5)
-                                  : const SizedBox(height: 18),
+                                  ? SizedBox(height: 5.h)
+                                  : SizedBox(height: 18.h),
                               _productChips(state),
-                              const SizedBox(height: 5),
+                              SizedBox(height: 5.h),
                             ],
                           ),
                         ),
                         Expanded(
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            padding: EdgeInsets.symmetric(horizontal: 16.w),
                             child: _customerList(state, term),
                           ),
                         ),
@@ -217,14 +215,13 @@ class _DashboardPageState extends State<DashboardPage> {
                       ),
                     ),
                   ).then((_) {
-                    // Refresh on return
                     _tryLoad();
                   });
                 },
                 backgroundColor: const Color(0xFF1E56F0),
                 elevation: 6,
                 shape: const CircleBorder(),
-                child: const Icon(Icons.add, color: Colors.white, size: 32),
+                child: Icon(Icons.add, color: Colors.white, size: 32.sp),
               ),
             );
           } else if (state is DashboardError) {
@@ -244,13 +241,11 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  // ─── Top bar ────────────────────────────────────────────────────────────────
   Widget _topBar(DashboardState state) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       child: Row(
         children: [
-          // Profile Avatar with Shop Switcher
           BlocBuilder<ShopContextBloc, ShopContextState>(
             builder: (context, shopState) {
               return InkWell(
@@ -267,13 +262,12 @@ class _DashboardPageState extends State<DashboardPage> {
                     color: Colors.white,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.person, color: AppColors.primary, size: 28.w),
+                  child: Icon(Icons.person, color: AppColors.primary, size: 28.sp),
                 ),
               );
             },
           ),
           SizedBox(width: 10.w),
-          // Welcome & Shop Name
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -304,7 +298,6 @@ class _DashboardPageState extends State<DashboardPage> {
               ],
             ),
           ),
-          // Action Buttons
           BlocBuilder<NotificationBloc, NotificationState>(
             builder: (context, notifState) {
               int unreadCount = 0;
@@ -325,7 +318,7 @@ class _DashboardPageState extends State<DashboardPage> {
               );
             },
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8.w),
           _headerBtn(
             Icons.settings_outlined,
             onTap: () {
@@ -399,17 +392,18 @@ class _DashboardPageState extends State<DashboardPage> {
                         ),
                         leading: CircleAvatar(
                           backgroundColor: isSelected ? AppColors.primary : Colors.grey[300],
-                          child: Icon(Icons.store, color: Colors.white, size: 20.w),
+                          child: Icon(Icons.store, color: Colors.white, size: 20.sp),
                         ),
                         title: Text(
                           shop.shopName,
                           style: TextStyle(
                             fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                             color: isSelected ? AppColors.primary : AppColors.textDark,
+                            fontSize: 14.sp,
                           ),
                         ),
                         trailing: isSelected 
-                            ? const Icon(Icons.check_circle, color: AppColors.primary) 
+                            ? Icon(Icons.check_circle, color: AppColors.primary, size: 20.sp) 
                             : null,
                       );
                     },
@@ -431,12 +425,12 @@ class _DashboardPageState extends State<DashboardPage> {
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.2), shape: BoxShape.circle),
         child: Stack(alignment: Alignment.center, children: [
-          Icon(icon, color: Colors.white, size: 24.w),
+          Icon(icon, color: Colors.white, size: 24.sp),
           if (badge != null)
             Positioned(
               top: 7.h, right: 7.w,
               child: Container(
-                width: 16.w, height: 16.w,
+                width: 16.r, height: 16.r,
                 decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
                 child: Center(
                   child: Text(badge, style: TextStyle(color: Colors.white, fontSize: 9.sp, fontWeight: FontWeight.bold)),
@@ -448,12 +442,9 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  // ─── Welcome ─────────────────────────────────────────────────────────────────
-
-  // ─── Search bar ───────────────────────────────────────────────────────────────
   Widget _searchBar(BusinessTerminology term) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Container(
         height: 45.h,
         decoration: BoxDecoration(
@@ -481,10 +472,10 @@ class _DashboardPageState extends State<DashboardPage> {
               color: Colors.grey[400],
               fontSize: 14.sp,
             ),
-            prefixIcon: Icon(Icons.search, color: Colors.grey[400], size: 22.w),
+            prefixIcon: Icon(Icons.search, color: Colors.grey[400], size: 22.sp),
             suffixIcon: _searchQuery.isNotEmpty
                 ? IconButton(
-                    icon: Icon(Icons.close, color: Colors.grey[400], size: 20.w),
+                    icon: Icon(Icons.close, color: Colors.grey[400], size: 20.sp),
                     onPressed: () {
                       _searchController.clear();
                       setState(() {
@@ -501,7 +492,6 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  // ─── Stats ────────────────────────────────────────────────────────────────────
   Widget _statsRow(DashboardLoaded state, BusinessTerminology term) {
     return Row(children: [
       Expanded(child: _statCard('Total', term.customerLabel, state.totalCustomers.toString(), Colors.black)),
@@ -509,16 +499,6 @@ class _DashboardPageState extends State<DashboardPage> {
       Expanded(child: _statCard('Active', term.subscriptionLabel, state.activeSubscriptions.toString(), const Color(0xFF27AE60))),
       SizedBox(width: 10.w),
       Expanded(child: _statCard('Expiring', term.subscriptionLabel, state.expiringSoon.length.toString(), const Color(0xFFE67E22))),
-    ]);
-  }
-
-  Widget _statsRowPlaceholder() {
-    return Row(children: [
-      Expanded(child: _statCard('Total', 'Term', '—', Colors.black26)),
-      const SizedBox(width: 10),
-      Expanded(child: _statCard('Active', 'Term', '—', const Color(0xFF27AE60))),
-      const SizedBox(width: 10),
-      Expanded(child: _statCard('Expiring', 'Term', '—', const Color(0xFFE67E22))),
     ]);
   }
 
@@ -571,7 +551,6 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  // ─── Product chips ────────────────────────────────────────────────────────────
   Widget _productChips(DashboardLoaded state) {
     final activeProducts = state.products.where((p) => p.status == 'active').toList();
     if (activeProducts.length <= 1) {
@@ -581,9 +560,9 @@ class _DashboardPageState extends State<DashboardPage> {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
-          ...state.products.where((p) => p.status == 'active').map((product) {
+          ...activeProducts.map((product) {
             return Padding(
-              padding: const EdgeInsets.only(right: 12),
+              padding: EdgeInsets.only(right: 12.w),
               child: _chip(product.name, _selectedProductId == product.productId, onTap: () {
                 setState(() => _selectedProductId = product.productId);
               }),
@@ -613,11 +592,9 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  // ─── Customer list ────────────────────────────────────────────────────────────
   Widget _customerList(DashboardLoaded state, BusinessTerminology term) {
     var filteredCustomers = state.customers;
     
-    // Filter by product chip
     filteredCustomers = filteredCustomers.where((c) {
       final customerSubs = [
         ...state.activeSubs.where((s) => s.customerId == c.customerId),
@@ -626,7 +603,6 @@ class _DashboardPageState extends State<DashboardPage> {
       return customerSubs.any((s) => s.productId == _selectedProductId);
     }).toList();
 
-    // Filter by search query
     if (_searchQuery.isNotEmpty) {
       filteredCustomers = filteredCustomers.where((c) {
         final matchesName = c.name.toLowerCase().contains(_searchQuery);
@@ -635,16 +611,13 @@ class _DashboardPageState extends State<DashboardPage> {
       }).toList();
     }
 
-    // Sort by status first, then by expiry
     filteredCustomers.sort((a, b) {
-      // 1. Status Check (Active first)
       final statusA = a.status.toLowerCase();
       final statusB = b.status.toLowerCase();
       if (statusA != statusB) {
         return statusA == 'active' ? -1 : 1;
       }
 
-      // 2. Subscription Expiry Logic
       final subA = [
         ...state.activeSubs.where((s) => s.customerId == a.customerId),
         ...state.expiringSoon.where((s) => s.customerId == a.customerId),
@@ -662,10 +635,6 @@ class _DashboardPageState extends State<DashboardPage> {
       final diffA = AppDateUtils.calculateDaysLeft(subA.endDate);
       final diffB = AppDateUtils.calculateDaysLeft(subB.endDate);
 
-      // Group 1: Expiring soon (0-30 days)
-      // Group 2: Regular Active (>30 days)
-      // Group 3: Expired (<0 days)
-      
       int getPriority(int diff) {
         if (diff >= 0 && diff <= 30) return 0;
         if (diff > 30) return 1;
@@ -694,17 +663,17 @@ class _DashboardPageState extends State<DashboardPage> {
     
     return ListView.builder(
       controller: _scrollController,
-      padding: const EdgeInsets.only(bottom: 100, top: 12),
+      padding: EdgeInsets.only(bottom: 100.h, top: 12.h),
       physics: const BouncingScrollPhysics(),
       itemCount: filteredCustomers.length + (state.hasMore ? 1 : 0),
       itemBuilder: (context, index) {
         if (index >= filteredCustomers.length) {
           return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24),
+            padding: EdgeInsets.symmetric(vertical: 24.h),
             child: Center(
               child: SizedBox(
-                width: 24.w,
-                height: 24.w,
+                width: 24.r,
+                height: 24.r,
                 child: const CircularProgressIndicator(strokeWidth: 2.5),
               ),
             ),
@@ -726,11 +695,15 @@ class _DashboardPageState extends State<DashboardPage> {
         child: Padding(
           padding: EdgeInsets.all(24.r),
           child: Column(children: [
-            Icon(Icons.cloud_off_outlined, size: 48.w, color: Colors.grey),
+            Icon(Icons.cloud_off_outlined, size: 48.sp, color: Colors.grey),
             SizedBox(height: 12.h),
-            Text(msg, textAlign: TextAlign.center, style: const TextStyle(color: Colors.grey)),
+            Text(msg, textAlign: TextAlign.center, style: TextStyle(color: Colors.grey, fontSize: 14.sp)),
             SizedBox(height: 12.h),
-            TextButton.icon(onPressed: _tryLoad, icon: const Icon(Icons.refresh), label: const Text('Retry')),
+            TextButton.icon(
+              onPressed: _tryLoad, 
+              icon: const Icon(Icons.refresh), 
+              label: Text('Retry', style: TextStyle(fontSize: 14.sp)),
+            ),
           ]),
         ),
       );

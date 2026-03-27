@@ -93,7 +93,7 @@ class ProductItemCard extends StatelessWidget {
                     child: Icon(
                       Icons.edit_outlined,
                       color: AppColors.primary,
-                      size: 18.w,
+                      size: 18.sp,
                     ),
                   ),
                 ),
@@ -111,7 +111,7 @@ class ProductItemCard extends StatelessWidget {
                     child: Icon(
                       isActive ? Icons.block : Icons.check_circle_outline,
                       color: isActive ? const Color(0xFFEF4444) : const Color(0xFF10B981),
-                      size: 18.w,
+                      size: 18.sp,
                     ),
                   ),
                 ),

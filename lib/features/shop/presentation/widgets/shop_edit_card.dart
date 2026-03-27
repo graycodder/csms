@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:csms/core/theme/app_colors.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:csms/features/shop/domain/entities/shop_entity.dart';
 
 class ShopEditCard extends StatefulWidget {
@@ -47,10 +48,10 @@ class _ShopEditCardState extends State<ShopEditCard> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(20.r),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.r),
         border: Border.all(color: AppColors.border.withOpacity(0.5)),
       ),
       child: Form(
@@ -69,7 +70,7 @@ class _ShopEditCardState extends State<ShopEditCard> {
                 return null;
               },
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             _buildEditField(
               title: 'Business Address',
               controller: _addressController,
@@ -81,7 +82,7 @@ class _ShopEditCardState extends State<ShopEditCard> {
                 return null;
               },
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             _buildEditField(
               title: 'Category',
               controller: _categoryController,
@@ -93,7 +94,7 @@ class _ShopEditCardState extends State<ShopEditCard> {
                 return null;
               },
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             _buildEditField(
               title: 'Contact Phone',
               controller: _phoneController,
@@ -106,30 +107,31 @@ class _ShopEditCardState extends State<ShopEditCard> {
                 return null;
               },
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: 32.h),
             Row(
               children: [
                 Expanded(
                   child: OutlinedButton(
                     onPressed: widget.onCancel,
                     style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      minimumSize: const Size(double.infinity, 48),
+                      padding: EdgeInsets.symmetric(vertical: 12.h),
+                      minimumSize: Size(double.infinity, 48.h),
                       side: const BorderSide(color: AppColors.border),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(8.r),
                       ),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Cancel',
                       style: TextStyle(
                         color: AppColors.textLight,
                         fontWeight: FontWeight.bold,
+                        fontSize: 14.sp,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12.w),
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
@@ -144,18 +146,19 @@ class _ShopEditCardState extends State<ShopEditCard> {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      minimumSize: const Size(double.infinity, 48),
+                      padding: EdgeInsets.symmetric(vertical: 12.h),
+                      minimumSize: Size(double.infinity, 48.h),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(8.r),
                       ),
                       elevation: 0,
                     ),
-                    child: const Text(
+                    child: Text(
                       'Save Changes',
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
+                        fontSize: 14.sp,
                       ),
                     ),
                   ),
@@ -181,35 +184,35 @@ class _ShopEditCardState extends State<ShopEditCard> {
       children: [
         Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             color: AppColors.textLight,
             fontWeight: FontWeight.w600,
-            fontSize: 13,
+            fontSize: 13.sp,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8.h),
         TextFormField(
           controller: controller,
           maxLength: maxLength,
           inputFormatters: inputFormatters,
           validator: validator,
           keyboardType: keyboardType,
-          style: const TextStyle(fontSize: 15, color: AppColors.textDark),
+          style: TextStyle(fontSize: 15.sp, color: AppColors.textDark),
           decoration: InputDecoration(
             counterText: '',
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 12,
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 16.w,
+              vertical: 12.h,
             ),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               borderSide: const BorderSide(color: AppColors.border),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               borderSide: const BorderSide(color: AppColors.border),
             ),
-            errorStyle: const TextStyle(fontSize: 11),
+            errorStyle: TextStyle(fontSize: 11.sp),
           ),
         ),
       ],

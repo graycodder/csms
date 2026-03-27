@@ -21,21 +21,13 @@ class ShopSettingsEditCard extends StatefulWidget {
 }
 
 class _ShopSettingsEditCardState extends State<ShopSettingsEditCard> {
-  late bool _autoArchiveExpired;
-  late bool _showProductFilters;
   late bool _whatsappReminderEnabled;
-  late TextEditingController _notificationDaysController;
   late TextEditingController _expiredDaysController;
 
   @override
   void initState() {
     super.initState();
-    _autoArchiveExpired = widget.settings.autoArchiveExpired;
-    _showProductFilters = widget.settings.showProductFilters;
     _whatsappReminderEnabled = widget.settings.whatsappReminderEnabled;
-    _notificationDaysController = TextEditingController(
-      text: widget.settings.notificationDaysBefore.toString(),
-    );
     _expiredDaysController = TextEditingController(
       text: widget.settings.expiredDaysBefore.toString(),
     );
@@ -43,7 +35,6 @@ class _ShopSettingsEditCardState extends State<ShopSettingsEditCard> {
 
   @override
   void dispose() {
-    _notificationDaysController.dispose();
     _expiredDaysController.dispose();
     super.dispose();
   }
@@ -51,7 +42,7 @@ class _ShopSettingsEditCardState extends State<ShopSettingsEditCard> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(20.r),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(22.r),
@@ -66,47 +57,46 @@ class _ShopSettingsEditCardState extends State<ShopSettingsEditCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Divider(height: 32, color: Color(0xFFF2F4F7)),
           _buildInputRow(
             title: 'Reminder Days',
-            subtitle: 'Reminder warning days',
+            subtitle: 'Warning days before expiration',
             controller: _expiredDaysController,
           ),
-          const Divider(height: 32, color: Color(0xFFF2F4F7)),
+          Divider(height: 32.h, color: const Color(0xFFF2F4F7)),
           _buildSwitchRow(
             title: 'WhatsApp Reminder',
             subtitle: 'Send WhatsApp reminder for renewals',
             value: _whatsappReminderEnabled,
             onChanged: (v) => setState(() => _whatsappReminderEnabled = v),
           ),
-          const SizedBox(height: 32),
+          SizedBox(height: 32.h),
           Row(
             children: [
               Expanded(
                 child: OutlinedButton(
                   onPressed: widget.onCancel,
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    minimumSize: const Size(double.infinity, 48),
+                    padding: EdgeInsets.symmetric(vertical: 12.h),
+                    minimumSize: Size(double.infinity, 48.h),
                     side: const BorderSide(color: AppColors.border),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(8.r),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Cancel',
                     style: TextStyle(
                       color: AppColors.textLight,
                       fontWeight: FontWeight.bold,
+                      fontSize: 14.sp,
                     ),
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {
-                    final notifDays = int.tryParse(_notificationDaysController.text) ?? 2;
                     final expDays = int.tryParse(_expiredDaysController.text) ?? 10;
                     
                     if (expDays <= 0) {
@@ -116,29 +106,27 @@ class _ShopSettingsEditCardState extends State<ShopSettingsEditCard> {
                       return;
                     }
 
-                    final updated = ShopSettings(
-                      notificationDaysBefore: notifDays,
+                    final updated = widget.settings.copyWith(
                       expiredDaysBefore: expDays,
-                      showProductFilters: _showProductFilters,
-                      autoArchiveExpired: _autoArchiveExpired,
                       whatsappReminderEnabled: _whatsappReminderEnabled,
                     );
                     widget.onSave(updated);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    minimumSize: const Size(double.infinity, 48),
+                    padding: EdgeInsets.symmetric(vertical: 12.h),
+                    minimumSize: Size(double.infinity, 48.h),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(8.r),
                     ),
                     elevation: 0,
                   ),
-                  child: const Text(
+                  child: Text(
                     'Save',
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
+                      fontSize: 14.sp,
                     ),
                   ),
                 ),
@@ -167,15 +155,15 @@ class _ShopSettingsEditCardState extends State<ShopSettingsEditCard> {
                 style: TextStyle(
                   color: AppColors.textDark,
                   fontWeight: FontWeight.bold,
-                  fontSize: 15,
+                  fontSize: 15.sp,
                 ),
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: 4.h),
               Text(
                 subtitle,
                 style: TextStyle(
                   color: AppColors.textLight.withOpacity(0.8),
-                  fontSize: 12,
+                  fontSize: 12.sp,
                 ),
               ),
             ],
@@ -207,15 +195,15 @@ class _ShopSettingsEditCardState extends State<ShopSettingsEditCard> {
                 style: TextStyle(
                   color: AppColors.textDark,
                   fontWeight: FontWeight.bold,
-                  fontSize: 15,
+                  fontSize: 15.sp,
                 ),
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: 4.h),
               Text(
                 subtitle,
                 style: TextStyle(
                   color: AppColors.textLight.withOpacity(0.8),
-                  fontSize: 12,
+                  fontSize: 12.sp,
                 ),
               ),
             ],
@@ -232,14 +220,14 @@ class _ShopSettingsEditCardState extends State<ShopSettingsEditCard> {
             ],
             textAlign: TextAlign.center,
             decoration: InputDecoration(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              contentPadding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
               hintText: '>',
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(8.r),
                 borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(8.r),
                 borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
               ),
             ),

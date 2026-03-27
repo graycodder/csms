@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'package:csms/features/customer/presentation/bloc/customer_bloc.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_bloc.dart';
@@ -108,59 +109,59 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Confirm ${TerminologyHelper.getTerminology(widget.shopCategory).renewActionLabel}', style: const TextStyle(fontWeight: FontWeight.bold)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+        title: Text('Confirm ${TerminologyHelper.getTerminology(widget.shopCategory).renewActionLabel}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Duration: $_selectedLabel', style: const TextStyle(fontSize: 15)),
-            const SizedBox(height: 8),
+            Text('Duration: $_selectedLabel', style: TextStyle(fontSize: 15.sp)),
+            SizedBox(height: 8.h),
             if (isActive) ...[
-              const SizedBox(height: 4),
+              SizedBox(height: 4.h),
               Container(
-                padding: const EdgeInsets.all(10),
+                padding: EdgeInsets.all(10.r),
                 decoration: BoxDecoration(
                   color: const Color(0xFFEFF6FF),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(10.r),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.info_outline, color: AppColors.primary, size: 18),
-                    const SizedBox(width: 8),
+                    Icon(Icons.info_outline, color: AppColors.primary, size: 18.sp),
+                    SizedBox(width: 8.w),
                     Expanded(
                       child: Text(
                         'Active ${TerminologyHelper.getTerminology(widget.shopCategory).subscriptionLabel.toLowerCase()} found — new period will be queued after current expiry.',
-                        style: const TextStyle(color: AppColors.primary, fontSize: 13),
+                        style: TextStyle(color: AppColors.primary, fontSize: 13.sp),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8.h),
               Text('Current expiry: ${_fmt(widget.currentEndDate)}',
-                  style: const TextStyle(color: AppColors.textLight, fontSize: 13)),
+                  style: TextStyle(color: AppColors.textLight, fontSize: 13.sp)),
             ],
-            const SizedBox(height: 4),
+            SizedBox(height: 4.h),
             Text('New expiry: ${_fmt(newEndDate)}',
-                style: const TextStyle(
+                style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: AppColors.textDark,
-                    fontSize: 14)),
+                    fontSize: 14.sp)),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel', style: TextStyle(color: AppColors.textLight)),
+            child: Text('Cancel', style: TextStyle(color: AppColors.textLight, fontSize: 14.sp)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
             ),
-            child: const Text('Confirm', style: TextStyle(color: Colors.white)),
+            child: Text('Confirm', style: TextStyle(color: Colors.white, fontSize: 14.sp)),
           ),
         ],
       ),
@@ -202,8 +203,8 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
         } else if (state is CustomerSuccess) {
           LoadingOverlay.hide();
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Membership renewed successfully!'),
+            SnackBar(
+              content: Text('Membership renewed successfully!', style: TextStyle(fontSize: 14.sp)),
               backgroundColor: Colors.green,
               behavior: SnackBarBehavior.floating,
             ),
@@ -213,7 +214,7 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
           LoadingOverlay.hide();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Error: ${state.message}'),
+              content: Text('Error: ${state.message}', style: TextStyle(fontSize: 14.sp)),
               backgroundColor: Colors.red,
               behavior: SnackBarBehavior.floating,
             ),
@@ -231,41 +232,41 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
           ),
           title: Text(
             TerminologyHelper.getTerminology(widget.shopCategory).renewActionLabel,
-            style: const TextStyle(color: AppColors.textDark, fontWeight: FontWeight.bold),
+            style: TextStyle(color: AppColors.textDark, fontWeight: FontWeight.bold, fontSize: 18.sp),
           ),
           centerTitle: true,
         ),
         body: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: EdgeInsets.all(24.0.r),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Title & Info
                 Text(widget.productName,
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.textDark)),
-                const SizedBox(height: 4),
+                    style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold, color: AppColors.textDark)),
+                SizedBox(height: 4.h),
                 Text('Current ${TerminologyHelper.getTerminology(widget.shopCategory).planLabel.toLowerCase()}: ${widget.validityValue} ${widget.validityUnit}',
-                    style: TextStyle(fontSize: 16, color: AppColors.textLight.withOpacity(0.7))),
-                const SizedBox(height: 24),
+                    style: TextStyle(fontSize: 16.sp, color: AppColors.textLight.withOpacity(0.7))),
+                SizedBox(height: 24.h),
 
                 // Queue info banner
                 if (isActive) ...[
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8.h),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
                     decoration: BoxDecoration(
                       color: const Color(0xFFEFF6FF),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(10.r),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.queue, size: 16, color: AppColors.primary),
-                        const SizedBox(width: 8),
+                        Icon(Icons.queue, size: 16.sp, color: AppColors.primary),
+                        SizedBox(width: 8.w),
                         Expanded(
                           child: Text(
                             'Currently active until ${_fmt(widget.currentEndDate)} — new period will be queued.',
-                            style: const TextStyle(color: AppColors.primary, fontSize: 12),
+                            style: TextStyle(color: AppColors.primary, fontSize: 12.sp),
                           ),
                         ),
                       ],
@@ -273,14 +274,14 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
                   ),
                 ] else ...[
                   Text('Expired on ${_fmt(widget.currentEndDate)}',
-                      style: const TextStyle(color: Colors.red, fontSize: 13)),
+                      style: TextStyle(color: Colors.red, fontSize: 13.sp)),
                 ],
 
-                const SizedBox(height: 20),
+                SizedBox(height: 20.h),
                 
                 if (widget.priceType == 'flexible') ...[
-                  const Text('Custom Price', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                  const SizedBox(height: 12),
+                  Text('Custom Price', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.sp)),
+                  SizedBox(height: 12.h),
                   TextField(
                     controller: _priceController,
                     keyboardType: TextInputType.number,
@@ -293,7 +294,7 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
                     ),
                     onChanged: (v) => setState(() {}),
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20.h),
                 ],
 
                 if (widget.validityType == 'flexible') ...[
@@ -304,8 +305,8 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Validity', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                            const SizedBox(height: 12),
+                            Text('Validity', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.sp)),
+                            SizedBox(height: 12.h),
                             TextField(
                               controller: _validityController,
                               keyboardType: TextInputType.number,
@@ -327,14 +328,14 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
                           ],
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      SizedBox(width: 16.w),
                       Expanded(
                         flex: 3,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Unit', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                            const SizedBox(height: 12),
+                            Text('Unit', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.sp)),
+                            SizedBox(height: 12.h),
                             DropdownButtonFormField<String>(
                               value: (_selectedUnit ?? 'months').toLowerCase(),
                               items: const [
@@ -353,36 +354,36 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20.h),
                 ],
 
                 if (widget.validityType != 'flexible') ...[
-                  const Text('Quick Select Duration:', style: TextStyle(color: AppColors.textLight, fontSize: 14)),
-                  const SizedBox(height: 12),
+                  Text('Quick Select Duration:', style: TextStyle(color: AppColors.textLight, fontSize: 14.sp)),
+                  SizedBox(height: 12.h),
 
                   // Duration grid
                   if (widget.validityUnit.toLowerCase().contains('month')) ...[
                     Row(children: [
                       Expanded(child: _durationBtn('1 Month', 1, 'Months')),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12.w),
                       Expanded(child: _durationBtn('3 Months', 3, 'Months')),
                     ]),
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12.h),
                     Row(children: [
                       Expanded(child: _durationBtn('6 Months', 6, 'Months')),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12.w),
                       Expanded(child: _durationBtn('12 Months', 12, 'Months')),
                     ]),
                   ] else ...[
                     Row(children: [
                       Expanded(child: _durationBtn('${widget.validityValue} Days', widget.validityValue, 'Days')),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12.w),
                       Expanded(child: _durationBtn('${widget.validityValue * 2} Days', widget.validityValue * 2, 'Days')),
                     ]),
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12.h),
                     Row(children: [
                       Expanded(child: _durationBtn('${widget.validityValue * 3} Days', widget.validityValue * 3, 'Days')),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12.w),
                       Expanded(child: _durationBtn('${widget.validityValue * 6} Days', widget.validityValue * 6, 'Days')),
                     ]),
                   ],
@@ -390,38 +391,38 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
 
                 // New end date preview
                 if (newEndDate != null) ...[
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16.h),
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                     decoration: BoxDecoration(
                       color: const Color(0xFFE8F5E9),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
                     child: Column(
                       children: [
                         Row(
                           children: [
-                            const Icon(Icons.calendar_today, color: Color(0xFF27AE60), size: 18),
-                            const SizedBox(width: 10),
+                            Icon(Icons.calendar_today, color: const Color(0xFF27AE60), size: 18.sp),
+                            SizedBox(width: 10.w),
                             Text('New expiry: ${_fmt(newEndDate)}',
-                                style: const TextStyle(
-                                    color: Color(0xFF27AE60),
+                                style: TextStyle(
+                                    color: const Color(0xFF27AE60),
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 14)),
+                                    fontSize: 14.sp)),
                           ],
                         ),
                         if (_priceController.text.isNotEmpty) ...[
-                          const SizedBox(height: 8),
+                          SizedBox(height: 8.h),
                           Row(
                             children: [
-                              const Icon(Icons.payments_outlined, color: Color(0xFF27AE60), size: 18),
-                              const SizedBox(width: 10),
+                              Icon(Icons.payments_outlined, color: const Color(0xFF27AE60), size: 18.sp),
+                              SizedBox(width: 10.w),
                               Text('Renewal Price: ₹${_priceController.text}',
-                                  style: const TextStyle(
-                                      color: Color(0xFF27AE60),
+                                  style: TextStyle(
+                                      color: const Color(0xFF27AE60),
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 14)),
+                                      fontSize: 14.sp)),
                             ],
                           ),
                         ],
@@ -430,23 +431,22 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
                   ),
                 ],
 
-                const SizedBox(height: 20),
+                SizedBox(height: 20.h),
 
-                // Confirm button
                 SizedBox(
                   width: double.infinity,
-                  height: 56,
+                  height: 56.h,
                   child: ElevatedButton(
                     onPressed: _selectedValue != null ? () => _confirm(context) : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
                       elevation: 0,
                     ),
                     child: Text(
                       _selectedValue != null ? 'Confirm ${TerminologyHelper.getTerminology(widget.shopCategory).renewActionLabel}' : 'Select a Duration',
-                      style: const TextStyle(
-                        fontSize: 18,
+                      style: TextStyle(
+                        fontSize: 18.sp,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
@@ -465,16 +465,16 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
     final isSelected = _selectedValue == value && _selectedUnit == unit;
     return InkWell(
       onTap: () => _selectDuration(value, unit, label),
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(12.r),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16),
+        padding: EdgeInsets.symmetric(vertical: 16.h),
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: isSelected ? AppColors.primary : const Color(0xFFF0F7FF),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
             color: isSelected ? AppColors.primary : Colors.transparent,
-            width: 2,
+            width: 2.w,
           ),
         ),
         child: Text(
@@ -482,7 +482,7 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
           style: TextStyle(
             color: isSelected ? Colors.white : AppColors.primary,
             fontWeight: FontWeight.bold,
-            fontSize: 15,
+            fontSize: 15.sp,
           ),
         ),
       ),

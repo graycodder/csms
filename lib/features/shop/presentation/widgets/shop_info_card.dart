@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:csms/core/theme/app_colors.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ShopInfoCard extends StatelessWidget {
   final String shopName;
@@ -20,10 +21,10 @@ class ShopInfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(20.r),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.r),
         border: Border.all(color: AppColors.border.withOpacity(0.5)),
       ),
       child: Column(
@@ -32,29 +33,32 @@ class ShopInfoCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Business Information',
-                style: TextStyle(
-                  color: AppColors.textDark,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
+              Expanded(
+                child: Text(
+                  'Business Information',
+                  style: TextStyle(
+                    color: AppColors.textDark,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18.sp,
+                  ),
                 ),
               ),
               GestureDetector(
                 onTap: onEdit,
                 child: Row(
-                  children: const [
+                  children: [
                     Icon(
                       Icons.edit_outlined,
-                      size: 16,
+                      size: 16.sp,
                       color: AppColors.primary,
                     ),
-                    SizedBox(width: 4),
+                    SizedBox(width: 4.w),
                     Text(
                       'Edit',
                       style: TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.bold,
+                        fontSize: 14.sp,
                       ),
                     ),
                   ],
@@ -62,25 +66,25 @@ class ShopInfoCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24.h),
           _buildInfoFieldRow(
             title: 'Business Name',
             value: shopName,
             icon: Icons.business_outlined,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           _buildInfoFieldRow(
             title: 'Business Address',
             value: shopAddress,
             icon: Icons.location_on_outlined,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           _buildInfoFieldRow(
             title: 'Category',
             value: shopCategory,
             icon: Icons.category_outlined,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           _buildInfoFieldRow(
             title: 'Phone Number',
             value: shopPhone,
@@ -101,23 +105,25 @@ class ShopInfoCard extends StatelessWidget {
       children: [
         Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             color: AppColors.textLight,
             fontWeight: FontWeight.w600,
-            fontSize: 13,
+            fontSize: 13.sp,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8.h),
         Row(
           children: [
-            Icon(icon, color: AppColors.textLight, size: 20),
-            const SizedBox(width: 8),
-            Text(
-              value,
-              style: const TextStyle(
-                color: AppColors.textDark,
-                fontWeight: FontWeight.w500,
-                fontSize: 16,
+            Icon(icon, color: AppColors.textLight, size: 20.sp),
+            SizedBox(width: 8.w),
+            Expanded(
+              child: Text(
+                value,
+                style: TextStyle(
+                  color: AppColors.textDark,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 16.sp,
+                ),
               ),
             ),
           ],

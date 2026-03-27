@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'package:csms/features/customer/domain/entities/customer_entity.dart';
 import 'package:csms/features/subscription/domain/entities/subscription_entity.dart';
@@ -62,15 +63,15 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Confirm Changes'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+        title: Text('Confirm Changes', style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
         content: Text(
           'Are you sure you want to save the changes for "${_nameController.text.trim()}"?',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: AppColors.textLight)),
+            child: Text('Cancel', style: TextStyle(color: AppColors.textLight, fontSize: 14.sp)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -86,9 +87,9 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
             ),
-            child: const Text('Confirm', style: TextStyle(color: Colors.white)),
+            child: Text('Confirm', style: TextStyle(color: Colors.white, fontSize: 14.sp)),
           ),
         ],
       ),
@@ -102,7 +103,7 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leadingWidth: 48,
+        leadingWidth: 48.w,
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
           icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
@@ -115,22 +116,22 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
               style: TextStyle(
                 color: AppColors.textDark,
                 fontWeight: FontWeight.bold,
-                fontSize: 18,
+                fontSize: 18.sp,
               ),
             ),
             Text(
               'Update ${TerminologyHelper.getTerminology(widget.shopCategory).customerLabel.toLowerCase()} details',
               style: TextStyle(
                 color: AppColors.textLight.withOpacity(0.8),
-                fontSize: 13,
+                fontSize: 13.sp,
                 fontWeight: FontWeight.normal,
               ),
             ),
           ],
         ),
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1.0),
-          child: Container(color: AppColors.border, height: 1.0),
+          preferredSize: Size.fromHeight(1.0.h),
+          child: Container(color: AppColors.border, height: 1.0.h),
         ),
       ),
       body: BlocConsumer<CustomerBloc, CustomerState>(
@@ -153,13 +154,13 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
               showDialog(
                 context: context,
                 builder: (ctx) => AlertDialog(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  title: const Text('Number Already Used'),
-                  content: Text(state.message),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+                  title: Text('Number Already Used', style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
+                  content: Text(state.message, style: TextStyle(fontSize: 14.sp)),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(ctx),
-                      child: const Text('OK', style: TextStyle(fontWeight: FontWeight.bold)),
+                      child: Text('OK', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp)),
                     ),
                   ],
                 ),
@@ -177,7 +178,7 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
         },
         builder: (context, state) {
           return SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
+            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
             child: Form(
               key: _formKey,
               child: Column(
@@ -204,7 +205,7 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20.h),
 
                   _buildLabel('Phone Number *'),
                   TextFormField(
@@ -226,7 +227,7 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20.h),
 
                   // Customer Status
                   _buildLabel('Account Status'),
@@ -239,7 +240,7 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                           onPressed: () => setState(() => _selectedStatus = 'active'),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12.w),
                       Expanded(
                         child: _statusButton(
                           label: 'Inactive',
@@ -249,30 +250,30 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20.h),
 
                   SizedBox(
                     width: double.infinity,
-                    height: 52,
+                    height: 52.h,
                     child: ElevatedButton(
                       onPressed: _submit,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(12.r),
                         ),
                       ),
-                      child: const Text(
+                      child: Text(
                         'Save Changes',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
                           color: Colors.white,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20.h),
                 ],
               ),
             ),
@@ -289,14 +290,14 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
   }) {
     return InkWell(
       onTap: onPressed,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(12.r),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: EdgeInsets.symmetric(vertical: 12.h),
         decoration: BoxDecoration(
           color: isActive 
               ? (label == 'Active' ? AppColors.success.withOpacity(0.1) : Colors.red.withOpacity(0.1))
               : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
             color: isActive 
                 ? (label == 'Active' ? AppColors.success : Colors.red)
@@ -312,6 +313,7 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                   ? (label == 'Active' ? AppColors.success : Colors.red)
                   : AppColors.textLight,
               fontWeight: FontWeight.bold,
+              fontSize: 14.sp,
             ),
           ),
         ),
@@ -321,13 +323,13 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
 
   Widget _buildLabel(String text) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
+      padding: EdgeInsets.only(bottom: 8.h),
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontWeight: FontWeight.w600,
           color: AppColors.textDark,
-          fontSize: 14,
+          fontSize: 14.sp,
         ),
       ),
     );

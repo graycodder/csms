@@ -46,7 +46,6 @@ class CustomerDetailsPage extends StatelessWidget {
             final shopState = context.read<ShopContextBloc>().state;
             final authState = context.read<AuthBloc>().state;
             if (shopState is ShopSelected && authState is AuthAuthenticated) {
-              // Add a small delay to ensure Firebase propagation before reload
               Future.delayed(const Duration(milliseconds: 300), () {
                 if (context.mounted) {
                   context.read<DashboardBloc>().add(
@@ -77,8 +76,6 @@ class CustomerDetailsPage extends StatelessWidget {
                 ...state.expiringSoon.where((s) => s.customerId == customerId),
               ];
               
-              // Remove duplicates if any (though there shouldn't be)
-              // Filter to show only the subscription with the latest end date for each product
               final Map<String, SubscriptionEntity> latestSubsPerProduct = {};
               for (var sub in customerSubs) {
                 final current = latestSubsPerProduct[sub.productId];
@@ -87,8 +84,8 @@ class CustomerDetailsPage extends StatelessWidget {
                 }
               }
               final uniqueSubs = latestSubsPerProduct.values.toList();
-  
               final term = TerminologyHelper.getTerminology(state.shop.category);
+
               if (customer == null) {
                 return Scaffold(
                   appBar: AppBar(title: const Text('Error')),
@@ -99,12 +96,12 @@ class CustomerDetailsPage extends StatelessWidget {
               return Stack(
                 children: [
                   Container(
-                    height: 300,
-                    decoration: const BoxDecoration(
+                    height: 300.h,
+                    decoration: BoxDecoration(
                       color: AppColors.primary,
                       borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(30),
-                        bottomRight: Radius.circular(30),
+                        bottomLeft: Radius.circular(30.r),
+                        bottomRight: Radius.circular(30.r),
                       ),
                     ),
                   ),
@@ -114,16 +111,16 @@ class CustomerDetailsPage extends StatelessWidget {
                         _buildAppBar(context, customer, state.products, state),
                         Expanded(
                           child: ListView(
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
                             children: [
                               _buildHeaderInfo(customer),
-                              const SizedBox(height: 24),
+                              SizedBox(height: 24.h),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     'Active ${term.planLabel}s',
-                                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                                    style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: Colors.white),
                                   ),
                                   BlocBuilder<AuthBloc, AuthState>(
                                     builder: (context, authState) {
@@ -154,31 +151,32 @@ class CustomerDetailsPage extends StatelessWidget {
                                             ),
                                           ),
                                         ),
-                                        icon: const Icon(Icons.add, color: Colors.white),
-                                        label: Text('Add New ${term.planLabel}', style: TextStyle(color: Colors.white)),
+                                        icon: Icon(Icons.add, color: Colors.white, size: 18.sp),
+                                        label: Text('Add New ${term.planLabel}', style: TextStyle(color: Colors.white, fontSize: 13.sp)),
                                         style: TextButton.styleFrom(
                                           backgroundColor: Colors.white.withOpacity(0.2),
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                                          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
                                         ),
                                       );
                                     },
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 16),
+                              SizedBox(height: 16.h),
                               if (uniqueSubs.isEmpty)
                                 Center(
-                                  child: Text('No active ${term.planLabel.toLowerCase()}s found', style: const TextStyle(color: Colors.white70)),
+                                  child: Text('No active ${term.planLabel.toLowerCase()}s found', style: TextStyle(color: Colors.white70, fontSize: 14.sp)),
                                 )
                               else
                                 ...uniqueSubs.map((sub) {
                                   final prod = state.products.where((p) => p.productId == sub.productId).firstOrNull;
                                   return Padding(
-                                    padding: const EdgeInsets.only(bottom: 16),
+                                    padding: EdgeInsets.only(bottom: 16.h),
                                     child: _buildSubscriptionCard(context, sub, prod, state, term, customer.name),
                                   );
                                 }).toList(),
-                              const SizedBox(height: 100),
+                              SizedBox(height: 100.h),
                             ],
                           ),
                         ),
@@ -192,7 +190,6 @@ class CustomerDetailsPage extends StatelessWidget {
           },
         ),
       ),
-      floatingActionButton: null,
     );
   }
 
@@ -203,20 +200,19 @@ class CustomerDetailsPage extends StatelessWidget {
 
   Widget _buildSubscriptionCard(BuildContext context, SubscriptionEntity sub, ProductEntity? product, DashboardLoaded state, BusinessTerminology term, String customerName) {
     if (product == null) return const SizedBox.shrink();
-
     final daysLeft = AppDateUtils.calculateDaysLeft(sub.endDate);
     final isExpired = daysLeft < 0;
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(20.r),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            blurRadius: 10.r,
+            offset: Offset(0, 4.h),
           ),
         ],
       ),
@@ -234,20 +230,20 @@ class CustomerDetailsPage extends StatelessWidget {
                       product.name[0].toUpperCase() + product.name.substring(1).toLowerCase(),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textDark),
+                      style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: AppColors.textDark),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4.h),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                       decoration: BoxDecoration(
                         color: isExpired ? Colors.red[50] : Colors.green[50],
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(8.r),
                       ),
                       child: Text(
                         isExpired ? 'Expired' : 'Active',
                         style: TextStyle(
                           color: isExpired ? Colors.red : Colors.green,
-                          fontSize: 12,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -255,7 +251,7 @@ class CustomerDetailsPage extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
               BlocBuilder<AuthBloc, AuthState>(
                 builder: (context, authState) {
                   return Row(
@@ -267,13 +263,13 @@ class CustomerDetailsPage extends StatelessWidget {
                           MaterialPageRoute(
                             builder: (context) => EditSubscriptionPage(
                               subscription: sub,
-                              productName: product?.name ?? term.planLabel,
+                              productName: product.name,
                               shopCategory: state.shop.category,
                               customerName: customerName,
                             ),
                           ),
                         ),
-                        icon: Icon(Icons.edit_outlined, color: Colors.grey[600], size: 20),
+                        icon: Icon(Icons.edit_outlined, color: Colors.grey[600], size: 20.sp),
                         tooltip: 'Correct Details',
                       ),
                       IconButton(
@@ -288,12 +284,12 @@ class CustomerDetailsPage extends StatelessWidget {
                                   shopId: sub.shopId,
                                   currentEndDate: sub.endDate,
                                   ownerId: authState is AuthAuthenticated ? authState.ownerId : '',
-                                  productName: product?.name ?? term.subscriptionLabel,
-                                  validityUnit: product?.validityUnit ?? 'Months',
-                                  validityValue: product?.validityValue ?? 1,
-                                  priceType: product?.priceType ?? 'fixed',
-                                  validityType: product?.validityType ?? 'fixed',
-                                  basePrice: product?.price ?? 0.0,
+                                  productName: product.name,
+                                  validityUnit: product.validityUnit,
+                                  validityValue: product.validityValue,
+                                  priceType: product.priceType,
+                                  validityType: product.validityType,
+                                  basePrice: product.price,
                                   shopCategory: state.shop.category,
                                   customerName: customerName,
                                 ),
@@ -301,7 +297,7 @@ class CustomerDetailsPage extends StatelessWidget {
                             ),
                           );
                         },
-                        icon: const Icon(Icons.autorenew, color: AppColors.primary),
+                        icon: Icon(Icons.autorenew, color: AppColors.primary, size: 24.sp),
                         tooltip: 'Renew Plan',
                       ),
                     ],
@@ -310,36 +306,37 @@ class CustomerDetailsPage extends StatelessWidget {
               ),
             ],
           ),
-          const Divider(height: 32, color: Color(0xFFF0F0F0)),
+          Divider(height: 32.h, color: const Color(0xFFF0F0F0)),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Expiry Date', style: TextStyle(color: AppColors.textLight, fontSize: 13)),
-                  const SizedBox(height: 4),
-                  Text(_fmt(sub.endDate), style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.textDark)),
+                  Text('Expiry Date', style: TextStyle(color: AppColors.textLight, fontSize: 13.sp)),
+                  SizedBox(height: 4.h),
+                  Text(_fmt(sub.endDate), style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.textDark, fontSize: 15.sp)),
                 ],
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const Text('Price', style: TextStyle(color: AppColors.textLight, fontSize: 13)),
-                  const SizedBox(height: 4),
+                  Text('Price', style: TextStyle(color: AppColors.textLight, fontSize: 13.sp)),
+                  SizedBox(height: 4.h),
                   Text(sub.price.toStringAsFixed(0),
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textDark)),
+                      style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textDark, fontSize: 15.sp)),
                 ],
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  const Text('Days Left', style: TextStyle(color: AppColors.textLight, fontSize: 13)),
-                  const SizedBox(height: 4),
+                  Text('Days Left', style: TextStyle(color: AppColors.textLight, fontSize: 13.sp)),
+                  SizedBox(height: 4.h),
                   Text(
                     isExpired ? '0 days' : '$daysLeft days',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
+                      fontSize: 15.sp,
                       color: isExpired ? Colors.red : AppColors.primary,
                     ),
                   ),
@@ -354,12 +351,19 @@ class CustomerDetailsPage extends StatelessWidget {
 
   Widget _buildAppBar(BuildContext context, CustomerEntity customer, List<ProductEntity> products, DashboardLoaded state) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _buildCircleIconButton(Icons.arrow_back, () => Navigator.pop(context)),
-          Text("Customer Details", style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: Colors.white)),
+          Expanded(
+            child: Center(
+              child: Text(
+                "Customer Details",
+                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: Colors.white),
+              ),
+            ),
+          ),
           Row(
             children: [
               _buildCircleIconButton(Icons.history, () {
@@ -376,7 +380,7 @@ class CustomerDetailsPage extends StatelessWidget {
                   ),
                 );
               }),
-              const SizedBox(width: 8),
+              SizedBox(width: 8.w),
               _buildCircleIconButton(Icons.edit_outlined, () {
                 Navigator.push(
                   context,
@@ -402,11 +406,11 @@ class CustomerDetailsPage extends StatelessWidget {
   Widget _buildCircleIconButton(IconData icon, VoidCallback onPressed) {
     return InkWell(
       onTap: onPressed,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(20.r),
       child: Container(
-        padding: const EdgeInsets.all(8),
+        padding: EdgeInsets.all(8.r),
         decoration: BoxDecoration(color: Colors.white.withOpacity(0.15), shape: BoxShape.circle),
-        child: Icon(icon, color: Colors.white, size: 24),
+        child: Icon(icon, color: Colors.white, size: 24.sp),
       ),
     );
   }
@@ -419,16 +423,16 @@ class CustomerDetailsPage extends StatelessWidget {
           customer.name[0].toUpperCase() + customer.name.substring(1).toLowerCase(),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.white, fontSize: 28.sp, fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8.h),
         InkWell(
           onTap: () => AppLauncherUtils.makePhoneCall(customer.mobileNumber),
           child: Row(
             children: [
-              Icon(Icons.call, color: Colors.white.withOpacity(0.9), size: 18),
-              const SizedBox(width: 8),
-              Text(customer.mobileNumber, style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 16)),
+              Icon(Icons.call, color: Colors.white.withOpacity(0.9), size: 18.sp),
+              SizedBox(width: 8.w),
+              Text(customer.mobileNumber, style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 16.sp)),
             ],
           ),
         ),

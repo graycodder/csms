@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:csms/core/theme/app_colors.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_event.dart';
@@ -54,14 +55,14 @@ class _OnboardingPageState extends State<OnboardingPage> {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text('Confirm Registration'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Please verify your details before proceeding:'),
-              const SizedBox(height: 16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+        title: Text('Confirm Registration', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp, color: AppColors.textDark)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Please verify your details before proceeding:', style: TextStyle(fontSize: 14.sp, color: AppColors.textLight)),
+              SizedBox(height: 16.h),
               _buildSummaryItem('Business Name', _shopNameController.text),
               _buildSummaryItem('Owner Name', _nameController.text),
               _buildSummaryItem('Email', _emailController.text.trim()),
@@ -71,7 +72,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Edit', style: TextStyle(color: AppColors.textLight)),
+              child: Text('Edit', style: TextStyle(color: AppColors.textLight, fontSize: 14.sp)),
             ),
             ElevatedButton(
               onPressed: () {
@@ -91,7 +92,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
               ),
               child: const Text('Confirm & Create', style: TextStyle(color: Colors.white)),
             ),
@@ -103,12 +104,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   Widget _buildSummaryItem(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
+      padding: EdgeInsets.only(bottom: 8.h),
       child: RichText(
         text: TextSpan(
-          style: const TextStyle(color: AppColors.textDark, fontSize: 14),
+          style: TextStyle(color: AppColors.textDark, fontSize: 14.sp),
           children: [
-            TextSpan(text: '$label: ', style: const TextStyle(fontWeight: FontWeight.bold)),
+            TextSpan(text: '$label: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp)),
             TextSpan(text: value),
           ],
         ),
@@ -161,12 +162,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
         builder: (context, state) {
           return SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildHeader(),
-                  const SizedBox(height: 32),
+                  SizedBox(height: 32.h),
                   Expanded(
                     child: SingleChildScrollView(
                       child: _buildCurrentStep(state),
@@ -195,16 +196,16 @@ class _OnboardingPageState extends State<OnboardingPage> {
       children: [
         Text(
           title,
-          style: const TextStyle(
-            fontSize: 28,
+          style: TextStyle(
+            fontSize: 28.sp,
             fontWeight: FontWeight.bold,
             color: AppColors.textDark,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8.h),
         Text(
           subtitle,
-          style: const TextStyle(fontSize: 16, color: AppColors.textLight),
+          style: TextStyle(fontSize: 16.sp, color: AppColors.textLight),
         ),
       ],
     );
@@ -221,15 +222,15 @@ class _OnboardingPageState extends State<OnboardingPage> {
     return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             "BUSINESS INFORMATION",
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              fontSize: 12,
+              fontSize: 12.sp,
               color: AppColors.primary,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           TextFormField(
             controller: _shopNameController,
             maxLength: 20,
@@ -247,7 +248,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
               return null;
             },
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           TextFormField(
             controller: _shopAddressController,
             maxLength: 40,
@@ -265,7 +266,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
               return null;
             },
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           DropdownButtonFormField<String>(
             value: _categoryController.text.isEmpty ? null : _categoryController.text,
             decoration: const InputDecoration(
@@ -288,7 +289,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
               return null;
             },
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           TextFormField(
             controller: _shopPhoneController,
             keyboardType: TextInputType.phone,
@@ -309,8 +310,23 @@ class _OnboardingPageState extends State<OnboardingPage> {
               return null;
             },
           ),
-          const SizedBox(height: 48),
-          ElevatedButton(onPressed: _onNext, child: const Text("Next")),
+          SizedBox(height: 48.h),
+          SizedBox(
+            width: double.infinity,
+            height: 52.h,
+            child: ElevatedButton(
+              onPressed: _onNext,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                elevation: 0,
+              ),
+              child: Text(
+                "Next",
+                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.white),
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -319,15 +335,15 @@ class _OnboardingPageState extends State<OnboardingPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           "ACCOUNT INFORMATION",
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: 12,
+            fontSize: 12.sp,
             color: AppColors.primary,
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16.h),
         TextFormField(
           controller: _nameController,
           maxLength: 20,
@@ -345,7 +361,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
             return null;
           },
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16.h),
         TextFormField(
           controller: _emailController,
           keyboardType: TextInputType.emailAddress,
@@ -360,7 +376,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
             return null;
           },
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16.h),
         TextFormField(
           controller: _passwordController,
           obscureText: _obscurePassword,
@@ -385,10 +401,22 @@ class _OnboardingPageState extends State<OnboardingPage> {
             return null;
           },
         ),
-        const SizedBox(height: 48),
-        ElevatedButton(
-          onPressed: _onComplete,
-          child: const Text("Complete Registration"),
+        SizedBox(height: 48.h),
+        SizedBox(
+          width: double.infinity,
+          height: 52.h,
+          child: ElevatedButton(
+            onPressed: _onComplete,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+              elevation: 0,
+            ),
+            child: Text(
+              "Complete Registration",
+              style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+          ),
         ),
       ],
     );

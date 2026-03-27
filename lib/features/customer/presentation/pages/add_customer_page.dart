@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:csms/core/theme/app_colors.dart';
 import 'package:csms/features/customer/presentation/bloc/customer_bloc.dart';
 import 'package:csms/features/customer/domain/entities/customer_entity.dart';
@@ -109,7 +110,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
         title: Text('Confirm Addition'),
         content: Text(
           'Are you sure you want to add "${_nameController.text.trim()}" as a new ${TerminologyHelper.getTerminology(widget.shopCategory).customerLabel.toLowerCase()} with the selected ${TerminologyHelper.getTerminology(widget.shopCategory).planLabel.toLowerCase()}?',
@@ -117,7 +118,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: AppColors.textLight)),
+            child: Text('Cancel', style: TextStyle(color: AppColors.textLight, fontSize: 14.sp)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -166,9 +167,9 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
             ),
-            child: const Text('Confirm', style: TextStyle(color: Colors.white)),
+            child: Text('Confirm', style: TextStyle(color: Colors.white, fontSize: 14.sp)),
           ),
         ],
       ),
@@ -195,14 +196,14 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
               style: TextStyle(
                 color: AppColors.textDark,
                 fontWeight: FontWeight.bold,
-                fontSize: 18,
+                fontSize: 18.sp,
               ),
             ),
             Text(
               'Fill in ${TerminologyHelper.getTerminology(widget.shopCategory).customerLabel.toLowerCase()} details',
               style: TextStyle(
                 color: AppColors.textLight.withOpacity(0.8),
-                fontSize: 13,
+                fontSize: 13.sp,
                 fontWeight: FontWeight.normal,
               ),
             ),
@@ -233,13 +234,13 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
               showDialog(
                 context: context,
                 builder: (ctx) => AlertDialog(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  title: const Text('Number Already Used'),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+                  title: Text('Number Already Used', style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
                   content: Text(state.message),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(ctx),
-                      child: const Text('OK', style: TextStyle(fontWeight: FontWeight.bold)),
+                      child: Text('OK', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp)),
                     ),
                   ],
                 ),
@@ -257,7 +258,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
         },
         builder: (context, state) {
           return SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
+            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
             child: Form(
               key: _formKey,
               child: Column(
@@ -284,7 +285,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20.h),
 
                   _buildLabel('Phone Number *'),
                   TextFormField(
@@ -306,7 +307,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20.h),
 
                   _buildLabel('Product *'),
                   DropdownButtonFormField<ProductEntity>(
@@ -333,7 +334,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                     },
                     validator: (v) => v == null ? 'Please select a product' : null,
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20.h),
 
                   if (_selectedProduct?.priceType == 'flexible') ...[
                     _buildLabel('Price *'),
@@ -355,7 +356,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(height: 20.h),
                   ],
 
                   // Plan Details
@@ -372,9 +373,9 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                               FilteringTextInputFormatter.digitsOnly,
                               FilteringTextInputFormatter.deny(RegExp(r'^0')),
                             ],
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               isDense: true,
-                              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 15),
+                              contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 15.h),
                               hintText: 'No leading 0',
                             ),
                             onChanged: (_) => setState(() {}),
@@ -386,16 +387,16 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                             },
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        SizedBox(width: 12.w),
                         Expanded(
                           flex: 3,
                           child: DropdownButtonFormField<String>(
                             value: ['days', 'months'].contains(_customValidityUnit.toLowerCase()) 
                                 ? _customValidityUnit.toLowerCase() 
                                 : 'days',
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               isDense: true,
-                              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 15),
+                              contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 15.h),
                             ),
                             items: const [
                               DropdownMenuItem(value: 'days', child: Text('Days')),
@@ -415,10 +416,10 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                   else
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF9FAFB),
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(8.r),
                         border: Border.all(color: AppColors.border),
                       ),
                       child: Text(
@@ -427,19 +428,19 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                           : 'Select a product',
                         style: TextStyle(
                           color: _selectedProduct != null ? AppColors.textDark : AppColors.textLight,
-                          fontSize: 15,
+                          fontSize: 15.sp,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24.h),
 
                   // Summary Box
                   Container(
-                    padding: const EdgeInsets.all(20),
+                    padding: EdgeInsets.all(20.r),
                     decoration: BoxDecoration(
                       color: const Color(0xFFF0F7FF),
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(16.r),
                       border: Border.all(color: AppColors.primary.withOpacity(0.1)),
                     ),
                     child: Column(
@@ -450,58 +451,58 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                           style: TextStyle(
                             color: AppColors.textDark,
                             fontWeight: FontWeight.w600,
-                            fontSize: 15,
+                            fontSize: 15.sp,
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: 12.h),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             const Text('Expiry Date:', style: TextStyle(color: AppColors.textLight)),
                             Text(
                               _fmt(_computedExpiryDate),
-                              style: const TextStyle(color: AppColors.textDark, fontWeight: FontWeight.bold),
+                              style: TextStyle(color: AppColors.textDark, fontWeight: FontWeight.bold, fontSize: 14.sp),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: 8.h),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             const Text('Total Amount:', style: TextStyle(color: AppColors.textLight)),
                             Text(
                               '${_computedAmount.toStringAsFixed(0)}',
-                              style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+                              style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 14.sp),
                             ),
                           ],
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  SizedBox(height: 32.h),
 
                   SizedBox(
                     width: double.infinity,
-                    height: 52,
+                    height: 52.h,
                     child: ElevatedButton(
                       onPressed: _submit,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(12.r),
                         ),
                       ),
                       child: Text(
                         'Add ${TerminologyHelper.getTerminology(widget.shopCategory).customerLabel}',
-                        style: const TextStyle(
-                          fontSize: 16,
+                        style: TextStyle(
+                          fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
                           color: Colors.white,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20.h),
                 ],
               ),
             ),
@@ -513,13 +514,13 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
 
   Widget _buildLabel(String text) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
+      padding: EdgeInsets.only(bottom: 8.0.h),
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontWeight: FontWeight.w600,
           color: AppColors.textDark,
-          fontSize: 14,
+          fontSize: 14.sp,
         ),
       ),
     );

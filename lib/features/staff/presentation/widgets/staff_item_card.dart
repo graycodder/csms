@@ -66,7 +66,7 @@ class StaffItemCard extends StatelessWidget {
                         color: isActive ? const Color(0xFF1A1A2E) : Colors.grey[600],
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8.w),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
                       decoration: BoxDecoration(
@@ -111,7 +111,7 @@ class StaffItemCard extends StatelessWidget {
                 child: Icon(
                   Icons.edit_outlined,
                   color: isActive ? AppColors.primary : Colors.grey[400],
-                  size: 20.w,
+                  size: 20.sp,
                 ),
               ),
               SizedBox(width: 16.w),
@@ -120,7 +120,7 @@ class StaffItemCard extends StatelessWidget {
                 child: Icon(
                   isActive ? Icons.toggle_on : Icons.toggle_off,
                   color: isActive ? Colors.green : Colors.grey[400],
-                  size: 45.w,
+                  size: 45.sp,
                 ),
               ),
             ],

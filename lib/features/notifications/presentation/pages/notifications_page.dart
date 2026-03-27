@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:csms/core/theme/app_colors.dart';
 import 'package:csms/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:csms/features/customer/presentation/pages/customer_details_page.dart';
@@ -57,16 +58,16 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
     return Container(
       padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 16,
-        left: 20,
-        right: 20,
-        bottom: 24,
+        top: MediaQuery.of(context).padding.top + 16.h,
+        left: 20.w,
+        right: 20.w,
+        bottom: 24.h,
       ),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.primary,
         borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
+          bottomLeft: Radius.circular(24.r),
+          bottomRight: Radius.circular(24.r),
         ),
       ),
       child: Column(
@@ -76,29 +77,29 @@ class _NotificationsPageState extends State<NotificationsPage> {
             children: [
               InkWell(
                 onTap: () => Navigator.pop(context),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(20.r),
                 child: Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: EdgeInsets.all(8.r),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.15),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.arrow_back,
                     color: Colors.white,
-                    size: 24,
+                    size: 24.sp,
                   ),
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: 16.w),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Notifications',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 22,
+                      fontSize: 22.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -106,14 +107,14 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     '${notifications.length} alert${notifications.length == 1 ? '' : 's'}',
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.9),
-                      fontSize: 14,
+                      fontSize: 14.sp,
                     ),
                   ),
                 ],
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24.h),
           Row(
             children: [
               Expanded(
@@ -123,7 +124,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   activeColor: AppColors.primary,
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8.w),
               Expanded(
                 child: _buildTabButton(
                   index: 1,
@@ -150,12 +151,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
           _selectedTab = index;
         });
       },
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(12.r),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: EdgeInsets.symmetric(vertical: 12.h),
         decoration: BoxDecoration(
           color: isSelected ? Colors.white : Colors.white.withOpacity(0.15),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12.r),
         ),
         alignment: Alignment.center,
         child: Text(
@@ -163,7 +164,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
           style: TextStyle(
             color: isSelected ? activeColor : Colors.white,
             fontWeight: FontWeight.bold,
-            fontSize: 14,
+            fontSize: 14.sp,
           ),
         ),
       ),
@@ -181,45 +182,45 @@ class _NotificationsPageState extends State<NotificationsPage> {
     if (filteredList.isEmpty) {
       return Center(
         child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 40),
-          padding: const EdgeInsets.all(32),
+          margin: EdgeInsets.symmetric(horizontal: 40.w),
+          padding: EdgeInsets.all(32.r),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(16.r),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
+                padding: EdgeInsets.all(12.r),
+                decoration: const BoxDecoration(
                   color: AppColors.successBg,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.error_outline,
                   color: AppColors.successText,
-                  size: 24,
+                  size: 24.sp,
                 ),
               ),
-              const SizedBox(height: 16),
-              const Text(
+              SizedBox(height: 16.h),
+              Text(
                 'All Clear!',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 18,
+                  fontSize: 18.sp,
                   color: AppColors.textDark,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8.h),
               Text(
                 _selectedTab == 1
                     ? 'No unread notifications'
                     : 'Your notification inbox is empty',
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.textLight,
-                  fontSize: 14,
+                  fontSize: 14.sp,
                 ),
               ),
             ],
@@ -229,7 +230,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     }
 
     return ListView(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(20.r),
       children: [
         ...filteredList.map((notification) => _buildNotificationCard(notification, term)).toList(),
       ],
@@ -249,18 +250,18 @@ class _NotificationsPageState extends State<NotificationsPage> {
         }
       },
       child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
+        margin: EdgeInsets.only(bottom: 12.h),
+        padding: EdgeInsets.all(16.r),
         decoration: BoxDecoration(
           color: cardBgColor,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(16.r),
           border: Border.all(color: statusColor.withOpacity(0.1)),
           boxShadow: [
             if (isUnread)
               BoxShadow(
                 color: AppColors.primary.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
+                blurRadius: 10.r,
+                offset: Offset(0, 4.h),
               ),
           ],
         ),
@@ -268,7 +269,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              padding: const EdgeInsets.all(10),
+              padding: EdgeInsets.all(10.r),
               decoration: BoxDecoration(
                 color: isUnread ? AppColors.primary.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
                 shape: BoxShape.circle,
@@ -276,10 +277,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
               child: Icon(
                 notification.type == 'subscription' ? Icons.person_add_outlined : Icons.notifications_none_outlined,
                 color: statusColor,
-                size: 20,
+                size: 20.sp,
               ),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: 16.w),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -297,31 +298,27 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontWeight: isUnread ? FontWeight.bold : FontWeight.w600,
-                            fontSize: 16,
+                            fontSize: 16.sp,
                             color: AppColors.textDark,
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      SizedBox(width: 8.w),
                       Text(
                         _fmtRelative(notification.createdAt),
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.textLight,
-                          fontSize: 12,
+                          fontSize: 12.sp,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 6),
                   Text(
                     notification.body
-                        .replaceAll('Subscription', term.subscriptionLabel)
-                        .replaceAll('subscription', term.subscriptionLabel.toLowerCase())
-                        .replaceAll('Customer', term.customerLabel)
-                        .replaceAll('customer', term.customerLabel.toLowerCase()),
-                    style: const TextStyle(
+                      .replaceAll('customer', term.customerLabel.toLowerCase()),
+                    style: TextStyle(
                       color: AppColors.textLight,
-                      fontSize: 14,
+                      fontSize: 14.sp,
                       height: 1.4,
                     ),
                   ),
@@ -330,9 +327,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
             ),
             if (isUnread)
               Container(
-                width: 8,
-                height: 8,
-                margin: const EdgeInsets.only(top: 6, left: 8),
+                width: 8.r,
+                height: 8.r,
+                margin: EdgeInsets.only(top: 6.h, left: 8.w),
                 decoration: const BoxDecoration(
                   color: AppColors.primary,
                   shape: BoxShape.circle,

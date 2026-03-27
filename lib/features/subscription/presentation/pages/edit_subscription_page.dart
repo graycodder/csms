@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'package:csms/features/subscription/domain/entities/subscription_entity.dart';
@@ -107,12 +108,12 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
         },
         builder: (context, state) {
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(24.r),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('${TerminologyHelper.getTerminology(widget.shopCategory).subscriptionLabel} Price *', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                const SizedBox(height: 12),
+                Text('${TerminologyHelper.getTerminology(widget.shopCategory).subscriptionLabel} Price *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp)),
+                SizedBox(height: 12.h),
                 Form(
                   key: _formKey,
                   child: TextFormField(
@@ -123,9 +124,9 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
                       LengthLimitingTextInputFormatter(6),
                       FilteringTextInputFormatter.deny(RegExp(r'^0')),
                     ],
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       hintText: 'Enter price (Max 6 digits)',
-                      prefixIcon: Icon(Icons.currency_rupee, size: 18),
+                      prefixIcon: Icon(Icons.currency_rupee, size: 18.sp),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -139,37 +140,37 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
                     },
                   ),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24.h),
         
-                const Text('Expiry Date', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                const SizedBox(height: 12),
+                Text('Expiry Date', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp)),
+                SizedBox(height: 12.h),
                 InkWell(
                   onTap: _pickDate,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       border: Border.all(color: AppColors.border),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.calendar_today, size: 20, color: AppColors.textLight),
-                        const SizedBox(width: 12),
+                        Icon(Icons.calendar_today, size: 20.sp, color: AppColors.textLight),
+                        SizedBox(width: 12.w),
                         Text(
                           _df.format(_selectedDate),
-                          style: const TextStyle(fontSize: 16, color: AppColors.textDark),
+                          style: TextStyle(fontSize: 16.sp, color: AppColors.textDark),
                         ),
                       ],
                     ),
                   ),
                 ),
                 
-                const SizedBox(height: 40),
+                SizedBox(height: 40.h),
                 
                 SizedBox(
                   width: double.infinity,
-                  height: 56,
+                  height: 56.h,
                   child: ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState?.validate() ?? false) {
@@ -178,12 +179,12 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
                       elevation: 0,
                     ),
-                    child: const Text(
+                    child: Text(
                       'Save Changes',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                      style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                   ),
                 ),
@@ -199,7 +200,7 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
         title: const Text('Confirm Changes'),
         content: Text(
           'Are you sure you want to save the changes for the "${widget.productName}" plan?',
@@ -231,7 +232,7 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
             ),
             child: const Text('Confirm', style: TextStyle(color: Colors.white)),
           ),

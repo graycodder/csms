@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:csms/core/theme/app_colors.dart';
 import 'package:csms/features/shop/domain/entities/shop_entity.dart';
 import 'package:csms/features/shop/presentation/bloc/shop_context_bloc.dart';
@@ -19,11 +20,12 @@ class ShopEditPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF2F4F7),
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Edit Business Info',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
+            fontSize: 20.sp,
           ),
         ),
         backgroundColor: AppColors.primary,
@@ -31,7 +33,7 @@ class ShopEditPage extends StatelessWidget {
         elevation: 0,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(20.r),
         child: ShopEditCard(
           shop: shop,
           onSave: (name, shopAddress, category, phone) {
@@ -47,13 +49,13 @@ class ShopEditPage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Confirm Changes', style: TextStyle(fontWeight: FontWeight.bold)),
-        content: const Text('Are you sure you want to update the business information?'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+        title: Text('Confirm Changes', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp)),
+        content: Text('Are you sure you want to update the business information?', style: TextStyle(fontSize: 14.sp)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel', style: TextStyle(color: AppColors.textLight)),
+            child: Text('Cancel', style: TextStyle(color: AppColors.textLight, fontSize: 14.sp)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -75,9 +77,9 @@ class ShopEditPage extends StatelessWidget {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
             ),
-            child: const Text('Confirm', style: TextStyle(color: Colors.white)),
+            child: Text('Confirm', style: TextStyle(color: Colors.white, fontSize: 14.sp)),
           ),
         ],
       ),

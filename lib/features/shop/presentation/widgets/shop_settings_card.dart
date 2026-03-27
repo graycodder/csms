@@ -16,7 +16,7 @@ class ShopSettingsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(20.r),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(22.r),
@@ -34,29 +34,32 @@ class ShopSettingsCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Business Settings',
-                style: TextStyle(
-                  color: AppColors.textDark,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
+              Expanded(
+                child: Text(
+                  'Business Settings',
+                  style: TextStyle(
+                    color: AppColors.textDark,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18.sp,
+                  ),
                 ),
               ),
               GestureDetector(
                 onTap: onEdit,
                 child: Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.edit_outlined,
-                      size: 16,
+                      size: 16.sp,
                       color: AppColors.primary,
                     ),
-                    const SizedBox(width: 4),
+                    SizedBox(width: 4.w),
                     Text(
                       'Edit',
                       style: TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.bold,
+                        fontSize: 14.sp,
                       ),
                     ),
                   ],
@@ -64,53 +67,21 @@ class ShopSettingsCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 24),
-          // _buildSettingsRow(
-          //   title: 'Auto Archive Expired',
-          //   subtitle: 'Automatically archive expired subscriptions',
-          //   trailing: _buildBadge(
-          //     settings.autoArchiveExpired ? 'Enabled' : 'Disabled',
-          //     settings.autoArchiveExpired ? const Color(0xFFE8F5E9) : const Color(0xFFF2F4F7),
-          //     settings.autoArchiveExpired ? const Color(0xFF2E7D32) : const Color(0xFF5F6368),
-          //   ),
-          // ),
-          // const Divider(height: 32, color: Color(0xFFF2F4F7)),
-          // _buildSettingsRow(
-          //   title: 'Show Product Filters',
-          //   subtitle: 'Display product filters in customer list',
-          //   trailing: _buildBadge(
-          //     settings.showProductFilters ? 'Enabled' : 'Disabled',
-          //     settings.showProductFilters ? const Color(0xFFE8F5E9) : const Color(0xFFF2F4F7),
-          //     settings.showProductFilters ? const Color(0xFF2E7D32) : const Color(0xFF5F6368),
-          //   ),
-          // ),
-          // const Divider(height: 32, color: Color(0xFFF2F4F7)),
-          // _buildSettingsRow(
-          //   title: 'Notification Days Before',
-          //   subtitle: 'Days before expiry to send notifications',
-          //   trailing: Text(
-          //     '${settings.notificationDaysBefore} days',
-          //     style: TextStyle(
-          //       fontWeight: FontWeight.bold,
-          //       fontSize: 15,
-          //       color: AppColors.textDark,
-          //     ),
-          //   ),
-          // ),
-          const Divider(height: 32, color: Color(0xFFF2F4F7)),
+          SizedBox(height: 24.h),
+          Divider(height: 32.h, color: const Color(0xFFF2F4F7)),
           _buildSettingsRow(
-            title: 'Expired Days Before',
-            subtitle: 'Days to mark subscription as expired',
+            title: 'Reminder Days',
+            subtitle: 'Days before expiration to notify',
             trailing: Text(
               '${settings.expiredDaysBefore} days',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 15,
+                fontSize: 15.sp,
                 color: AppColors.textDark,
               ),
             ),
           ),
-          const Divider(height: 32, color: Color(0xFFF2F4F7)),
+          Divider(height: 32.h, color: const Color(0xFFF2F4F7)),
           _buildSettingsRow(
             title: 'WhatsApp Reminder',
             subtitle: 'Send WhatsApp reminder for renewals',
@@ -141,15 +112,15 @@ class ShopSettingsCard extends StatelessWidget {
                 style: TextStyle(
                   color: AppColors.textDark,
                   fontWeight: FontWeight.bold,
-                  fontSize: 15,
+                  fontSize: 15.sp,
                 ),
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: 4.h),
               Text(
                 subtitle,
                 style: TextStyle(
                   color: AppColors.textLight.withOpacity(0.8),
-                  fontSize: 12,
+                  fontSize: 12.sp,
                 ),
               ),
             ],
@@ -162,17 +133,17 @@ class ShopSettingsCard extends StatelessWidget {
 
   Widget _buildBadge(String label, Color bgColor, Color textColor) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
       ),
       child: Text(
         label,
         style: TextStyle(
           color: textColor,
           fontWeight: FontWeight.w600,
-          fontSize: 12,
+          fontSize: 12.sp,
         ),
       ),
     );

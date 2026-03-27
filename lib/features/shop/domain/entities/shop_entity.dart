@@ -39,6 +39,24 @@ class ShopSettings extends Equatable {
     };
   }
 
+  ShopSettings copyWith({
+    int? notificationDaysBefore,
+    int? expiredDaysBefore,
+    bool? showProductFilters,
+    bool? autoArchiveExpired,
+    bool? whatsappReminderEnabled,
+    String? defaultCountryCode,
+  }) {
+    return ShopSettings(
+      notificationDaysBefore: notificationDaysBefore ?? this.notificationDaysBefore,
+      expiredDaysBefore: expiredDaysBefore ?? this.expiredDaysBefore,
+      showProductFilters: showProductFilters ?? this.showProductFilters,
+      autoArchiveExpired: autoArchiveExpired ?? this.autoArchiveExpired,
+      whatsappReminderEnabled: whatsappReminderEnabled ?? this.whatsappReminderEnabled,
+      defaultCountryCode: defaultCountryCode ?? this.defaultCountryCode,
+    );
+  }
+
   @override
   List<Object?> get props => [
     notificationDaysBefore,
