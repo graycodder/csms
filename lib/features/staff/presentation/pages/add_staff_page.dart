@@ -42,25 +42,52 @@ class _AddStaffPageState extends State<AddStaffPage> {
 
   void _submit() {
     if (_formKey.currentState?.validate() ?? false) {
-      LoadingOverlay.show(context);
-      context.read<StaffBloc>().add(
-        AddStaff(
-          shopId: widget.shopId,
-          ownerId: widget.ownerId,
-          staff: StaffEntity(
-            staffId: '',
-            shopId: widget.shopId,
-            ownerId: widget.ownerId,
-            name: _nameController.text.trim(),
-            phone: _phoneController.text.trim(),
-            email: _emailController.text.trim(),
-            role: _selectedRole ?? 'Staff',
-            createdAt: DateTime.now(),
-          ),
-          password: _passwordController.text.trim(),
-        ),
-      );
+      _showConfirmDialog();
     }
+  }
+
+  void _showConfirmDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Confirm New Staff', style: TextStyle(fontWeight: FontWeight.bold)),
+        content: const Text('Are you sure you want to add this new staff member?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.textLight)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx); // Close dialog
+              context.read<StaffBloc>().add(
+                AddStaff(
+                  shopId: widget.shopId,
+                  ownerId: widget.ownerId,
+                  staff: StaffEntity(
+                    staffId: '',
+                    shopId: widget.shopId,
+                    ownerId: widget.ownerId,
+                    name: _nameController.text.trim(),
+                    phone: _phoneController.text.trim(),
+                    email: _emailController.text.trim(),
+                    role: _selectedRole ?? 'Staff',
+                    createdAt: DateTime.now(),
+                  ),
+                  password: _passwordController.text.trim(),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: const Text('Confirm', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
   }
 
   InputDecoration _inputDecoration(String hint, {Widget? suffixIcon}) {

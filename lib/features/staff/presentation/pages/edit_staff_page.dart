@@ -54,24 +54,52 @@ class _EditStaffPageState extends State<EditStaffPage> {
 
   void _submit() {
     if (_formKey.currentState?.validate() ?? false) {
-      context.read<StaffBloc>().add(
-        UpdateStaff(
-          shopId: widget.staff.shopId,
-          ownerId: widget.staff.ownerId,
-          staff: StaffEntity(
-            staffId: widget.staff.staffId,
-            shopId: widget.staff.shopId,
-            ownerId: widget.staff.ownerId,
-            name: _nameController.text.trim(),
-            phone: _phoneController.text.trim(),
-            email: _emailController.text.trim(),
-            role: _selectedRole ?? 'Staff',
-            status: widget.staff.status,
-            createdAt: widget.staff.createdAt,
-          ),
-        ),
-      );
+      _showConfirmDialog();
     }
+  }
+
+  void _showConfirmDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Confirm Changes', style: TextStyle(fontWeight: FontWeight.bold)),
+        content: const Text('Are you sure you want to save the changes to this staff member?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.textLight)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx); // Close dialog
+              context.read<StaffBloc>().add(
+                    UpdateStaff(
+                      shopId: widget.staff.shopId,
+                      ownerId: widget.staff.ownerId,
+                      staff: StaffEntity(
+                        staffId: widget.staff.staffId,
+                        shopId: widget.staff.shopId,
+                        ownerId: widget.staff.ownerId,
+                        name: _nameController.text.trim(),
+                        phone: _phoneController.text.trim(),
+                        email: _emailController.text.trim(),
+                        role: _selectedRole ?? 'Staff',
+                        status: widget.staff.status,
+                        createdAt: widget.staff.createdAt,
+                      ),
+                    ),
+                  );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: const Text('Confirm', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
   }
 
   InputDecoration _inputDecoration(String hint) {

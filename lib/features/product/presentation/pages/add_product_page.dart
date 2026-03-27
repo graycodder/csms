@@ -212,37 +212,65 @@ class _AddProductPageState extends State<AddProductPage> {
 
   void _submitForm() {
     if (_formKey.currentState?.validate() ?? false) {
-      final name = _nameController.text.trim();
-      final price = _priceType == 'fixed' 
-          ? (int.tryParse(_priceController.text.trim()) ?? 0)
-          : 0;
-      final valdVal = _validityType == 'fixed'
-          ? (int.tryParse(_validityController.text.trim()) ?? 30)
-          : 0;
-      
-      final newProduct = ProductEntity(
-        productId: '',
-        shopId: widget.shopId,
-        name: name,
-        price: price.toDouble(),
-        validityValue: valdVal,
-        validityUnit: _validityUnit,
-        validityDays: _validityUnit == 'months' ? valdVal * 30 : valdVal,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-        updatedById: widget.ownerId,
-        ownerId: widget.ownerId,
-        priceType: _priceType,
-        validityType: _validityType,
-      );
-      
-      context.read<ProductBloc>().add(AddProduct(
-        ownerId: widget.ownerId,
-        product: newProduct,
-      ));
-      
-      Navigator.pop(context);
+      _showConfirmDialog();
     }
+  }
+
+  void _showConfirmDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Confirm New Product', style: TextStyle(fontWeight: FontWeight.bold)),
+        content: const Text('Are you sure you want to add this new product?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.textLight)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx); // Close dialog
+              final name = _nameController.text.trim();
+              final price = _priceType == 'fixed' 
+                  ? (int.tryParse(_priceController.text.trim()) ?? 0)
+                  : 0;
+              final valdVal = _validityType == 'fixed'
+                  ? (int.tryParse(_validityController.text.trim()) ?? 30)
+                  : 0;
+              
+              final newProduct = ProductEntity(
+                productId: '',
+                shopId: widget.shopId,
+                name: name,
+                price: price.toDouble(),
+                validityValue: valdVal,
+                validityUnit: _validityUnit,
+                validityDays: _validityUnit == 'months' ? valdVal * 30 : valdVal,
+                createdAt: DateTime.now(),
+                updatedAt: DateTime.now(),
+                updatedById: widget.ownerId,
+                ownerId: widget.ownerId,
+                priceType: _priceType,
+                validityType: _validityType,
+              );
+              
+              context.read<ProductBloc>().add(AddProduct(
+                ownerId: widget.ownerId,
+                product: newProduct,
+              ));
+              
+              Navigator.pop(context); // Close page
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: const Text('Confirm', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildLabel(String label) {
