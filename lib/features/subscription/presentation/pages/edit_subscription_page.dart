@@ -174,6 +174,7 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
                   child: ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState?.validate() ?? false) {
+                        FocusManager.instance.primaryFocus?.unfocus();
                         _showConfirmDialog();
                       }
                     },
@@ -207,11 +208,15 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              FocusManager.instance.primaryFocus?.unfocus();
+              Navigator.pop(context);
+            },
             child: const Text('Cancel', style: TextStyle(color: AppColors.textLight)),
           ),
           ElevatedButton(
             onPressed: () {
+              FocusManager.instance.primaryFocus?.unfocus();
               Navigator.pop(context); // Close dialog
               
               final price = double.tryParse(_priceController.text) ?? widget.subscription.price;

@@ -43,6 +43,7 @@ class _AddStaffPageState extends State<AddStaffPage> {
 
   void _submit() {
     if (_formKey.currentState?.validate() ?? false) {
+      FocusManager.instance.primaryFocus?.unfocus();
       _showConfirmDialog();
     }
   }
@@ -56,11 +57,15 @@ class _AddStaffPageState extends State<AddStaffPage> {
         content: Text('Are you sure you want to add this new staff member?', style: TextStyle(fontSize: 14.sp)),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () {
+              FocusManager.instance.primaryFocus?.unfocus();
+              Navigator.pop(ctx);
+            },
             child: Text('Cancel', style: TextStyle(color: AppColors.textLight, fontSize: 14.sp)),
           ),
           ElevatedButton(
             onPressed: () {
+              FocusManager.instance.primaryFocus?.unfocus();
               Navigator.pop(ctx); // Close dialog
               context.read<StaffBloc>().add(
                 AddStaff(

@@ -55,6 +55,7 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
 
   void _submit() {
     if (_formKey.currentState!.validate()) {
+      FocusManager.instance.primaryFocus?.unfocus();
       _showConfirmDialog();
     }
   }
@@ -70,11 +71,15 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              FocusManager.instance.primaryFocus?.unfocus();
+              Navigator.pop(context);
+            },
             child: Text('Cancel', style: TextStyle(color: AppColors.textLight, fontSize: 14.sp)),
           ),
           ElevatedButton(
             onPressed: () {
+              FocusManager.instance.primaryFocus?.unfocus();
               Navigator.pop(context);
               final updated = widget.customer.copyWith(
                 name: _nameController.text.trim(),

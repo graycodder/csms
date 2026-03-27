@@ -176,9 +176,9 @@ class CustomerCard extends StatelessWidget {
                 ),
               ),
             ],
-            SizedBox(height: 16.h),
+            SizedBox(height: 5.h),
             const Divider(height: 1, color: Color(0xFFF0F0F0)),
-            SizedBox(height: 16.h),
+            SizedBox(height: 5.h),
             // Expiry + price
             Row(
               children: [
@@ -204,7 +204,7 @@ class CustomerCard extends StatelessWidget {
             ),
             // Warning banner
             if (sub != null && isWarn) ...[
-              SizedBox(height: 14.h),
+              SizedBox(height: 7.h),
               WhatsappReminderBanner(
                 shop: state.shop,
                 customer: customer,

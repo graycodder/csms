@@ -23,18 +23,22 @@ class NotificationService {
   Future<void> initialize() async {
     if (_isInitialized) return;
 
-    // 1. Request Permission
-    await _fcm.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
+    // 1. Request FCM Permission (may throw SERVICE_NOT_AVAILABLE if device has
+    //    no internet or Google Play Services is unavailable — handle gracefully)
+    try {
+      await _fcm.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+    } catch (e) {
+      debugPrint('FCM requestPermission error (non-fatal): $e');
+    }
 
     // 2. Initialize Local Notifications
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
     
-    // Custom Sound Setup for iOS
     const DarwinInitializationSettings initializationSettingsIOS =
         DarwinInitializationSettings(
       requestSoundPermission: true,
@@ -50,7 +54,6 @@ class NotificationService {
     await _localNotificationsPlugin.initialize(
       settings: initializationSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) {
-        // Handle foreground/background tap
         debugPrint('Notification clicked: ${response.payload}');
       },
     );
@@ -69,39 +72,44 @@ class NotificationService {
             AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(channel);
 
-    // 4. Register Background Handler
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    // 4. Register Background Handler + Foreground listener
+    //    Also wrapped — FCM listener setup can fail on devices without Play Services
+    try {
+      FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-    // 5. Handle Foreground Messages
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      RemoteNotification? notification = message.notification;
-      AndroidNotification? android = message.notification?.android;
+      // 5. Handle Foreground Messages
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        RemoteNotification? notification = message.notification;
+        AndroidNotification? android = message.notification?.android;
 
-      if (notification != null && android != null) {
-        _localNotificationsPlugin.show(
-          id: notification.hashCode,
-          title: notification.title,
-          body: notification.body,
-          notificationDetails: NotificationDetails(
-            android: AndroidNotificationDetails(
-              channel.id,
-              channel.name,
-              channelDescription: channel.description,
-              icon: '@mipmap/ic_launcher',
-              importance: Importance.max,
-              priority: Priority.max,
-              playSound: true,
+        if (notification != null && android != null) {
+          _localNotificationsPlugin.show(
+            id: notification.hashCode,
+            title: notification.title,
+            body: notification.body,
+            notificationDetails: NotificationDetails(
+              android: AndroidNotificationDetails(
+                channel.id,
+                channel.name,
+                channelDescription: channel.description,
+                icon: '@mipmap/ic_launcher',
+                importance: Importance.max,
+                priority: Priority.max,
+                playSound: true,
+              ),
+              iOS: const DarwinNotificationDetails(
+                sound: 'notification_sound.caf',
+                presentAlert: true,
+                presentBadge: true,
+                presentSound: true,
+              ),
             ),
-            iOS: const DarwinNotificationDetails(
-              sound: 'notification_sound.caf', // Make sure to add notification_sound.caf to Runner in Xcode
-              presentAlert: true,
-              presentBadge: true,
-              presentSound: true,
-            ),
-          ),
-        );
-      }
-    });
+          );
+        }
+      });
+    } catch (e) {
+      debugPrint('FCM listener setup error (non-fatal): $e');
+    }
 
     _isInitialized = true;
   }

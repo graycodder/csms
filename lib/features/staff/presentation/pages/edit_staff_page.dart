@@ -55,6 +55,7 @@ class _EditStaffPageState extends State<EditStaffPage> {
 
   void _submit() {
     if (_formKey.currentState?.validate() ?? false) {
+      FocusManager.instance.primaryFocus?.unfocus();
       _showConfirmDialog();
     }
   }
@@ -68,11 +69,15 @@ class _EditStaffPageState extends State<EditStaffPage> {
         content: Text('Are you sure you want to save the changes to this staff member?', style: TextStyle(fontSize: 14.sp)),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () {
+              FocusManager.instance.primaryFocus?.unfocus();
+              Navigator.pop(ctx);
+            },
             child: Text('Cancel', style: TextStyle(color: AppColors.textLight, fontSize: 14.sp)),
           ),
           ElevatedButton(
             onPressed: () {
+              FocusManager.instance.primaryFocus?.unfocus();
               Navigator.pop(ctx); // Close dialog
               context.read<StaffBloc>().add(
                     UpdateStaff(

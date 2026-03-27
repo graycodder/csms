@@ -106,6 +106,7 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
     final newEndDate = _calculateNewEndDate(widget.currentEndDate, _selectedValue!, _selectedUnit!);
     final isActive = widget.currentEndDate.isAfter(DateTime.now());
 
+    FocusManager.instance.primaryFocus?.unfocus();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
@@ -152,11 +153,17 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () {
+              FocusManager.instance.primaryFocus?.unfocus();
+              Navigator.pop(context, false);
+            },
             child: Text('Cancel', style: TextStyle(color: AppColors.textLight, fontSize: 14.sp)),
           ),
           ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () {
+              FocusManager.instance.primaryFocus?.unfocus();
+              Navigator.pop(context, true);
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),

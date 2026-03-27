@@ -113,7 +113,7 @@ class CustomerDetailsPage extends StatelessWidget {
                                 children: [
                                   Text(
                                     'Active ${term.planLabel}s',
-                                    style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: Colors.white),
+                                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.white),
                                   ),
                                   BlocBuilder<AuthBloc, AuthState>(
                                     builder: (context, authState) {
@@ -156,7 +156,7 @@ class CustomerDetailsPage extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                              SizedBox(height: 16.h),
+                              SizedBox(height: 5.h),
                               if (uniqueSubs.isEmpty)
                                 Center(
                                   child: Text('No active ${term.planLabel.toLowerCase()}s found', style: TextStyle(color: Colors.white70, fontSize: 14.sp)),
@@ -418,7 +418,7 @@ class CustomerDetailsPage extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style: TextStyle(color: Colors.white, fontSize: 28.sp, fontWeight: FontWeight.bold),
         ),
-        SizedBox(height: 8.h),
+      //  SizedBox(height: 8.h),
         InkWell(
           onTap: () => AppLauncherUtils.makePhoneCall(customer.mobileNumber),
           child: Row(
