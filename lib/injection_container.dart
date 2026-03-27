@@ -168,7 +168,11 @@ Future<void> init() async {
 
   //! External
 
-  sl.registerLazySingleton(() => FirebaseDatabase.instance);
+  sl.registerLazySingleton(() {
+    final db = FirebaseDatabase.instance;
+    db.setPersistenceEnabled(true);
+    return db;
+  });
   sl.registerLazySingleton(() => FirebaseAuth.instance);
   sl.registerLazySingleton(() => FirebaseFirestore.instance);
 }

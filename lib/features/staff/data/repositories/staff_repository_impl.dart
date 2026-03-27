@@ -11,7 +11,9 @@ class StaffRepositoryImpl implements StaffRepository {
   final FirebaseDatabase _database;
 
   StaffRepositoryImpl({FirebaseDatabase? database})
-      : _database = database ?? FirebaseDatabase.instance;
+      : _database = database ?? FirebaseDatabase.instance {
+    _database.ref().child('users').keepSynced(true);
+  }
 
   DatabaseReference get _usersRef => _database.ref().child('users');
 

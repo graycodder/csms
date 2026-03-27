@@ -13,7 +13,9 @@ class ShopRepositoryImpl implements ShopRepository {
   ShopRepositoryImpl({
     FirebaseDatabase? database,
     required this.localDataSource,
-  }) : _database = database ?? FirebaseDatabase.instance;
+  }) : _database = database ?? FirebaseDatabase.instance {
+    _database.ref().child('shops').keepSynced(true);
+  }
 
   @override
   Future<Either<Failure, ShopEntity>> getShop(String shopId) async {

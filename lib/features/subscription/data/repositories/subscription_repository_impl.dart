@@ -11,7 +11,9 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
   final FirebaseDatabase _database;
 
   SubscriptionRepositoryImpl({FirebaseDatabase? database})
-    : _database = database ?? FirebaseDatabase.instance;
+    : _database = database ?? FirebaseDatabase.instance {
+    _database.ref().child('subscriptions').keepSynced(true);
+  }
 
   @override
   Future<Either<Failure, void>> createSubscription({

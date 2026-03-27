@@ -9,7 +9,9 @@ class ProductRepositoryImpl implements ProductRepository {
   final FirebaseDatabase _database;
 
   ProductRepositoryImpl({FirebaseDatabase? database})
-    : _database = database ?? FirebaseDatabase.instance;
+    : _database = database ?? FirebaseDatabase.instance {
+    _database.ref().child('products').keepSynced(true);
+  }
 
   @override
   Future<Either<Failure, List<ProductEntity>>> getProducts(
