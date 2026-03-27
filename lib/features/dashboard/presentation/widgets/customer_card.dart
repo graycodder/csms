@@ -191,7 +191,7 @@ class CustomerCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const Spacer(),
+               // const Spacer(),
                 Text(
                   price,
                   style: TextStyle(
