@@ -111,12 +111,6 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Edit details for ${widget.productName}',
-                  style: const TextStyle(color: AppColors.textLight, fontSize: 14),
-                ),
-                const SizedBox(height: 32),
-                
                 Text('${TerminologyHelper.getTerminology(widget.shopCategory).subscriptionLabel} Price *', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                 const SizedBox(height: 12),
                 Form(

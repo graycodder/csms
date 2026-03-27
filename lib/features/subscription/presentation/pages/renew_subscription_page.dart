@@ -62,6 +62,7 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
       _selectedValue = widget.validityValue;
       _selectedUnit = widget.validityUnit.toLowerCase();
       _selectedLabel = 'Custom Duration';
+      _updatePrice(_selectedValue);
     }
   }
 
@@ -86,7 +87,15 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
       if (label != 'Custom Duration') {
         _validityController.text = value.toString();
       }
+      _updatePrice(value);
     });
+  }
+
+  void _updatePrice(int? value) {
+    if (value == null || widget.validityValue == 0) return;
+    // Calculate price relative to base plan price and its validity
+    final price = (widget.basePrice / widget.validityValue) * value;
+    _priceController.text = price.toStringAsFixed(0);
   }
 
   Future<void> _confirm(BuildContext context) async {
@@ -299,6 +308,7 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
                                 setState(() {
                                   _selectedValue = int.tryParse(v);
                                   _selectedLabel = 'Custom Duration';
+                                  _updatePrice(_selectedValue);
                                 });
                               },
                               decoration: const InputDecoration(

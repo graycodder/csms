@@ -100,7 +100,7 @@ class CustomerCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    customer.name,
+                    customer.name[0].toUpperCase() + customer.name.substring(1).toLowerCase(),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(

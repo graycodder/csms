@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'edit_customer_page.dart';
 import 'package:csms/features/subscription/presentation/pages/renew_subscription_page.dart';
@@ -223,7 +224,7 @@ class CustomerDetailsPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      product.name,
+                      product.name[0].toUpperCase() + product.name.substring(1).toLowerCase(),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textDark),
@@ -273,8 +274,8 @@ class CustomerDetailsPage extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => BlocProvider(
-                                create: (_) => di.sl<CustomerBloc>(),
+                              builder: (_) => BlocProvider.value(
+                                value: context.read<CustomerBloc>(),
                                 child: RenewSubscriptionPage(
                                   subscriptionId: sub.subscriptionId,
                                   shopId: sub.shopId,
@@ -351,6 +352,7 @@ class CustomerDetailsPage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _buildCircleIconButton(Icons.arrow_back, () => Navigator.pop(context)),
+          Text("Customer Details", style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: Colors.white)),
           Row(
             children: [
               _buildCircleIconButton(Icons.history, () {
@@ -372,8 +374,8 @@ class CustomerDetailsPage extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => BlocProvider(
-                      create: (_) => di.sl<CustomerBloc>(),
+                    builder: (_) => BlocProvider.value(
+                      value: context.read<CustomerBloc>(),
                       child: EditCustomerPage(
                         customer: customer,
                         products: products,
@@ -407,7 +409,7 @@ class CustomerDetailsPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          customer.name,
+          customer.name[0].toUpperCase() + customer.name.substring(1).toLowerCase(),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
