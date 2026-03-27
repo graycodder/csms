@@ -66,99 +66,10 @@ class _ShopSettingsEditCardState extends State<ShopSettingsEditCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Business Settings',
-                style: TextStyle(
-                  color: AppColors.textDark,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      final notifDays = int.tryParse(_notificationDaysController.text) ?? 2;
-                      final expDays = int.tryParse(_expiredDaysController.text) ?? 10;
-                      
-                      if (expDays <= 0) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Expired days must be greater than 0')),
-                        );
-                        return;
-                      }
-
-                      final updated = ShopSettings(
-                        notificationDaysBefore: notifDays,
-                        expiredDaysBefore: expDays,
-                        showProductFilters: _showProductFilters,
-                        autoArchiveExpired: _autoArchiveExpired,
-                        whatsappReminderEnabled: _whatsappReminderEnabled,
-                      );
-                      widget.onSave(updated);
-                    },
-                    child: Row(
-                      children: [
-                        const Icon(Icons.check, size: 16, color: AppColors.success),
-                        const SizedBox(width: 4),
-                        Text(
-                          'Save',
-                          style: TextStyle(
-                            color: AppColors.success,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  GestureDetector(
-                    onTap: widget.onCancel,
-                    child: Row(
-                      children: [
-                        const Icon(Icons.close, size: 16, color: AppColors.textLight),
-                        const SizedBox(width: 4),
-                        Text(
-                          'Cancel',
-                          style: TextStyle(
-                            color: AppColors.textLight,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          // _buildSwitchRow(
-          //   title: 'Auto Archive Expired',
-          //   subtitle: 'Automatically archive expired subscriptions',
-          //   value: _autoArchiveExpired,
-          //   onChanged: (v) => setState(() => _autoArchiveExpired = v),
-          // ),
-          // const Divider(height: 32, color: Color(0xFFF2F4F7)),
-          // _buildSwitchRow(
-          //   title: 'Show Product Filters',
-          //   subtitle: 'Display product filters in customer list',
-          //   value: _showProductFilters,
-          //   onChanged: (v) => setState(() => _showProductFilters = v),
-          // ),
-          // const Divider(height: 32, color: Color(0xFFF2F4F7)),
-          // _buildInputRow(
-          //   title: 'Notification Days Before',
-          //   subtitle: 'Days before expiry to send notifications',
-          //   controller: _notificationDaysController,
-          // ),
           const Divider(height: 32, color: Color(0xFFF2F4F7)),
           _buildInputRow(
-            title: 'Expired Days Before',
-            subtitle: 'Days to mark subscription as expired',
+            title: 'Reminder Days',
+            subtitle: 'Reminder warning days',
             controller: _expiredDaysController,
           ),
           const Divider(height: 32, color: Color(0xFFF2F4F7)),
@@ -167,6 +78,72 @@ class _ShopSettingsEditCardState extends State<ShopSettingsEditCard> {
             subtitle: 'Send WhatsApp reminder for renewals',
             value: _whatsappReminderEnabled,
             onChanged: (v) => setState(() => _whatsappReminderEnabled = v),
+          ),
+          const SizedBox(height: 32),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: widget.onCancel,
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    minimumSize: const Size(double.infinity, 48),
+                    side: const BorderSide(color: AppColors.border),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(
+                      color: AppColors.textLight,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    final notifDays = int.tryParse(_notificationDaysController.text) ?? 2;
+                    final expDays = int.tryParse(_expiredDaysController.text) ?? 10;
+                    
+                    if (expDays <= 0) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Expired days must be greater than 0')),
+                      );
+                      return;
+                    }
+
+                    final updated = ShopSettings(
+                      notificationDaysBefore: notifDays,
+                      expiredDaysBefore: expDays,
+                      showProductFilters: _showProductFilters,
+                      autoArchiveExpired: _autoArchiveExpired,
+                      whatsappReminderEnabled: _whatsappReminderEnabled,
+                    );
+                    widget.onSave(updated);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    minimumSize: const Size(double.infinity, 48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    'Save',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

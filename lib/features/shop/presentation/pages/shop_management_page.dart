@@ -4,9 +4,9 @@ import 'package:csms/core/theme/app_colors.dart';
 import 'package:csms/features/shop/domain/entities/shop_entity.dart';
 import 'package:csms/features/shop/presentation/bloc/shop_context_bloc.dart';
 import 'package:csms/features/shop/presentation/widgets/shop_info_card.dart';
-import 'package:csms/features/shop/presentation/widgets/shop_edit_card.dart';
 import 'package:csms/features/shop/presentation/widgets/shop_settings_card.dart';
-import 'package:csms/features/shop/presentation/widgets/shop_settings_edit_card.dart';
+import 'package:csms/features/shop/presentation/pages/shop_edit_page.dart';
+import 'package:csms/features/shop/presentation/pages/shop_settings_edit_page.dart';
 import 'package:lottie/lottie.dart';
 import 'package:csms/core/utils/loading_overlay.dart';
 
@@ -18,8 +18,6 @@ class ShopManagementPage extends StatefulWidget {
 }
 
 class _ShopManagementPageState extends State<ShopManagementPage> {
-  bool _isEditingInfo = false;
-  bool _isEditingSettings = false;
 
   @override
   Widget build(BuildContext context) {
@@ -44,60 +42,32 @@ class _ShopManagementPageState extends State<ShopManagementPage> {
                     padding: const EdgeInsets.all(16),
                     child: Column(
                       children: [
-                        _isEditingInfo
-                            ? ShopEditCard(
-                                shop: shop,
-                                onSave: (name, shopAddress, category, phone) {
-                                  final updatedShop = ShopEntity(
-                                    shopId: shop.shopId,
-                                    ownerId: shop.ownerId,
-                                    shopName: name,
-                                    shopAddress: shopAddress,
-                                    category: category,
-                                    phone: phone,
-                                    settings: shop.settings,
-                                    createdAt: shop.createdAt,
-                                    updatedAt: DateTime.now(),
-                                    updatedById: shop.updatedById,
-                                  );
-                                  _updateShop(context, updatedShop);
-                                  setState(() => _isEditingInfo = false);
-                                },
-                                onCancel: () => setState(() => _isEditingInfo = false),
-                              )
-                            : ShopInfoCard(
-                                shopName: shop.shopName,
-                                shopAddress: shop.shopAddress,
-                                shopCategory: shop.category,
-                                shopPhone: shop.phone ?? '',
-                                onEdit: () => setState(() => _isEditingInfo = true),
+                        ShopInfoCard(
+                          shopName: shop.shopName,
+                          shopAddress: shop.shopAddress,
+                          shopCategory: shop.category,
+                          shopPhone: shop.phone ?? '',
+                          onEdit: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ShopEditPage(shop: shop),
                               ),
+                            );
+                          },
+                        ),
                         const SizedBox(height: 20),
-                        _isEditingSettings
-                            ? ShopSettingsEditCard(
-                                settings: shop.settings,
-                                onSave: (updatedSettings) {
-                                  final updatedShop = ShopEntity(
-                                    shopId: shop.shopId,
-                                    ownerId: shop.ownerId,
-                                    shopName: shop.shopName,
-                                    shopAddress: shop.shopAddress,
-                                    category: shop.category,
-                                    phone: shop.phone,
-                                    settings: updatedSettings,
-                                    createdAt: shop.createdAt,
-                                    updatedAt: DateTime.now(),
-                                    updatedById: shop.updatedById,
-                                  );
-                                  _updateShop(context, updatedShop);
-                                  setState(() => _isEditingSettings = false);
-                                },
-                                onCancel: () => setState(() => _isEditingSettings = false),
-                              )
-                            : ShopSettingsCard(
-                                settings: shop.settings,
-                                onEdit: () => setState(() => _isEditingSettings = true),
+                        ShopSettingsCard(
+                          settings: shop.settings,
+                          onEdit: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ShopSettingsEditPage(shop: shop),
                               ),
+                            );
+                          },
+                        ),
                         const SizedBox(height: 20),
                       ],
                     ),

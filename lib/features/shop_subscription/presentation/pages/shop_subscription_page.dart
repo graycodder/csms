@@ -80,29 +80,12 @@ class ShopSubscriptionPage extends StatelessWidget {
                       ),
                       child: Column(
                         children: [
-                          Text(
-                            status.shopName,
-                            style: TextStyle(
-                              fontSize: 18.sp,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textDark,
-                            ),
-                            textAlign: TextAlign.center,
+                            _buildInfoRow(
+                            'Plan Name',
+                           active?.planName ?? 'N/A',
+                            Icons.note_alt_outlined ,
                           ),
-                          if (active != null) ...[
-                             SizedBox(height: 4.h),
-                             Text(
-                              active.planName,
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                          SizedBox(height: 32.h),
-                          const Divider(height: 1, color: AppColors.border),
-                          SizedBox(height: 24.h),
+                          SizedBox(height: 16.h),
                           _buildInfoRow(
                             'Start Date',
                             active != null
