@@ -9,9 +9,8 @@ class CustomerRepositoryImpl implements CustomerRepository {
   final FirebaseDatabase _database;
 
   CustomerRepositoryImpl({FirebaseDatabase? database})
-    : _database = database ?? FirebaseDatabase.instance {
-    _database.ref().child('customers').keepSynced(true);
-  }
+    : _database = database ?? FirebaseDatabase.instance;
+
 
   @override
   Future<Either<Failure, List<CustomerEntity>>> getCustomers({
