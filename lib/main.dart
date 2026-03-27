@@ -96,15 +96,27 @@ class MyApp extends StatelessWidget {
             theme: AppTheme.lightTheme,
             home: const SplashScreen(),
             builder: (context, child) {
-              final content = config.isStaging
-                  ? Banner(
-                      message: "STAGING",
-                      location: BannerLocation.topEnd,
-                      color: Colors.orange,
-                      child: child!,
-                    )
-                  : child!;
-              
+              // Clamp system text scaling to 1.0 so device accessibility font
+              // settings do not stack on top of ScreenUtil's own .sp scaling.
+              // Without this, a device set to "Large" fonts will make all .sp
+              // values proportionally larger than the design intent.
+              final mediaQuery = MediaQuery.of(context);
+              Widget content = MediaQuery(
+                data: mediaQuery.copyWith(
+                  textScaler: TextScaler.noScaling,
+                ),
+                child: child!,
+              );
+
+              if (config.isStaging) {
+                content = Banner(
+                  message: "STAGING",
+                  location: BannerLocation.topEnd,
+                  color: Colors.orange,
+                  child: content,
+                );
+              }
+
               return GlobalVersionGuard(
                 child: GlobalSubscriptionGuard(
                   child: content,
