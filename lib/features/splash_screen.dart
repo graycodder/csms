@@ -76,29 +76,15 @@ class _SplashScreenState extends State<SplashScreen> {
         ),
       ],
       child: Scaffold(
-        backgroundColor: AppColors.primary,
+        backgroundColor: Colors.white,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 20,
-                      spreadRadius: 5,
-                    ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.business_rounded,
-                  size: 64,
-                  color: AppColors.primary,
-                ),
+              Image.asset(
+                'assets/images/app_icon.png',
+                width: 140,
+                height: 140,
               ),
               const SizedBox(height: 32),
               Lottie.asset(
