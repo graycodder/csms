@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:csms/core/theme/app_colors.dart';
+import 'package:csms/core/presentation/pages/webview_page.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_event.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_state.dart';
@@ -25,6 +26,7 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _obscurePassword = true;
+  bool _agreedToTerms = false;
 
   @override
   void dispose() {
@@ -34,6 +36,21 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _onLoginPressed() {
+    FocusScope.of(context).unfocus();
+    if (!_agreedToTerms) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Please accept the Terms & Conditions and Privacy Policy to continue.',
+            style: TextStyle(fontSize: 13.sp),
+          ),
+          backgroundColor: Colors.red.shade700,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
     if (_formKey.currentState?.validate() ?? false) {
       context.read<AuthBloc>().add(
         LoginRequested(
@@ -188,7 +205,91 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       SizedBox(height: 32.h),
 
-                      // Login Button
+                      // Terms & Conditions Checkbox
+                      SizedBox(height: 20.h),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: 24.w,
+                            height: 24.w,
+                            child: Checkbox(
+                              value: _agreedToTerms,
+                              activeColor: AppColors.primary,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(4.r),
+                              ),
+                              onChanged: (v) =>
+                                  setState(() => _agreedToTerms = v ?? false),
+                            ),
+                          ),
+                          SizedBox(width: 8.w),
+                          Expanded(
+                            child: RichText(
+                              text: TextSpan(
+                                text: 'I agree to the ',
+                                style: TextStyle(
+                                  color: AppColors.textLight,
+                                  fontSize: 12.sp,
+                                ),
+                                children: [
+                                  TextSpan(
+                                    text: 'Terms & Conditions',
+                                    style: TextStyle(
+                                      color: AppColors.primary,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12.sp,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => const WebViewPage(
+                                              title: 'Terms & Conditions',
+                                              url: 'https://csms-saas-platform.web.app/legal/terms',
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                  ),
+                                  TextSpan(
+                                    text: ' and ',
+                                    style: TextStyle(
+                                      color: AppColors.textLight,
+                                      fontSize: 12.sp,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: 'Privacy Policy',
+                                    style: TextStyle(
+                                      color: AppColors.primary,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12.sp,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => const WebViewPage(
+                                              title: 'Privacy Policy',
+                                              url: 'https://csms-saas-platform.web.app/legal/privacy',
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 20.h),
+
                       MultiBlocListener(
                         listeners: [
                           BlocListener<AuthBloc, AuthState>(
@@ -237,6 +338,11 @@ class _LoginPageState extends State<LoginPage> {
                           builder: (context, state) {
                             return ElevatedButton(
                               onPressed: _onLoginPressed,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: _agreedToTerms
+                                    ? AppColors.primary
+                                    : AppColors.primary.withOpacity(0.4),
+                              ),
                               child: const Text('Login'),
                             );
                           },
