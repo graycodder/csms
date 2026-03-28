@@ -17,18 +17,19 @@ class ShopRepositoryImpl implements ShopRepository {
 
 
   @override
-  Future<Either<Failure, ShopEntity>> getShop(String shopId) async {
-    try {
-      final snapshot = await _database.ref().child('shops').child(shopId).get();
-      if (snapshot.value != null) {
-        final data = Map<String, dynamic>.from(snapshot.value as Map);
-        return Right(ShopModel.fromJson(data, shopId));
-      } else {
-        return Left(ServerFailure('Shop not found'));
+  Stream<Either<Failure, ShopEntity>> getShop(String shopId) {
+    return _database.ref().child('shops').child(shopId).onValue.map((event) {
+      try {
+        if (event.snapshot.value != null) {
+          final data = Map<String, dynamic>.from(event.snapshot.value as Map);
+          return Right(ShopModel.fromJson(data, shopId));
+        } else {
+          return Left(ServerFailure('Shop not found'));
+        }
+      } catch (e) {
+        return Left(ServerFailure(e.toString()));
       }
-    } catch (e) {
-      return Left(ServerFailure(e.toString()));
-    }
+    });
   }
 
   @override

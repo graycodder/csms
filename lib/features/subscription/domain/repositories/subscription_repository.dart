@@ -38,13 +38,13 @@ abstract class SubscriptionRepository {
     String ownerId,
   );
 
-  Future<Either<Failure, List<SubscriptionEntity>>> getExpiringSubscriptions({
+  Stream<Either<Failure, List<SubscriptionEntity>>> getExpiringSubscriptions({
     required String shopId,
     required String ownerId,
     required int notificationDaysBefore,
   });
 
-  Future<Either<Failure, List<SubscriptionEntity>>> getActiveSubscriptions({
+  Stream<Either<Failure, List<SubscriptionEntity>>> getActiveSubscriptions({
     required String shopId,
     required String ownerId,
   });

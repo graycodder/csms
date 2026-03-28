@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:dartz/dartz.dart';
 import 'package:csms/features/staff/domain/entities/staff_entity.dart';
 import 'package:csms/features/staff/domain/repositories/staff_repository.dart';
 
@@ -92,10 +93,14 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
 
   Future<void> _onLoadStaff(LoadStaff event, Emitter<StaffState> emit) async {
     emit(StaffLoading());
-    final result = await repository.getStaff(event.shopId, event.ownerId);
-    result.fold(
-      (failure) => emit(StaffError(failure.message)),
-      (staffList) => emit(StaffLoaded(staffList)),
+    await emit.forEach<StaffState>(
+      repository.getStaff(event.shopId, event.ownerId).map((result) {
+        return result.fold(
+          (failure) => StaffError(failure.message),
+          (staffList) => StaffLoaded(staffList),
+        );
+      }),
+      onData: (state) => state,
     );
   }
 
@@ -104,8 +109,9 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
     final result = await repository.addStaff(event.shopId, event.ownerId, event.staff, password: event.password);
     result.fold(
       (failure) => emit(StaffError(failure.message)),
-      (_) => add(LoadStaff(event.shopId, event.ownerId)),
+      (_) => null,
     );
+    // No need to manually load, stream will update
   }
 
   Future<void> _onUpdateStaff(UpdateStaff event, Emitter<StaffState> emit) async {
@@ -113,8 +119,9 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
     final result = await repository.updateStaff(event.shopId, event.ownerId, event.staff);
     result.fold(
       (failure) => emit(StaffError(failure.message)),
-      (_) => add(LoadStaff(event.shopId, event.ownerId)),
+      (_) => null,
     );
+    // No need to manually load, stream will update
   }
 
   Future<void> _onToggleStaffStatus(ToggleStaffStatus event, Emitter<StaffState> emit) async {
@@ -134,7 +141,8 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
     final result = await repository.updateStaff(event.shopId, event.ownerId, updatedStaff);
     result.fold(
       (failure) => emit(StaffError(failure.message)),
-      (_) => add(LoadStaff(event.shopId, event.ownerId)),
+      (_) => null,
     );
+    // No need to manually load, stream will update
   }
 }

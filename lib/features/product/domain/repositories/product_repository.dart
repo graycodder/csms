@@ -3,7 +3,7 @@ import '../../../../core/error/failures.dart';
 import '../entities/product_entity.dart';
 
 abstract class ProductRepository {
-  Future<Either<Failure, List<ProductEntity>>> getProducts(
+  Stream<Either<Failure, List<ProductEntity>>> getProducts(
     String shopId,
     String ownerId,
   );

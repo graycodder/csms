@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:dartz/dartz.dart';
 import 'package:csms/features/product/domain/entities/product_entity.dart';
 import 'package:csms/features/product/domain/repositories/product_repository.dart';
 
@@ -81,14 +82,18 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   Future<void> _onLoadProducts(
       LoadProducts event, Emitter<ProductState> emit) async {
     emit(ProductLoading());
-    final result = await repository.getProducts(event.shopId, event.ownerId);
-    result.fold(
-      (failure) => emit(ProductError(failure.message)),
-      (products) {
-        // Sort newest first
-        products.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-        emit(ProductLoaded(products));
-      },
+    await emit.forEach<ProductState>(
+      repository.getProducts(event.shopId, event.ownerId).map((result) {
+        return result.fold(
+          (failure) => ProductError(failure.message),
+          (products) {
+            // Sort new first
+            products.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+            return ProductLoaded(products);
+          },
+        );
+      }),
+      onData: (state) => state,
     );
   }
 
@@ -98,9 +103,9 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     final result = await repository.addProduct(event.product);
     result.fold(
       (failure) => emit(ProductError(failure.message)),
-      (_) => add(
-          LoadProducts(shopId: event.product.shopId, ownerId: event.ownerId)),
+      (_) => null,
     );
+    // No need to manually load, stream will update
   }
 
   Future<void> _onUpdateProduct(
@@ -109,9 +114,9 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     final result = await repository.updateProduct(event.product);
     result.fold(
       (failure) => emit(ProductError(failure.message)),
-      (_) => add(
-          LoadProducts(shopId: event.product.shopId, ownerId: event.ownerId)),
+      (_) => null,
     );
+    // No need to manually load, stream will update
   }
 
 }

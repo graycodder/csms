@@ -223,83 +223,82 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
   }
 
   @override
-  Future<Either<Failure, List<SubscriptionEntity>>> getExpiringSubscriptions({
+  Stream<Either<Failure, List<SubscriptionEntity>>> getExpiringSubscriptions({
     required String shopId,
     required String ownerId,
     required int notificationDaysBefore,
-  }) async {
-    try {
-      final now = DateTime.now();
-      final threshold = now
-          .add(Duration(days: notificationDaysBefore))
-          .millisecondsSinceEpoch;
+  }) {
+    return _database
+        .ref()
+        .child('subscriptions')
+        .orderByChild('ownerId')
+        .equalTo(ownerId)
+        .onValue
+        .map((event) {
+          try {
+            final now = DateTime.now();
+            final threshold = now
+                .add(Duration(days: notificationDaysBefore))
+                .millisecondsSinceEpoch;
 
-      final snapshot = await _database
-          .ref()
-          .child('subscriptions')
-          .orderByChild('ownerId')
-          .equalTo(ownerId)
-          .get();
+            final expiringSubs = <SubscriptionEntity>[];
+            if (event.snapshot.value != null) {
+              final data = event.snapshot.value as Map<dynamic, dynamic>;
+              data.forEach((key, value) {
+                final subData = Map<String, dynamic>.from(value as Map);
+                final status = subData['status'] ?? '';
+                final endDate = subData['endDate'] as int? ?? 0;
+                final sId = subData['shopId'] ?? '';
 
-      final expiringSubs = <SubscriptionEntity>[];
-      if (snapshot.value != null) {
-        final data = snapshot.value as Map<dynamic, dynamic>;
-        data.forEach((key, value) {
-          final subData = Map<String, dynamic>.from(value as Map);
-          final status = subData['status'] ?? '';
-          final endDate = subData['endDate'] as int? ?? 0;
-          final sId = subData['shopId'] ?? '';
+                if (status == 'active' && endDate <= threshold && sId == shopId) {
+                  expiringSubs.add(
+                    SubscriptionModel.fromJson(subData, key.toString()),
+                  );
+                }
+              });
+            }
 
-          if (status == 'active' && endDate <= threshold && sId == shopId) {
-            expiringSubs.add(
-              SubscriptionModel.fromJson(subData, key.toString()),
-            );
+            return Right<Failure, List<SubscriptionEntity>>(expiringSubs);
+          } catch (e) {
+            return Left(ServerFailure(e.toString()));
           }
         });
-      }
-
-      return Right<Failure, List<SubscriptionEntity>>(expiringSubs);
-    } catch (e) {
-      return Left(ServerFailure(e.toString()));
-    }
   }
 
   @override
-  Future<Either<Failure, List<SubscriptionEntity>>> getActiveSubscriptions({
+  Stream<Either<Failure, List<SubscriptionEntity>>> getActiveSubscriptions({
     required String shopId,
     required String ownerId,
-  }) async {
-    try {
-      final now = DateTime.now().millisecondsSinceEpoch;
+  }) {
+    return _database
+        .ref()
+        .child('subscriptions')
+        .orderByChild('ownerId')
+        .equalTo(ownerId)
+        .onValue
+        .map((event) {
+          try {
+            final activeSubs = <SubscriptionEntity>[];
+            if (event.snapshot.value != null) {
+              final data = event.snapshot.value as Map<dynamic, dynamic>;
+              data.forEach((key, value) {
+                final subData = Map<String, dynamic>.from(value as Map);
+                final status = subData['status'] ?? '';
+                final sId = subData['shopId'] ?? '';
 
-      final snapshot = await _database
-          .ref()
-          .child('subscriptions')
-          .orderByChild('ownerId')
-          .equalTo(ownerId)
-          .get();
+                if (status == 'active' && sId == shopId) {
+                  activeSubs.add(
+                    SubscriptionModel.fromJson(subData, key.toString()),
+                  );
+                }
+              });
+            }
 
-      final activeSubs = <SubscriptionEntity>[];
-      if (snapshot.value != null) {
-        final data = snapshot.value as Map<dynamic, dynamic>;
-        data.forEach((key, value) {
-          final subData = Map<String, dynamic>.from(value as Map);
-          final status = subData['status'] ?? '';
-          final endDate = subData['endDate'] as int? ?? 0;
-          final sId = subData['shopId'] ?? '';
-
-          if (status == 'active' && sId == shopId) {
-            activeSubs.add(
-              SubscriptionModel.fromJson(subData, key.toString()),
-            );
+            return Right<Failure, List<SubscriptionEntity>>(activeSubs);
+          } catch (e) {
+            return Left(ServerFailure(e.toString()));
           }
         });
-      }
-
-      return Right<Failure, List<SubscriptionEntity>>(activeSubs);
-    } catch (e) {
-      return Left(ServerFailure(e.toString()));
-    }
   }
 
   @override

@@ -13,81 +13,50 @@ class CustomerRepositoryImpl implements CustomerRepository {
 
 
   @override
-  Future<Either<Failure, List<CustomerEntity>>> getCustomers({
+  Stream<Either<Failure, List<CustomerEntity>>> getCustomers({
     required String shopId,
     required String ownerId,
     int limit = 20,
     dynamic lastDoc,
-  }) async {
-    try {
-      Query query = _database
-          .ref()
-          .child('customers')
-          .orderByChild('owner_createdAt');
+  }) {
+    Query query = _database
+        .ref()
+        .child('customers')
+        .orderByChild('owner_createdAt');
 
-      if (lastDoc != null && lastDoc.toString().isNotEmpty) {
-        query = query.endAt(lastDoc).limitToLast(limit + 1);
-      } else {
-        query = query.startAt(ownerId).endAt('${ownerId}_\uf8ff').limitToLast(limit);
-      }
+    if (lastDoc != null && lastDoc.toString().isNotEmpty) {
+      query = query.endAt(lastDoc).limitToLast(limit + 1);
+    } else {
+      query = query.startAt(ownerId).endAt('${ownerId}_\uf8ff').limitToLast(limit);
+    }
 
-      final snapshot = await query.get();
-      final customers = <CustomerEntity>[];
+    return query.onValue.map((event) {
+      try {
+        final customers = <CustomerEntity>[];
+        if (event.snapshot.value != null) {
+          final data = event.snapshot.value as Map<dynamic, dynamic>;
+          final List<MapEntry<dynamic, dynamic>> entries = data.entries.toList();
+          
+          entries.sort((a, b) {
+            final valA = (a.value as Map)['owner_createdAt']?.toString() ?? '';
+            final valB = (b.value as Map)['owner_createdAt']?.toString() ?? '';
+            return valB.compareTo(valA);
+          });
 
-      if (snapshot.value != null) {
-        final data = snapshot.value as Map<dynamic, dynamic>;
-        final List<MapEntry<dynamic, dynamic>> entries = data.entries.toList();
-        
-        entries.sort((a, b) {
-          final valA = (a.value as Map)['owner_createdAt']?.toString() ?? '';
-          final valB = (b.value as Map)['owner_createdAt']?.toString() ?? '';
-          return valB.compareTo(valA);
-        });
-
-        for (final entry in entries) {
-          final customerData = Map<String, dynamic>.from(entry.value as Map);
-          if (customerData['shopId'] == shopId) {
-            final model = CustomerModel.fromJson(customerData, entry.key.toString());
-            if (lastDoc != null && model.owner_createdAt == lastDoc) continue;
-            customers.add(model);
-          }
-        }
-      }
-
-      // Fallback for first page: if no data found via index, try the legacy query once
-      if (customers.isEmpty && (lastDoc == null || lastDoc.toString().isEmpty)) {
-        final legacySnapshot = await _database
-            .ref()
-            .child('customers')
-            .orderByChild('ownerId')
-            .equalTo(ownerId)
-            .get();
-
-        if (legacySnapshot.value != null) {
-          final data = legacySnapshot.value as Map<dynamic, dynamic>;
-          for (final entry in data.entries) {
+          for (final entry in entries) {
             final customerData = Map<String, dynamic>.from(entry.value as Map);
             if (customerData['shopId'] == shopId) {
-              final key = entry.key.toString();
-              // Auto-migrate: populate the missing index
-              if (customerData['owner_createdAt'] == null) {
-                final createdAt = customerData['createdAt'] as int? ?? DateTime.now().millisecondsSinceEpoch;
-                _database.ref().child('customers').child(key).update({
-                  'owner_createdAt': '${ownerId}_$createdAt'
-                });
-              }
-              customers.add(CustomerModel.fromJson(customerData, key));
+              final model = CustomerModel.fromJson(customerData, entry.key.toString());
+              if (lastDoc != null && model.owner_createdAt == lastDoc) continue;
+              customers.add(model);
             }
           }
-          // Sort by creation date descending if legacy data is fetched
-          customers.sort((a, b) => b.createdAt.compareTo(a.createdAt));
         }
+        return Right(customers);
+      } catch (e) {
+        return Left(ServerFailure(e.toString()));
       }
-
-      return Right(customers);
-    } catch (e) {
-      return Left(ServerFailure(e.toString()));
-    }
+    });
   }
 
   @override

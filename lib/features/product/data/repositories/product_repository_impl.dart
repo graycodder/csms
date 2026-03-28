@@ -13,34 +13,34 @@ class ProductRepositoryImpl implements ProductRepository {
 
 
   @override
-  Future<Either<Failure, List<ProductEntity>>> getProducts(
+  Stream<Either<Failure, List<ProductEntity>>> getProducts(
     String shopId,
     String ownerId,
-  ) async {
-    try {
-      final snapshot = await _database
-          .ref()
-          .child('products')
-          .orderByChild('ownerId')
-          .equalTo(ownerId)
-          .get();
-
-      final products = <ProductEntity>[];
-      if (snapshot.value != null) {
-        final data = snapshot.value as Map<dynamic, dynamic>;
-        data.forEach((key, value) {
-          final productData = Map<String, dynamic>.from(value as Map);
-          // Filter by shopId locally
-          if (productData['shopId'] == shopId) {
-            products.add(ProductModel.fromJson(productData, key.toString()));
+  ) {
+    return _database
+        .ref()
+        .child('products')
+        .orderByChild('ownerId')
+        .equalTo(ownerId)
+        .onValue
+        .map((event) {
+          try {
+            final products = <ProductEntity>[];
+            if (event.snapshot.value != null) {
+              final data = event.snapshot.value as Map<dynamic, dynamic>;
+              data.forEach((key, value) {
+                final productData = Map<String, dynamic>.from(value as Map);
+                // Filter by shopId locally
+                if (productData['shopId'] == shopId) {
+                  products.add(ProductModel.fromJson(productData, key.toString()));
+                }
+              });
+            }
+            return Right(products);
+          } catch (e) {
+            return Left(ServerFailure(e.toString()));
           }
         });
-      }
-
-      return Right(products);
-    } catch (e) {
-      return Left(ServerFailure(e.toString()));
-    }
   }
 
   @override

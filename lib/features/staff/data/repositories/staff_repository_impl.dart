@@ -17,24 +17,25 @@ class StaffRepositoryImpl implements StaffRepository {
   DatabaseReference get _usersRef => _database.ref().child('users');
 
   @override
-  Future<Either<Failure, List<StaffEntity>>> getStaff(String shopId, String ownerId) async {
-    try {
-      final snapshot = await _usersRef.orderByChild('ownerId').equalTo(ownerId).get();
-      final staff = <StaffEntity>[];
-      if (snapshot.value != null) {
-        final data = snapshot.value as Map<dynamic, dynamic>;
-        data.forEach((key, value) {
-          final map = Map<dynamic, dynamic>.from(value as Map);
-          if (map['role'] != 'owner' && map['shopId'] == shopId) { 
-            staff.add(StaffModel.fromJson(map, key.toString()));
-          }
-        });
-        staff.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+  Stream<Either<Failure, List<StaffEntity>>> getStaff(String shopId, String ownerId) {
+    return _usersRef.orderByChild('ownerId').equalTo(ownerId).onValue.map((event) {
+      try {
+        final staff = <StaffEntity>[];
+        if (event.snapshot.value != null) {
+          final data = event.snapshot.value as Map<dynamic, dynamic>;
+          data.forEach((key, value) {
+            final map = Map<dynamic, dynamic>.from(value as Map);
+            if (map['role'] != 'owner' && map['shopId'] == shopId) {
+              staff.add(StaffModel.fromJson(map, key.toString()));
+            }
+          });
+          staff.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        }
+        return Right(staff);
+      } catch (e) {
+        return Left(ServerFailure(e.toString()));
       }
-      return Right(staff);
-    } catch (e) {
-      return Left(ServerFailure(e.toString()));
-    }
+    });
   }
 
   @override

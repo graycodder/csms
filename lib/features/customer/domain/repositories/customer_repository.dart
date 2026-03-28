@@ -3,7 +3,7 @@ import '../../../../core/error/failures.dart';
 import '../entities/customer_entity.dart';
 
 abstract class CustomerRepository {
-  Future<Either<Failure, List<CustomerEntity>>> getCustomers({
+  Stream<Either<Failure, List<CustomerEntity>>> getCustomers({
     required String shopId,
     required String ownerId,
     int limit = 20,

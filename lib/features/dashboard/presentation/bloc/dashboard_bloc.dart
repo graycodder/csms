@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:dartz/dartz.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:csms/core/error/failures.dart';
 import 'package:csms/features/customer/domain/entities/customer_entity.dart';
 import 'package:csms/features/product/domain/entities/product_entity.dart';
@@ -114,64 +115,77 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   ) async {
     emit(DashboardLoading());
 
-    // 1. Fetch Shop first to get settings
-    final shopResult = await shopRepository.getShop(event.shopId);
+    await emit.forEach<DashboardState>(
+      shopRepository.getShop(event.shopId).switchMap((shopResult) {
+        return shopResult.fold(
+          (failure) => Stream.value(DashboardError(failure.message)),
+          (shop) {
+            final warningThreshold = shop.settings.expiredDaysBefore;
 
-    return shopResult.fold(
-      (failure) => emit(DashboardError(failure.message)),
-      (shop) async {
-        final warningThreshold = shop.settings.expiredDaysBefore;
+            return Rx.combineLatest4(
+              customerRepository.getCustomers(
+                shopId: event.shopId,
+                ownerId: event.ownerId,
+              ),
+              productRepository.getProducts(
+                event.shopId,
+                event.ownerId,
+              ),
+              subscriptionRepository.getExpiringSubscriptions(
+                shopId: event.shopId,
+                ownerId: event.ownerId,
+                notificationDaysBefore: warningThreshold,
+              ),
+              subscriptionRepository.getActiveSubscriptions(
+                shopId: event.shopId,
+                ownerId: event.ownerId,
+              ),
+              (customersResult, productsResult, expiringResult, activeSubsResult) {
+                return _combineToDashboardState(
+                  shop: shop,
+                  customersResult: customersResult,
+                  productsResult: productsResult,
+                  expiringResult: expiringResult,
+                  activeSubsResult: activeSubsResult,
+                );
+              },
+            );
+          },
+        );
+      }).onErrorReturnWith((error, stackTrace) => DashboardError(error.toString())),
+      onData: (state) => state,
+    );
+  }
 
-        // 2. Fetch all other data using shop settings
-        final results = await Future.wait([
-          customerRepository.getCustomers(
-            shopId: event.shopId,
-            ownerId: event.ownerId,
-          ),
-          productRepository.getProducts(
-            event.shopId,
-            event.ownerId,
-          ),
-          subscriptionRepository.getExpiringSubscriptions(
-            shopId: event.shopId,
-            ownerId: event.ownerId,
-            notificationDaysBefore: warningThreshold,
-          ),
-          subscriptionRepository.getActiveSubscriptions(
-            shopId: event.shopId,
-            ownerId: event.ownerId,
-          ),
-        ]);
-
-        final customersResult = results[0] as Either<Failure, List<CustomerEntity>>;
-        final productsResult = results[1] as Either<Failure, List<ProductEntity>>;
-        final expiringResult = results[2] as Either<Failure, List<SubscriptionEntity>>;
-        final activeSubsResult = results[3] as Either<Failure, List<SubscriptionEntity>>;
-
-        customersResult.fold(
-          (failure) => emit(DashboardError(failure.message)),
-          (customers) {
-            productsResult.fold(
-              (failure) => emit(DashboardError(failure.message)),
-              (products) {
-                expiringResult.fold(
-                  (failure) => emit(DashboardError(failure.message)),
-                  (expiringSubs) {
-                    activeSubsResult.fold(
-                      (failure) => emit(DashboardError(failure.message)),
-                      (activeSubs) {
-                        emit(DashboardLoaded(
-                          customers: customers,
-                          products: products,
-                          expiringSoon: expiringSubs,
-                          activeSubs: activeSubs,
-                          totalCustomers: customers.length, // This might need a separate count query for large datasets
-                          activeSubscriptions: activeSubs.length,
-                          shop: shop,
-                          hasMore: customers.length >= 1000,
-                          lastDoc: customers.isNotEmpty ? customers.last.owner_createdAt : null,
-                        ));
-                      },
+  DashboardState _combineToDashboardState({
+    required ShopEntity shop,
+    required Either<Failure, List<CustomerEntity>> customersResult,
+    required Either<Failure, List<ProductEntity>> productsResult,
+    required Either<Failure, List<SubscriptionEntity>> expiringResult,
+    required Either<Failure, List<SubscriptionEntity>> activeSubsResult,
+  }) {
+    return customersResult.fold(
+      (failure) => DashboardError(failure.message),
+      (customers) {
+        return productsResult.fold(
+          (failure) => DashboardError(failure.message),
+          (products) {
+            return expiringResult.fold(
+              (failure) => DashboardError(failure.message),
+              (expiringSubs) {
+                return activeSubsResult.fold(
+                  (failure) => DashboardError(failure.message),
+                  (activeSubs) {
+                    return DashboardLoaded(
+                      customers: customers,
+                      products: products,
+                      expiringSoon: expiringSubs,
+                      activeSubs: activeSubs,
+                      totalCustomers: customers.length,
+                      activeSubscriptions: activeSubs.length,
+                      shop: shop,
+                      hasMore: customers.length >= 1000,
+                      lastDoc: customers.isNotEmpty ? customers.last.owner_createdAt : null,
                     );
                   },
                 );
@@ -189,11 +203,12 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   ) async {
     final currentState = state;
     if (currentState is DashboardLoaded && currentState.hasMore) {
+      // For LoadMore, we take the first emission of the stream as a future
       final results = await customerRepository.getCustomers(
         shopId: event.shopId,
         ownerId: event.ownerId,
         lastDoc: currentState.lastDoc,
-      );
+      ).first;
 
       results.fold(
         (failure) => null, // Fail silently or log
