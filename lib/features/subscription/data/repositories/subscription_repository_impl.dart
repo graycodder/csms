@@ -288,7 +288,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
           final endDate = subData['endDate'] as int? ?? 0;
           final sId = subData['shopId'] ?? '';
 
-          if (status == 'active' && endDate > now && sId == shopId) {
+          if (status == 'active' && sId == shopId) {
             activeSubs.add(
               SubscriptionModel.fromJson(subData, key.toString()),
             );

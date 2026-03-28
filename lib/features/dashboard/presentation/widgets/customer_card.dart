@@ -54,16 +54,23 @@ class CustomerCard extends StatelessWidget {
     
     final daysLeft = sub != null ? AppDateUtils.calculateDaysLeft(sub.endDate) : -1;
     final warningThreshold = state.shop.settings.expiredDaysBefore;
-    final isWarn = daysLeft >= 0 && daysLeft <= warningThreshold;
     
     final productNames = uniqueSubs.map((s) {
       final p = state.products.where((prod) => prod.productId == s.productId).firstOrNull;
       return p?.name ?? s.productId;
     }).toList().join(', ');
 
+    final isExpired = daysLeft < 0;
+    final isWarn = !isExpired && daysLeft <= warningThreshold;
+    
+    final Color statusColor = isExpired 
+        ? Colors.red 
+        : (isWarn ? const Color(0xFFE67E22) : const Color(0xFF27AE60));
+    final Color bgColor = isExpired 
+        ? Colors.red.withOpacity(0.1) 
+        : (isWarn ? const Color(0xFFFFF3E0) : const Color(0xFFE8F5E9));
+
     final price = sub != null ? sub.price.toStringAsFixed(0) : '—';
-    final Color statusColor = isWarn ? const Color(0xFFE67E22) : const Color(0xFF27AE60);
-    final Color bgColor = isWarn ? const Color(0xFFFFF3E0) : const Color(0xFFE8F5E9);
 
     return GestureDetector(
       onTap: () {

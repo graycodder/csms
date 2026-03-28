@@ -7,6 +7,7 @@ import 'package:csms/features/auth/presentation/bloc/auth_state.dart';
 import 'package:csms/features/shop/presentation/bloc/shop_context_bloc.dart';
 import 'package:csms/features/settings/presentation/settings_page.dart';
 import 'package:csms/features/customer/presentation/bloc/customer_bloc.dart';
+import 'package:csms/features/customer/domain/entities/customer_entity.dart';
 import 'package:csms/features/customer/presentation/pages/add_customer_page.dart';
 import 'package:csms/features/customer/presentation/pages/customer_details_page.dart';
 import 'package:csms/features/notifications/presentation/pages/notifications_page.dart';
@@ -612,40 +613,46 @@ class _DashboardPageState extends State<DashboardPage> {
     }
 
     filteredCustomers.sort((a, b) {
-      final statusA = a.status.toLowerCase();
-      final statusB = b.status.toLowerCase();
-      if (statusA != statusB) {
-        return statusA == 'active' ? -1 : 1;
+      // 1. Calculate a numeric score for each customer's urgency
+      int getScore(CustomerEntity c) {
+        final isActiveProfile = c.status.toLowerCase().trim() == 'active';
+        if (!isActiveProfile) return 1000; // Final Group: Inactive profile
+
+        final relevantSubs = [
+          ...state.activeSubs.where((s) => s.customerId == c.customerId),
+          ...state.expiringSoon.where((s) => s.customerId == c.customerId),
+        ].where((s) => s.productId == _selectedProductId).toList();
+
+        if (relevantSubs.isEmpty) return 900; // Penultimate Group: Active profile but no sub
+
+        // Select the LATEST expiration date for this product (handles renewals correctly)
+        relevantSubs.sort((s1, s2) => s2.endDate.compareTo(s1.endDate));
+        final sub = relevantSubs.first;
+        final days = AppDateUtils.calculateDaysLeft(sub.endDate);
+
+        if (days < 0) return 0;       // Top Group: Already Expired
+        if (days <= 30) return 100;  // Middle Group: Soon (0-30)
+        return 200;                  // Bottom Group: Safe (>30)
       }
 
-      final subA = [
-        ...state.activeSubs.where((s) => s.customerId == a.customerId),
-        ...state.expiringSoon.where((s) => s.customerId == a.customerId),
-      ].where((s) => s.productId == _selectedProductId).firstOrNull;
+      final scoreA = getScore(a);
+      final scoreB = getScore(b);
 
-      final subB = [
-        ...state.activeSubs.where((s) => s.customerId == b.customerId),
-        ...state.expiringSoon.where((s) => s.customerId == b.customerId),
-      ].where((s) => s.productId == _selectedProductId).firstOrNull;
+      if (scoreA != scoreB) return scoreA.compareTo(scoreB);
 
-      if (subA == null && subB == null) return 0;
-      if (subA == null) return 1;
-      if (subB == null) return -1;
-
-      final diffA = AppDateUtils.calculateDaysLeft(subA.endDate);
-      final diffB = AppDateUtils.calculateDaysLeft(subB.endDate);
-
-      int getPriority(int diff) {
-        if (diff >= 0 && diff <= 30) return 0;
-        if (diff > 30) return 1;
-        return 2;
+      // 2. Tertiary sort: Exact days left within the same score group
+      int getDays(CustomerEntity c) {
+        final subs = [
+          ...state.activeSubs.where((s) => s.customerId == c.customerId),
+          ...state.expiringSoon.where((s) => s.customerId == c.customerId),
+        ].where((s) => s.productId == _selectedProductId).toList();
+        if (subs.isEmpty) return 9999;
+        // Again, pick the latest sub for this product to match display
+        subs.sort((s1, s2) => s2.endDate.compareTo(s1.endDate));
+        return AppDateUtils.calculateDaysLeft(subs.first.endDate);
       }
 
-      final pA = getPriority(diffA);
-      final pB = getPriority(diffB);
-
-      if (pA != pB) return pA.compareTo(pB);
-      return diffA.compareTo(diffB);
+      return getDays(a).compareTo(getDays(b));
     });
 
     if (filteredCustomers.isEmpty) {
