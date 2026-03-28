@@ -101,20 +101,46 @@ class CustomerCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            
+                if (customer.status == 'inactive') ...[
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            borderRadius: BorderRadius.circular(6.r),
+                            border: Border.all(color: Colors.grey[300]!, width: 0.5.w),
+                          ),
+                          child: Text(
+                            'INACTIVE',
+                            style: TextStyle(
+                              color: Colors.grey[500],
+                              fontSize: 9.sp,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                      ],
             // Name + badge
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  child: Text(
-                    customer.name[0].toUpperCase() + customer.name.substring(1).toLowerCase(),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF1A1A1A),
-                    ),
+                  child: Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          customer.name[0].toUpperCase() + customer.name.substring(1).toLowerCase(),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF1A1A1A),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 SizedBox(width: 8.w),
