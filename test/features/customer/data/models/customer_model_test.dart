@@ -50,6 +50,22 @@ void main() {
       expect(result.createdAt, tCreatedAt);
     });
 
+    test('fromJson should handle status strings in assignedProductIds', () {
+      // Arrange
+      final json = {
+        'assignedProductIds': {'p1': 'active', 'p2': 'inactive', 'p3': true, 'p4': false},
+      };
+
+      // Act
+      final result = CustomerModel.fromJson(json, '123');
+
+      // Assert
+      expect(result.assignedProductIds['p1'], true);
+      expect(result.assignedProductIds['p2'], false);
+      expect(result.assignedProductIds['p3'], true);
+      expect(result.assignedProductIds['p4'], false);
+    });
+
     test('toJson should return a JSON map containing proper data', () {
       // Act
       final result = tCustomerModel.toJson();

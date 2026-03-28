@@ -34,6 +34,7 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
   late DateTime _selectedDate;
   final _formKey = GlobalKey<FormState>();
   final _df = DateFormat('MMM dd, yyyy');
+  late String _selectedStatus;
 
   @override
   void initState() {
@@ -42,6 +43,7 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
       text: widget.subscription.price.toStringAsFixed(0),
     );
     _selectedDate = widget.subscription.endDate;
+    _selectedStatus = widget.subscription.status;
   }
 
   @override
@@ -140,8 +142,7 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
                     },
                   ),
                 ),
-                SizedBox(height: 24.h),
-        
+                
                 Text('Expiry Date', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp)),
                 SizedBox(height: 12.h),
                 InkWell(
@@ -164,6 +165,32 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
                       ],
                     ),
                   ),
+                ),
+
+                SizedBox(height: 24.h),
+                
+                Text('Status', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp)),
+                SizedBox(height: 12.h),
+                DropdownButtonFormField<String>(
+                  value: _selectedStatus,
+                  decoration: InputDecoration(
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                      borderSide: const BorderSide(color: AppColors.border),
+                    ),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: 'active', child: Text('Active')),
+                    DropdownMenuItem(value: 'inactive', child: Text('Inactive')),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() => _selectedStatus = value);
+                    }
+                  },
                 ),
                 
                 SizedBox(height: 40.h),
@@ -233,6 +260,7 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
                 shopId: widget.subscription.shopId,
                 updatedByName: name,
                 customerName: widget.customerName,
+                status: _selectedStatus,
               ));
             },
             style: ElevatedButton.styleFrom(

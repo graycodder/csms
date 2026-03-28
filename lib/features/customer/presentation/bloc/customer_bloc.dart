@@ -132,6 +132,7 @@ class UpdateSubscription extends CustomerEvent {
   final String shopId;
   final String updatedByName;
   final String customerName;
+  final String? status;
 
   const UpdateSubscription({
     required this.subscriptionId,
@@ -142,10 +143,11 @@ class UpdateSubscription extends CustomerEvent {
     required this.shopId,
     required this.updatedByName,
     required this.customerName,
+    this.status,
   });
 
   @override
-  List<Object?> get props => [subscriptionId, endDate, price, updatedById, ownerId, shopId, updatedByName, customerName];
+  List<Object?> get props => [subscriptionId, endDate, price, updatedById, ownerId, shopId, updatedByName, customerName, status];
 }
 
 class ResetCustomer extends CustomerEvent {}
@@ -280,6 +282,7 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
       endDate: event.endDate,
       price: event.price,
       updatedById: event.updatedById,
+      status: event.status,
     );
     await result.fold(
       (failure) async => emit(CustomerError(failure.message)),

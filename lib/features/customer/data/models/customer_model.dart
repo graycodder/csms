@@ -21,7 +21,8 @@ class CustomerModel extends CustomerEntity {
     if (json['assignedProductIds'] != null) {
       final mapData = json['assignedProductIds'] as Map<dynamic, dynamic>;
       mapData.forEach((key, value) {
-        productsMap[key.toString()] = value as bool;
+        // Support both boolean and status string ("active"/"inactive")
+        productsMap[key.toString()] = (value == true || value == 'active');
       });
     }
 

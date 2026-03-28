@@ -141,8 +141,7 @@ class CustomerCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(
-                  child: InkWell(
+                InkWell(
                     onTap: () => AppLauncherUtils.makePhoneCall(customer.mobileNumber),
                     child: Row(
                       children: [
@@ -158,7 +157,7 @@ class CustomerCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                ),
+                
                 if (uniqueSubs.length > 1)
                   Text(
                     '${uniqueSubs.length} Plans',

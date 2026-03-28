@@ -30,6 +30,7 @@ abstract class SubscriptionRepository {
     required DateTime endDate,
     required double price,
     required String updatedById,
+    String? status,
   });
 
   Stream<Either<Failure, List<SubscriptionEntity>>> getSubscriptions(

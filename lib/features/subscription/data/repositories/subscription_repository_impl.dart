@@ -343,6 +343,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
     required DateTime endDate,
     required double price,
     required String updatedById,
+    String? status,
   }) async {
     try {
       final subRef = _database
@@ -350,26 +351,45 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
           .child('subscriptions')
           .child(subscriptionId);
 
-      await subRef.update({
+      final Map<String, dynamic> subUpdate = {
         'endDate': endDate.millisecondsSinceEpoch,
         'price': price,
         'updatedAt': ServerValue.timestamp,
         'updatedById': updatedById,
-      });
+      };
 
-      // Get current data for logging
+      if (status != null) {
+        subUpdate['status'] = status;
+      }
+
+      await subRef.update(subUpdate);
+
+      // Get current data for logging and customer update
       final snapshot = await subRef.get();
       if (snapshot.exists) {
         final data = Map<String, dynamic>.from(snapshot.value as Map);
         final shopId = data['shopId'] ?? '';
+        final customerId = data['customerId'] ?? '';
+        final productId = data['productId'] ?? '';
         final logId = _database.ref().push().key ?? DateTime.now().millisecondsSinceEpoch.toString();
 
-        await _database.ref().child('subscription_logs').child(shopId).child(logId).set({
+        final Map<String, dynamic> extraUpdates = {};
+
+        // Update customer's assigned product status if status was provided
+        if (status != null && customerId.isNotEmpty && productId.isNotEmpty) {
+          extraUpdates['customers/$customerId/assignedProductIds/$productId'] = status;
+          extraUpdates['customers/$customerId/updatedAt'] = ServerValue.timestamp;
+          extraUpdates['customers/$customerId/updatedById'] = updatedById;
+        }
+
+        // Add log
+        extraUpdates['subscription_logs/$shopId/$logId'] = {
           'logId': logId,
           'subscriptionId': subscriptionId,
-          'customerId': data['customerId'],
+          'customerId': customerId,
           'shopId': shopId,
           'action': 'edit',
+          'status': status ?? data['status'],
           'newEndDate': endDate.millisecondsSinceEpoch,
           'newPrice': price,
           'createdAt': ServerValue.timestamp,
@@ -377,8 +397,12 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
           'updatedById': updatedById,
           'description': 'Subscription details corrected.',
           'ownerId': data['ownerId'] ?? '',
-          'productId': data['productId'] ?? '',
-        });
+          'productId': productId,
+        };
+
+        if (extraUpdates.isNotEmpty) {
+          await _database.ref().update(extraUpdates);
+        }
       }
 
       return const Right(null);
