@@ -91,7 +91,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     importance: Importance.max,
     priority: Priority.max,
     playSound: true,
-    icon: '@mipmap/ic_launcher',
+    icon: '@mipmap/launcher_icon',
   );
 
   static const DarwinNotificationDetails _iosDetails = DarwinNotificationDetails(
