@@ -1,7 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:dartz/dartz.dart';
 import 'package:csms/features/shop/domain/entities/shop_entity.dart';
 import 'package:csms/features/shop/domain/repositories/shop_repository.dart';
+import 'package:csms/core/error/failures.dart';
 
 abstract class ShopContextEvent extends Equatable {
   const ShopContextEvent();
@@ -93,55 +95,73 @@ class ShopContextBloc extends Bloc<ShopContextEvent, ShopContextState> {
     Emitter<ShopContextState> emit,
   ) async {
     emit(ShopContextLoading());
-    final result = await repository.getShopsByOwner(event.ownerId);
-    result.fold((failure) => emit(ShopContextError(failure.message)), (shops) {
-      // Role-based filtering: If not owner, only show assigned shop
-      List<ShopEntity> filteredShops = shops;
-      if (event.role != 'owner' && event.shopId.isNotEmpty) {
-        filteredShops = shops.where((s) => s.shopId == event.shopId).toList();
-      }
 
-      if (filteredShops.isEmpty) {
-        emit(ShopContextEmpty());
-      } else if (filteredShops.length == 1) {
-        repository.saveSelectedShopId(filteredShops.first.shopId);
-        emit(ShopSelected(filteredShops.first, filteredShops));
-      } else {
-        // Check for cached shop selection
-        final cachedId = repository.getSelectedShopId();
-        if (cachedId != null) {
-          final cachedShop = filteredShops.cast<ShopEntity?>().firstWhere(
-                (s) => s?.shopId == cachedId,
-                orElse: () => null,
-              );
-          if (cachedShop != null) {
-            emit(ShopSelected(cachedShop, filteredShops));
-            return;
-          }
-        }
-        emit(ShopContextLoaded(filteredShops));
-      }
-    });
+    await emit.forEach<Either<Failure, List<ShopEntity>>>(
+      repository.getShopsByOwner(event.ownerId),
+      onData: (result) {
+        return result.fold(
+          (failure) => ShopContextError(failure.message),
+          (shops) {
+            // Role-based filtering: If not owner, only show assigned shop
+            List<ShopEntity> filteredShops = shops;
+            if (event.role != 'owner' && event.shopId.isNotEmpty) {
+              filteredShops = shops.where((s) => s.shopId == event.shopId).toList();
+            }
+
+            if (filteredShops.isEmpty) {
+              return ShopContextEmpty();
+            }
+
+            // Determine which shop should be selected
+            String? shopIdToSelect;
+            
+            // 1. If currently selected, stay on it (fetch latest data from list)
+            final currentState = state;
+            if (currentState is ShopSelected) {
+              shopIdToSelect = currentState.selectedShop.shopId;
+            } 
+            // 2. Otherwise check cached ID
+            else {
+              shopIdToSelect = repository.getSelectedShopId();
+            }
+            
+            // 3. Fallback to first shop if only one exists or no valid selection
+            if (shopIdToSelect == null && filteredShops.length == 1) {
+              shopIdToSelect = filteredShops.first.shopId;
+            }
+
+            if (shopIdToSelect != null) {
+              final selectedShop = filteredShops.cast<ShopEntity?>().firstWhere(
+                    (s) => s?.shopId == shopIdToSelect,
+                    orElse: () => null,
+                  );
+              if (selectedShop != null) {
+                repository.saveSelectedShopId(selectedShop.shopId);
+                return ShopSelected(selectedShop, filteredShops);
+              }
+            }
+
+            return ShopContextLoaded(filteredShops);
+          },
+        );
+      },
+    );
   }
 
   void _onSelectShop(SelectShop event, Emitter<ShopContextState> emit) {
     repository.saveSelectedShopId(event.shop.shopId);
-    
     emit(ShopSelected(event.shop, event.shops));
   }
 
   Future<void> _onUpdateShop(UpdateShop event, Emitter<ShopContextState> emit) async {
-    final currentShops = state is ShopSelected ? (state as ShopSelected).shops : <ShopEntity>[];
-    emit(ShopContextLoading());
+    // No need to emit loading here as it might flicker the UI incorrectly 
+    // since the stream will eventually push the update.
+    // However, for immediate feedback on the management page, we can stay in current state or show overlay.
     final result = await repository.updateShop(event.shop);
     result.fold(
       (failure) => emit(ShopContextError(failure.message)),
-      (_) {
-        // After successful update, we might want to stay on ShopSelected with new data
-        emit(ShopSelected(event.shop, currentShops));
-        // And optionally reload to sync the full list
-        add(LoadShops(ownerId: event.shop.ownerId));
-      },
+      (_) => null,
     );
+    // Logic: Repository update happens -> Firebase onValue triggers -> _onLoadShops emits new ShopSelected
   }
 }

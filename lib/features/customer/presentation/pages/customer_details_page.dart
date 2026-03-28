@@ -352,7 +352,7 @@ class CustomerDetailsPage extends StatelessWidget {
           Expanded(
             child: Center(
               child: Text(
-                "Customer Details",
+                "${TerminologyHelper.getTerminology(state.shop.category).customerLabel} Details",
                 style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: Colors.white),
               ),
             ),

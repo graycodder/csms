@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'package:dartz/dartz.dart';
 import 'package:csms/features/product/domain/entities/product_entity.dart';
 import 'package:csms/features/product/domain/repositories/product_repository.dart';
+import 'package:csms/core/error/failures.dart';
 
 // ─── Events ──────────────────────────────────────────────────────────────────
 

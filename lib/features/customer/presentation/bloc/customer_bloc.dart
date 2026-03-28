@@ -4,6 +4,7 @@ import 'package:csms/features/customer/domain/entities/customer_entity.dart';
 import 'package:csms/features/customer/domain/repositories/customer_repository.dart';
 import 'package:csms/features/subscription/domain/repositories/subscription_repository.dart';
 import 'package:csms/features/notifications/domain/repositories/notification_repository.dart';
+import 'package:csms/core/error/failures.dart';
 
 // Events
 abstract class CustomerEvent extends Equatable {

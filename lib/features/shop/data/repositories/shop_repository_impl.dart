@@ -33,47 +33,47 @@ class ShopRepositoryImpl implements ShopRepository {
   }
 
   @override
-  Future<Either<Failure, List<ShopEntity>>> getShopsByOwner(
+  Stream<Either<Failure, List<ShopEntity>>> getShopsByOwner(
     String ownerId,
-  ) async {
-    try {
-      final snapshot = await _database
-          .ref()
-          .child('shops')
-          .orderByChild('ownerId')
-          .equalTo(ownerId)
-          .get();
-
-      final shops = <ShopEntity>[];
-      if (snapshot.value != null) {
-        final data = snapshot.value as Map<dynamic, dynamic>;
-        data.forEach((key, value) {
-          final shopData = Map<String, dynamic>.from(value as Map);
-          shops.add(
-            ShopEntity(
-              shopId: key.toString(),
-              ownerId: shopData['ownerId'] ?? '',
-              shopName: shopData['shopName'] ?? '',
-              shopAddress: shopData['shopAddress'] ?? '',
-              category: shopData['category'] ?? '',
-              phone: shopData['phone'],
-              settings: ShopSettings.fromJson(shopData['settings'] ?? {}),
-              createdAt: DateTime.fromMillisecondsSinceEpoch(
-                shopData['createdAt'] ?? 0,
-              ),
-              updatedAt: DateTime.fromMillisecondsSinceEpoch(
-                shopData['updatedAt'] ?? 0,
-              ),
-              updatedById: shopData['updatedById'] ?? '',
-            ),
-          );
+  ) {
+    return _database
+        .ref()
+        .child('shops')
+        .orderByChild('ownerId')
+        .equalTo(ownerId)
+        .onValue
+        .map((event) {
+          try {
+            final shops = <ShopEntity>[];
+            if (event.snapshot.value != null) {
+              final data = event.snapshot.value as Map<dynamic, dynamic>;
+              data.forEach((key, value) {
+                final shopData = Map<String, dynamic>.from(value as Map);
+                shops.add(
+                  ShopEntity(
+                    shopId: key.toString(),
+                    ownerId: shopData['ownerId'] ?? '',
+                    shopName: shopData['shopName'] ?? '',
+                    shopAddress: shopData['shopAddress'] ?? '',
+                    category: shopData['category'] ?? '',
+                    phone: shopData['phone'],
+                    settings: ShopSettings.fromJson(shopData['settings'] ?? {}),
+                    createdAt: DateTime.fromMillisecondsSinceEpoch(
+                      shopData['createdAt'] ?? 0,
+                    ),
+                    updatedAt: DateTime.fromMillisecondsSinceEpoch(
+                      shopData['updatedAt'] ?? 0,
+                    ),
+                    updatedById: shopData['updatedById'] ?? '',
+                  ),
+                );
+              });
+            }
+            return Right(shops);
+          } catch (e) {
+            return Left(ServerFailure(e.toString()));
+          }
         });
-      }
-
-      return Right(shops);
-    } catch (e) {
-      return Left(ServerFailure(e.toString()));
-    }
   }
 
   @override
