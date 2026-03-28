@@ -629,10 +629,11 @@ class _DashboardPageState extends State<DashboardPage> {
         relevantSubs.sort((s1, s2) => s2.endDate.compareTo(s1.endDate));
         final sub = relevantSubs.first;
         final days = AppDateUtils.calculateDaysLeft(sub.endDate);
+        final warningThreshold = state.shop.settings.expiredDaysBefore;
 
         if (days < 0) return 0;       // Top Group: Already Expired
-        if (days <= 30) return 100;  // Middle Group: Soon (0-30)
-        return 200;                  // Bottom Group: Safe (>30)
+        if (days <= warningThreshold) return 100;  // Middle Group: Soon (0-X days)
+        return 200;                  // Bottom Group: Safe (>X days)
       }
 
       final scoreA = getScore(a);

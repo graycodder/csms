@@ -20,7 +20,7 @@ class ShopSettings extends Equatable {
   factory ShopSettings.fromJson(Map<dynamic, dynamic> json) {
     return ShopSettings(
       notificationDaysBefore: json['notificationDaysBefore'] ?? 2,
-      expiredDaysBefore: json['expiredDaysBefore'] ?? 10,
+      expiredDaysBefore: json['expiredDaysBefore'] ?? 30,
       showProductFilters: json['showProductFilters'] ?? false,
       autoArchiveExpired: json['autoArchiveExpired'] ?? true,
       whatsappReminderEnabled: json['whatsappReminderEnabled'] ?? false,

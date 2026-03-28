@@ -168,7 +168,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
                           totalCustomers: customers.length, // This might need a separate count query for large datasets
                           activeSubscriptions: activeSubs.length,
                           shop: shop,
-                          hasMore: customers.length >= 20,
+                          hasMore: customers.length >= 1000,
                           lastDoc: customers.isNotEmpty ? customers.last.owner_createdAt : null,
                         ));
                       },
@@ -203,7 +203,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
           } else {
             emit(currentState.copyWith(
               customers: [...currentState.customers, ...newCustomers],
-              hasMore: newCustomers.length >= 20,
+              hasMore: newCustomers.length >= 1000,
               lastDoc: newCustomers.last.owner_createdAt,
             ));
           }
