@@ -94,149 +94,179 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Assign a new product to ${widget.customerName}',
-              style: const TextStyle(color: AppColors.textLight, fontSize: 15),
-            ),
-            const SizedBox(height: 32),
-            
-            const Text('Select Product', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<ProductEntity>(
-              value: _selectedProduct,
-              hint: const Text('Select a product'),
-              decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.inventory_2_outlined),
-              ),
-              items: widget.products.where((p) {
-                return p.status == 'active' && !widget.existingProductIds.contains(p.productId);
-              }).map((p) {
-                return DropdownMenuItem(
-                  value: p,
-                  child: Text(p.name),
-                );
-              }).toList(),
-              onChanged: (v) {
-                if (v != null) {
-                  setState(() {
-                    _selectedProduct = v;
-                    _updateControllers(v);
-                  });
-                }
-              },
-            ),
-            const SizedBox(height: 24),
-
-            if (_selectedProduct?.priceType == 'flexible') ...[
-              const Text('Price', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _priceController,
-                keyboardType: TextInputType.number,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  FilteringTextInputFormatter.deny(RegExp(r'^0')),
-                ],
-                decoration: const InputDecoration(
-                  hintText: 'Enter price',
+      body: BlocConsumer<CustomerBloc, CustomerState>(
+        listener: (context, state) {
+          if (state is CustomerLoading) {
+            LoadingOverlay.show(context);
+          } else if (state is CustomerSuccess) {
+            LoadingOverlay.hide();
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('${terminology.planLabel} assigned successfully!'),
+                  backgroundColor: Colors.green,
+                  behavior: SnackBarBehavior.floating,
                 ),
+              );
+            }
+          } else if (state is CustomerError) {
+            LoadingOverlay.hide();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
               ),
-              const SizedBox(height: 24),
-            ],
+            );
+          }
+        },
+        builder: (context, state) {
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Assign a new product to ${widget.customerName}',
+                  style: const TextStyle(color: AppColors.textLight, fontSize: 15),
+                ),
+                const SizedBox(height: 32),
+                
+                const Text('Select Product', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<ProductEntity>(
+                  value: _selectedProduct,
+                  hint: const Text('Select a product'),
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.inventory_2_outlined),
+                  ),
+                  items: widget.products.where((p) {
+                    return p.status == 'active' && !widget.existingProductIds.contains(p.productId);
+                  }).map((p) {
+                    return DropdownMenuItem(
+                      value: p,
+                      child: Text(p.name),
+                    );
+                  }).toList(),
+                  onChanged: (v) {
+                    if (v != null) {
+                      setState(() {
+                        _selectedProduct = v;
+                        _updateControllers(v);
+                      });
+                    }
+                  },
+                ),
+                const SizedBox(height: 24),
 
-            if (_selectedProduct?.validityType == 'flexible') ...[
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Validity', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                        const SizedBox(height: 12),
-                        TextField(
-                          controller: _validityController,
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
-                            FilteringTextInputFormatter.deny(RegExp(r'^0')),
+                if (_selectedProduct?.priceType == 'flexible') ...[
+                  const Text('Price', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _priceController,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      FilteringTextInputFormatter.deny(RegExp(r'^0')),
+                    ],
+                    decoration: const InputDecoration(
+                      hintText: 'Enter price',
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+
+                if (_selectedProduct?.validityType == 'flexible') ...[
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Validity', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                            const SizedBox(height: 12),
+                            TextField(
+                              controller: _validityController,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                                FilteringTextInputFormatter.deny(RegExp(r'^0')),
+                              ],
+                              decoration: const InputDecoration(
+                                hintText: 'Validity',
+                              ),
+                            ),
                           ],
-                          decoration: const InputDecoration(
-                            hintText: 'Validity',
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        flex: 3,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Unit', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                            const SizedBox(height: 12),
+                            DropdownButtonFormField<String>(
+                              value: _selectedUnit,
+                              items: _units.map((u) => DropdownMenuItem(
+                                value: u, 
+                                child: Text(u[0].toUpperCase() + u.substring(1))
+                              )).toList(),
+                              onChanged: (v) => setState(() => _selectedUnit = v!),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ] else if (_selectedProduct != null) ...[
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF9FAFB),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.info_outline, color: AppColors.primary, size: 20),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'This ${terminology.planLabel.toLowerCase()} is fixed at ₹${_selectedProduct!.price.toStringAsFixed(0)} for ${_selectedProduct!.validityValue} ${_selectedProduct!.validityUnit}.',
+                            style: const TextStyle(color: AppColors.textDark, fontSize: 14),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    flex: 3,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Unit', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                        const SizedBox(height: 12),
-                        DropdownButtonFormField<String>(
-                          value: _selectedUnit,
-                          items: _units.map((u) => DropdownMenuItem(
-                            value: u, 
-                            child: Text(u[0].toUpperCase() + u.substring(1))
-                          )).toList(),
-                          onChanged: (v) => setState(() => _selectedUnit = v!),
-                        ),
-                      ],
+                ],
+                const SizedBox(height: 40),
+                
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: _onAddPlanPressed,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    ),
+                    child: Text(
+                      'Add ${terminology.planLabel}',
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                   ),
-                ],
-              ),
-            ] else if (_selectedProduct != null) ...[
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF9FAFB),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.border),
                 ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.info_outline, color: AppColors.primary, size: 20),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'This ${terminology.planLabel.toLowerCase()} is fixed at ₹${_selectedProduct!.price.toStringAsFixed(0)} for ${_selectedProduct!.validityValue} ${_selectedProduct!.validityUnit}.',
-                        style: const TextStyle(color: AppColors.textDark, fontSize: 14),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-            const SizedBox(height: 40),
-            
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: _onAddPlanPressed,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                ),
-                child: Text(
-                  'Add ${terminology.planLabel}',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-                ),
-              ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -266,6 +296,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
       }
     }
     
+    FocusManager.instance.primaryFocus?.unfocus();
     _showConfirmDialog();
   }
 
@@ -282,11 +313,15 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              FocusManager.instance.primaryFocus?.unfocus();
+              Navigator.pop(context);
+            },
             child: const Text('Cancel', style: TextStyle(color: AppColors.textLight)),
           ),
           ElevatedButton(
             onPressed: () {
+              FocusManager.instance.primaryFocus?.unfocus();
               Navigator.pop(context); // Close dialog
               
               final val = int.tryParse(_validityController.text) ?? 1;
@@ -305,7 +340,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                     productName: _selectedProduct!.name,
                   ));
               
-              Navigator.pop(context); // Close page
+              // Navigator.pop(context); // REMOVED: Wait for Bloc state
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,

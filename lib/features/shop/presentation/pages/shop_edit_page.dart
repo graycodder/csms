@@ -32,14 +32,41 @@ class ShopEditPage extends StatelessWidget {
         iconTheme: const IconThemeData(color: Colors.white),
         elevation: 0,
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(20.r),
-        child: ShopEditCard(
-          shop: shop,
-          onSave: (name, shopAddress, category, phone) {
-            _showConfirmDialog(context, name, shopAddress, category, phone);
-          },
-          onCancel: () => Navigator.pop(context),
+      body: BlocListener<ShopContextBloc, ShopContextState>(
+        listener: (context, state) {
+          if (state is ShopSelected) {
+            LoadingOverlay.hide();
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Business information updated successfully!'),
+                  backgroundColor: Colors.green,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            }
+          } else if (state is ShopContextError) {
+            LoadingOverlay.hide();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+        },
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(20.r),
+          child: ShopEditCard(
+            shop: shop,
+            onSave: (name, shopAddress, category, phone) {
+              FocusManager.instance.primaryFocus?.unfocus();
+              _showConfirmDialog(context, name, shopAddress, category, phone);
+            },
+            onCancel: () => Navigator.pop(context),
+          ),
         ),
       ),
     );
@@ -54,11 +81,15 @@ class ShopEditPage extends StatelessWidget {
         content: Text('Are you sure you want to update the business information?', style: TextStyle(fontSize: 14.sp)),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () {
+              FocusManager.instance.primaryFocus?.unfocus();
+              Navigator.pop(ctx);
+            },
             child: Text('Cancel', style: TextStyle(color: AppColors.textLight, fontSize: 14.sp)),
           ),
           ElevatedButton(
             onPressed: () {
+              FocusManager.instance.primaryFocus?.unfocus();
               Navigator.pop(ctx); // Close dialog
               final updatedShop = ShopEntity(
                 shopId: shop.shopId,
@@ -73,7 +104,7 @@ class ShopEditPage extends StatelessWidget {
                 updatedById: shop.updatedById,
               );
               _updateShop(context, updatedShop);
-              Navigator.pop(context); // Close page
+              // Navigator.pop(context); // REMOVED: Wait for Bloc state to pop
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,

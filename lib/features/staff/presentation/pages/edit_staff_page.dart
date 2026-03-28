@@ -130,7 +130,7 @@ class _EditStaffPageState extends State<EditStaffPage> {
       ),
       body: BlocConsumer<StaffBloc, StaffState>(
         listener: (context, state) {
-          if (state is StaffLoading) {
+          if (state is StaffLoading || state is StaffOperationInProgress) {
             LoadingOverlay.show(context);
           } else if (state is StaffLoaded) {
             LoadingOverlay.hide();
