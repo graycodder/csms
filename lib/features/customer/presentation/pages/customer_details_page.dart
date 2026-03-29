@@ -220,7 +220,8 @@ class CustomerDetailsPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      product.name[0].toUpperCase() + product.name.substring(1).toLowerCase(),
+                      product.name,
+                      //product.name[0].toUpperCase() + product.name.substring(1).toLowerCase(),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: AppColors.textDark),
@@ -413,10 +414,11 @@ class CustomerDetailsPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          customer.name[0].toUpperCase() + customer.name.substring(1).toLowerCase(),
+          customer.name,
+          //customer.name[0].toUpperCase() + customer.name.substring(1).toLowerCase(),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(color: Colors.white, fontSize: 28.sp, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.white, fontSize: 18.sp, fontWeight: FontWeight.bold),
         ),
       //  SizedBox(height: 8.h),
         InkWell(

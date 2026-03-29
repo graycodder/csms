@@ -86,7 +86,7 @@ class CustomerCard extends StatelessWidget {
       },
       child: Container(
         margin: EdgeInsets.only(bottom: 16.h),
-        padding: EdgeInsets.all(20.r),
+        padding: EdgeInsets.only(left: 20.r, right: 20.r, top: 15.r, bottom: 15.r),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(22.r),
@@ -130,11 +130,12 @@ class CustomerCard extends StatelessWidget {
                     children: [
                       Flexible(
                         child: Text(
-                          customer.name[0].toUpperCase() + customer.name.substring(1).toLowerCase(),
+                          customer.name,
+                         // customer.name[0].toUpperCase() + customer.name.substring(1).toLowerCase(),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 18.sp,
+                            fontSize: 16.sp,
                             fontWeight: FontWeight.bold,
                             color: const Color(0xFF1A1A1A),
                           ),

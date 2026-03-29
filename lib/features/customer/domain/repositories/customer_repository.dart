@@ -6,7 +6,7 @@ abstract class CustomerRepository {
   Stream<Either<Failure, List<CustomerEntity>>> getCustomers({
     required String shopId,
     required String ownerId,
-    int limit = 20,
+    int limit = 5000,
     dynamic lastDoc,
   });
 

@@ -97,6 +97,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   final ProductRepository productRepository;
   final SubscriptionRepository subscriptionRepository;
   final ShopRepository shopRepository;
+  static const int _customerPageSize = 5000;
 
   DashboardBloc({
     required this.customerRepository,
@@ -184,7 +185,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
                       totalCustomers: customers.length,
                       activeSubscriptions: activeSubs.length,
                       shop: shop,
-                      hasMore: customers.length >= 1000,
+                      hasMore: customers.length >= _customerPageSize,
                       lastDoc: customers.isNotEmpty ? customers.last.owner_createdAt : null,
                     );
                   },
@@ -207,6 +208,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       final results = await customerRepository.getCustomers(
         shopId: event.shopId,
         ownerId: event.ownerId,
+        limit: _customerPageSize,
         lastDoc: currentState.lastDoc,
       ).first;
 
@@ -218,7 +220,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
           } else {
             emit(currentState.copyWith(
               customers: [...currentState.customers, ...newCustomers],
-              hasMore: newCustomers.length >= 1000,
+              hasMore: newCustomers.length >= _customerPageSize,
               lastDoc: newCustomers.last.owner_createdAt,
             ));
           }
