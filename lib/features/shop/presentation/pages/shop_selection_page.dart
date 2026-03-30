@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:csms/core/theme/app_colors.dart';
 import 'package:csms/features/shop/presentation/bloc/shop_context_bloc.dart';
 import 'package:csms/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:csms/core/utils/loading_overlay.dart';
 
 class ShopSelectionPage extends StatelessWidget {
   const ShopSelectionPage({super.key});
@@ -31,7 +32,7 @@ class ShopSelectionPage extends StatelessWidget {
         },
         builder: (context, state) {
           if (state is ShopContextLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const LoadingOverlay();
           }
 
           if (state is ShopContextLoaded) {

@@ -72,23 +72,27 @@
         },
         "shop_subscriptions": {
             "$shopId": {
-                ".read": "auth != null && (root.child('admins').child(auth.uid).exists() || root.child('shops').child($shopId).child('ownerId').val() == auth.uid || root.child('users').child(auth.uid).child('ownerId').val() == root.child('shops').child($shopId).child('ownerId').val())",
-                ".write": "auth != null && root.child('admins').child(auth.uid).exists()"
+                ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() == 'Admin' || root.child('users').child(auth.uid).child('role').val() == 'admin' || root.child('users').child(auth.uid).child('role').val() == 'owner' || root.child('shops').child($shopId).child('ownerId').val() == auth.uid || root.child('users').child(auth.uid).child('ownerId').val() == root.child('shops').child($shopId).child('ownerId').val())",
+                ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() == 'Admin' || root.child('users').child(auth.uid).child('role').val() == 'admin' || root.child('users').child(auth.uid).child('role').val() == 'owner')"
             }
         },
         "shop_subscription_logs": {
             ".indexOn": [
                 "shopId"
             ],
-            ".read": "auth != null && (root.child('admins').child(auth.uid).exists() || (query.orderByChild == 'shopId' && (root.child('shops').child(query.equalTo).child('ownerId').val() == auth.uid || root.child('users').child(auth.uid).child('ownerId').val() == root.child('shops').child(query.equalTo).child('ownerId').val())))",
+            ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() == 'Admin' || root.child('users').child(auth.uid).child('role').val() == 'admin' || root.child('users').child(auth.uid).child('role').val() == 'owner' || (query.orderByChild == 'shopId' && (root.child('shops').child(query.equalTo).child('ownerId').val() == auth.uid || root.child('users').child(auth.uid).child('ownerId').val() == root.child('shops').child(query.equalTo).child('ownerId').val())))",
             "$logId": {
-                ".read": "auth != null && (root.child('admins').child(auth.uid).exists() || root.child('shops').child(data.child('shopId').val()).child('ownerId').val() == auth.uid || root.child('users').child(auth.uid).child('ownerId').val() == root.child('shops').child(data.child('shopId').val()).child('ownerId').val())",
-                ".write": "auth != null && root.child('admins').child(auth.uid).exists()"
+                ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() == 'Admin' || root.child('users').child(auth.uid).child('role').val() == 'admin' || root.child('users').child(auth.uid).child('role').val() == 'owner' || root.child('shops').child(data.child('shopId').val()).child('ownerId').val() == auth.uid || root.child('users').child(auth.uid).child('ownerId').val() == root.child('shops').child(data.child('shopId').val()).child('ownerId').val())",
+                ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() == 'Admin' || root.child('users').child(auth.uid).child('role').val() == 'admin' || root.child('users').child(auth.uid).child('role').val() == 'owner')"
             }
+        },
+        "subscription_plans": {
+            ".read": "auth != null",
+            ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() == 'Admin' || root.child('users').child(auth.uid).child('role').val() == 'admin' || root.child('users').child(auth.uid).child('role').val() == 'owner')"
         },
         "app_config": {
             ".read": true,
-            ".write": "auth != null && root.child('admins').child(auth.uid).exists()"
+            ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() == 'Admin' || root.child('users').child(auth.uid).child('role').val() == 'admin' || root.child('users').child(auth.uid).child('role').val() == 'owner')"
         }
     }
 }

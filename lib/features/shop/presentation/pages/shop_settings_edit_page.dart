@@ -35,7 +35,7 @@ class ShopSettingsEditPage extends StatelessWidget {
       body: BlocListener<ShopContextBloc, ShopContextState>(
         listener: (context, state) {
           if (state is ShopSelected) {
-            LoadingOverlay.hide();
+            LoadingOverlayHelper.hide();
             if (Navigator.canPop(context)) {
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
@@ -47,7 +47,7 @@ class ShopSettingsEditPage extends StatelessWidget {
               );
             }
           } else if (state is ShopContextError) {
-            LoadingOverlay.hide();
+            LoadingOverlayHelper.hide();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
@@ -118,7 +118,7 @@ class ShopSettingsEditPage extends StatelessWidget {
   }
 
   void _updateShop(BuildContext context, ShopEntity updatedShop) {
-    LoadingOverlay.show(context);
+    LoadingOverlayHelper.show(context);
     context.read<ShopContextBloc>().add(UpdateShop(updatedShop));
   }
 }

@@ -295,9 +295,9 @@ class _LoginPageState extends State<LoginPage> {
                           BlocListener<AuthBloc, AuthState>(
                             listener: (context, state) {
                               if (state is AuthLoading) {
-                                LoadingOverlay.show(context);
+                                LoadingOverlayHelper.show(context);
                               } else if (state is AuthAuthenticated) {
-                                LoadingOverlay.hide();
+                                LoadingOverlayHelper.hide();
                                 context.read<ShopContextBloc>().add(
                                       LoadShops(
                                         ownerId: state.ownerId,
@@ -306,7 +306,7 @@ class _LoginPageState extends State<LoginPage> {
                                       ),
                                     );
                               } else if (state is AuthError) {
-                                LoadingOverlay.hide();
+                                LoadingOverlayHelper.hide();
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(content: Text(state.message)),
                                 );

@@ -97,9 +97,9 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
       body: BlocConsumer<CustomerBloc, CustomerState>(
         listener: (context, state) {
           if (state is CustomerLoading) {
-            LoadingOverlay.show(context);
+            LoadingOverlayHelper.show(context);
           } else if (state is CustomerSuccess) {
-            LoadingOverlay.hide();
+            LoadingOverlayHelper.hide();
             if (Navigator.canPop(context)) {
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
@@ -111,7 +111,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
               );
             }
           } else if (state is CustomerError) {
-            LoadingOverlay.hide();
+            LoadingOverlayHelper.hide();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),

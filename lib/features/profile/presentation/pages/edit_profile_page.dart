@@ -7,6 +7,7 @@ import '../bloc/profile_bloc.dart';
 import '../bloc/profile_event.dart';
 import '../bloc/profile_state.dart';
 import '../../domain/entities/profile_entity.dart';
+import 'package:csms/core/utils/loading_overlay.dart';
 
 class EditProfilePage extends StatefulWidget {
   final ProfileEntity profile;
@@ -110,7 +111,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
                       ),
                       child: state is ProfileLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
+                          ? const LoadingOverlay(useBox: false, size: 24)
                           : Text(
                               'Save Changes',
                               style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: Colors.white),

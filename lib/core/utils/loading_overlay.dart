@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
-class LoadingOverlay {
+class LoadingOverlayHelper {
   static OverlayEntry? _overlayEntry;
 
   static void show(BuildContext context) {
@@ -10,31 +10,7 @@ class LoadingOverlay {
     _overlayEntry = OverlayEntry(
       builder: (context) => Container(
         color: Colors.black.withOpacity(0.3),
-        child: Center(
-          child: Material(
-            color: Colors.transparent,
-            child: Container(
-              padding: const EdgeInsets.all(28),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Lottie.asset(
-                'assets/animations/loading.json',
-                width: 70,
-                height: 70,
-                fit: BoxFit.contain,
-              ),
-            ),
-          ),
-        ),
+        child: const LoadingOverlay(),
       ),
     );
 
@@ -50,5 +26,51 @@ class LoadingOverlay {
     } finally {
       _overlayEntry = null;
     }
+  }
+}
+
+class LoadingOverlay extends StatelessWidget {
+  final double? size;
+  final bool useBox;
+  const LoadingOverlay({super.key, this.size, this.useBox = true});
+
+  @override
+  Widget build(BuildContext context) {
+    if (!useBox) {
+      return Center(
+        child: Lottie.asset(
+          'assets/animations/loading.json',
+          width: size ?? 70,
+          height: size ?? 70,
+          fit: BoxFit.contain,
+        ),
+      );
+    }
+
+    return Center(
+      child: Material(
+        color: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.all(28),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Lottie.asset(
+            'assets/animations/loading.json',
+            width: size ?? 70,
+            height: size ?? 70,
+            fit: BoxFit.contain,
+          ),
+        ),
+      ),
+    );
   }
 }

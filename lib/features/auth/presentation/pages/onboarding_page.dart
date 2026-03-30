@@ -138,9 +138,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthLoading) {
-            LoadingOverlay.show(context);
+            LoadingOverlayHelper.show(context);
           } else if (state is AuthAuthenticated) {
-            LoadingOverlay.hide();
+            LoadingOverlayHelper.hide();
             context.read<ShopContextBloc>().add(
                   LoadShops(
                     ownerId: state.ownerId,
@@ -153,7 +153,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
               MaterialPageRoute(builder: (_) => const ShopSelectionPage()),
             );
           } else if (state is AuthError) {
-            LoadingOverlay.hide();
+            LoadingOverlayHelper.hide();
             ScaffoldMessenger.of(
               context,
             ).showSnackBar(SnackBar(content: Text(state.message)));

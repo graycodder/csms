@@ -24,6 +24,7 @@ import 'package:csms/core/utils/launcher_utils.dart';
 import 'package:csms/features/shop_subscription/presentation/bloc/shop_subscription_bloc.dart';
 import 'package:csms/features/shop_subscription/domain/entities/shop_subscription_entity.dart';
 
+import 'package:csms/core/utils/loading_overlay.dart';
 import 'package:csms/features/dashboard/presentation/widgets/customer_card.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -80,6 +81,7 @@ class _DashboardPageState extends State<DashboardPage> {
     final shopState = context.read<ShopContextBloc>().state;
     final authState = context.read<AuthBloc>().state;
     if (shopState is ShopSelected && authState is AuthAuthenticated) {
+      print('DEBUG: DashboardPage _tryLoad - Triggering LoadDashboardData for shopId: ${shopState.selectedShop.shopId}');
       context.read<DashboardBloc>().add(
         LoadDashboardData(shopId: shopState.selectedShop.shopId, ownerId: authState.ownerId),
       );
@@ -228,14 +230,8 @@ class _DashboardPageState extends State<DashboardPage> {
           } else if (state is DashboardError) {
             return Scaffold(body: _errorBox(state.message));
           }
-          return Scaffold(
-            body: Center(
-              child: Lottie.asset(
-                'assets/animations/loading.json',
-                width: 80.w,
-                height: 80.w,
-              ),
-            ),
+          return const Scaffold(
+            body: LoadingOverlay(),
           );
         },
       ),
@@ -678,12 +674,8 @@ class _DashboardPageState extends State<DashboardPage> {
         if (index >= filteredCustomers.length) {
           return Padding(
             padding: EdgeInsets.symmetric(vertical: 24.h),
-            child: Center(
-              child: SizedBox(
-                width: 24.r,
-                height: 24.r,
-                child: const CircularProgressIndicator(strokeWidth: 2.5),
-              ),
+            child: const Center(
+              child: LoadingOverlay(size: 24),
             ),
           );
         }

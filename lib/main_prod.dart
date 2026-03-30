@@ -6,6 +6,6 @@ void main() async {
   await bootstrap(AppConfig(
     environment: Environment.production,
     firebaseOptions: DefaultFirebaseOptions.currentPlatform,
-    appTitle: 'Business Manager',
+    appTitle: 'CSMS',
   ));
 }

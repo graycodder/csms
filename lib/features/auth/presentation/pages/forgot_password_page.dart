@@ -144,9 +144,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       BlocConsumer<AuthBloc, AuthState>(
                         listener: (context, state) {
                           if (state is AuthLoading) {
-                            LoadingOverlay.show(context);
+                            LoadingOverlayHelper.show(context);
                           } else if (state is AuthPasswordResetSent) {
-                            LoadingOverlay.hide();
+                            LoadingOverlayHelper.hide();
                             if (!mounted) return;
 
                             showDialog(
@@ -177,7 +177,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                               ),
                             );
                           } else if (state is AuthError) {
-                            LoadingOverlay.hide();
+                            LoadingOverlayHelper.hide();
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(state.message),

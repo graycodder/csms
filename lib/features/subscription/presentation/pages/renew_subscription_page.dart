@@ -206,9 +206,9 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
     return BlocListener<CustomerBloc, CustomerState>(
       listener: (context, state) {
         if (state is CustomerLoading) {
-          LoadingOverlay.show(context);
+          LoadingOverlayHelper.show(context);
         } else if (state is CustomerSuccess) {
-          LoadingOverlay.hide();
+          LoadingOverlayHelper.hide();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Membership renewed successfully!', style: TextStyle(fontSize: 14.sp)),
@@ -218,7 +218,7 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
           );
           Navigator.pop(context); // Close Renew Page
         } else if (state is CustomerError) {
-          LoadingOverlay.hide();
+          LoadingOverlayHelper.hide();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Error: ${state.message}', style: TextStyle(fontSize: 14.sp)),

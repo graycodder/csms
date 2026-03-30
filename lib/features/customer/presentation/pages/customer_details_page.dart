@@ -20,6 +20,7 @@ import 'package:csms/features/shop/presentation/bloc/shop_context_bloc.dart';
 import 'package:csms/core/utils/date_utils.dart';
 import 'package:csms/core/utils/launcher_utils.dart';
 import 'package:csms/core/utils/terminology_helper.dart';
+import 'package:csms/core/utils/loading_overlay.dart';
 
 class CustomerDetailsPage extends StatelessWidget {
   final String customerId;
@@ -179,7 +180,7 @@ class CustomerDetailsPage extends StatelessWidget {
                 ],
               );
             }
-            return const Center(child: CircularProgressIndicator());
+            return const LoadingOverlay();
           },
         ),
       ),

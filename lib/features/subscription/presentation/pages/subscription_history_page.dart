@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import 'package:csms/injection_container.dart' as di;
 import '../bloc/subscription_bloc.dart';
 import 'package:csms/core/utils/terminology_helper.dart';
+import 'package:csms/core/utils/loading_overlay.dart';
 
 class SubscriptionHistoryPage extends StatelessWidget {
   final String shopId;
@@ -46,7 +47,7 @@ class SubscriptionHistoryPage extends StatelessWidget {
         body: BlocBuilder<SubscriptionBloc, SubscriptionState>(
           builder: (context, state) {
             if (state is SubscriptionLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return const LoadingOverlay();
             } else if (state is SubscriptionError) {
               return Center(child: Text('Error: ${state.message}', style: TextStyle(fontSize: 14.sp)));
             } else if (state is SubscriptionHistoryLoaded) {

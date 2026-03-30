@@ -50,9 +50,9 @@ class _StaffManagementPageState extends State<StaffManagementPage> {
             child: BlocConsumer<StaffBloc, StaffState>(
               listener: (context, state) {
                 if (state is StaffLoaded) {
-                  LoadingOverlay.hide();
+                  LoadingOverlayHelper.hide();
                 } else if (state is StaffError) {
-                  LoadingOverlay.hide();
+                  LoadingOverlayHelper.hide();
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(state.message, style: TextStyle(fontSize: 14.sp)),
@@ -347,7 +347,7 @@ class _StaffManagementPageState extends State<StaffManagementPage> {
                   onPressed: () {
                     final shop = _shopContext(this.context);
                     if (shop != null) {
-                      LoadingOverlay.show(this.context);
+                      LoadingOverlayHelper.show(this.context);
                       this.context.read<StaffBloc>().add(
                             ToggleStaffStatus(
                                 shopId: shop.shopId,

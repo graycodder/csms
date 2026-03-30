@@ -7,6 +7,7 @@ import '../bloc/profile_bloc.dart';
 import '../bloc/profile_event.dart';
 import '../bloc/profile_state.dart';
 import 'edit_profile_page.dart';
+import 'package:csms/core/utils/loading_overlay.dart';
 
 class ProfilePage extends StatelessWidget {
   final String userId;
@@ -59,7 +60,7 @@ class ProfilePage extends StatelessWidget {
         body: BlocBuilder<ProfileBloc, ProfileState>(
           builder: (context, state) {
             if (state is ProfileLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return const LoadingOverlay();
             } else if (state is ProfileLoaded) {
               final p = state.profile;
               return SingleChildScrollView(

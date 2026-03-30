@@ -119,9 +119,9 @@ class _AddStaffPageState extends State<AddStaffPage> {
       body: BlocConsumer<StaffBloc, StaffState>(
         listener: (context, state) {
           if (state is StaffLoading || state is StaffOperationInProgress) {
-            LoadingOverlay.show(context);
+            LoadingOverlayHelper.show(context);
           } else if (state is StaffLoaded) {
-            LoadingOverlay.hide();
+            LoadingOverlayHelper.hide();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('Staff added successfully!', style: TextStyle(fontSize: 14.sp)),
@@ -131,7 +131,7 @@ class _AddStaffPageState extends State<AddStaffPage> {
             );
             Navigator.pop(context);
           } else if (state is StaffError) {
-            LoadingOverlay.hide();
+            LoadingOverlayHelper.hide();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message, style: TextStyle(fontSize: 14.sp)),

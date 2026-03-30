@@ -7,6 +7,7 @@ import 'package:csms/features/shop/presentation/bloc/shop_context_bloc.dart';
 import '../bloc/shop_subscription_bloc.dart';
 import 'shop_subscription_history_page.dart';
 import 'package:csms/injection_container.dart' as di;
+import 'package:csms/core/utils/loading_overlay.dart';
 
 class ShopSubscriptionPage extends StatelessWidget {
   const ShopSubscriptionPage({super.key});
@@ -37,7 +38,7 @@ class ShopSubscriptionPage extends StatelessWidget {
         body: BlocBuilder<ShopSubscriptionBloc, ShopSubscriptionState>(
           builder: (context, state) {
             if (state is ShopSubscriptionLoading || state is ShopSubscriptionInitial) {
-              return const Center(child: CircularProgressIndicator());
+              return const LoadingOverlay();
             }
 
             if (state is ShopSubscriptionError) {

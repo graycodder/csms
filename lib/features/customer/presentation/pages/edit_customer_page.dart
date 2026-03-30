@@ -142,9 +142,9 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
       body: BlocConsumer<CustomerBloc, CustomerState>(
         listener: (context, state) {
           if (state is CustomerLoading) {
-            LoadingOverlay.show(context);
+            LoadingOverlayHelper.show(context);
           } else if (state is CustomerSuccess) {
-            LoadingOverlay.hide();
+            LoadingOverlayHelper.hide();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('${TerminologyHelper.getTerminology(widget.shopCategory).customerLabel} updated successfully!'),
@@ -154,7 +154,7 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
             );
             Navigator.pop(context);
           } else if (state is CustomerError) {
-            LoadingOverlay.hide();
+            LoadingOverlayHelper.hide();
             if (state.message.contains('already used')) {
               showDialog(
                 context: context,

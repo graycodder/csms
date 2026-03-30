@@ -61,9 +61,9 @@ class _AddProductPageState extends State<AddProductPage> {
       body: BlocConsumer<ProductBloc, ProductState>(
         listener: (context, state) {
           if (state is ProductLoading || state is ProductOperationInProgress) {
-            LoadingOverlay.show(context);
+            LoadingOverlayHelper.show(context);
           } else if (state is ProductLoaded) {
-            LoadingOverlay.hide();
+            LoadingOverlayHelper.hide();
             if (Navigator.canPop(context)) {
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
@@ -75,7 +75,7 @@ class _AddProductPageState extends State<AddProductPage> {
               );
             }
           } else if (state is ProductError) {
-            LoadingOverlay.hide();
+            LoadingOverlayHelper.hide();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message), backgroundColor: Colors.red),
             );

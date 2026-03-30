@@ -227,9 +227,9 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
       body: BlocConsumer<CustomerBloc, CustomerState>(
         listener: (context, state) {
           if (state is CustomerLoading) {
-            LoadingOverlay.show(context);
+            LoadingOverlayHelper.show(context);
           } else if (state is CustomerSuccess) {
-            LoadingOverlay.hide();
+            LoadingOverlayHelper.hide();
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Customer added successfully!'),
@@ -239,7 +239,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
             );
             Navigator.pop(context);
           } else if (state is CustomerError) {
-            LoadingOverlay.hide();
+            LoadingOverlayHelper.hide();
             if (state.message.contains('already used')) {
               showDialog(
                 context: context,

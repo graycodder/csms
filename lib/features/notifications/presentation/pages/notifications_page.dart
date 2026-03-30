@@ -10,6 +10,7 @@ import 'package:csms/features/shop/presentation/bloc/shop_context_bloc.dart';
 import 'package:csms/features/notifications/presentation/bloc/notification_bloc.dart';
 import 'package:csms/features/notifications/domain/entities/notification_entity.dart';
 import 'package:csms/core/utils/terminology_helper.dart';
+import 'package:csms/core/utils/loading_overlay.dart';
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -40,7 +41,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
               ],
             );
           }
-          return const Center(child: CircularProgressIndicator());
+          return const LoadingOverlay();
         },
       ),
     );

@@ -60,11 +60,11 @@ class _ProductManagementPageState extends State<ProductManagementPage> {
             child: BlocConsumer<ProductBloc, ProductState>(
               listener: (context, state) {
                 if (state is ProductOperationInProgress) {
-                  LoadingOverlay.show(context);
+                  LoadingOverlayHelper.show(context);
                 } else if (state is ProductLoaded) {
-                  LoadingOverlay.hide();
+                  LoadingOverlayHelper.hide();
                 } else if (state is ProductError) {
-                  LoadingOverlay.hide();
+                  LoadingOverlayHelper.hide();
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(state.message, style: TextStyle(fontSize: 14.sp)),

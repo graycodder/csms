@@ -86,9 +86,9 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
       body: BlocConsumer<CustomerBloc, CustomerState>(
         listener: (context, state) {
           if (state is CustomerLoading) {
-            LoadingOverlay.show(context);
+            LoadingOverlayHelper.show(context);
           } else if (state is CustomerSuccess) {
-            LoadingOverlay.hide();
+            LoadingOverlayHelper.hide();
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Membership updated successfully!'),
@@ -98,7 +98,7 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
             );
             Navigator.pop(context); // Close Edit Page
           } else if (state is CustomerError) {
-            LoadingOverlay.hide();
+            LoadingOverlayHelper.hide();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('Error: ${state.message}'),

@@ -31,9 +31,9 @@ class _ShopManagementPageState extends State<ShopManagementPage> {
             child: BlocConsumer<ShopContextBloc, ShopContextState>(
               listener: (context, state) {
                 if (state is ShopSelected) {
-                  LoadingOverlay.hide();
+                  LoadingOverlayHelper.hide();
                 } else if (state is ShopContextError) {
-                  LoadingOverlay.hide();
+                  LoadingOverlayHelper.hide();
                 }
               },
               builder: (context, state) {
@@ -96,7 +96,7 @@ class _ShopManagementPageState extends State<ShopManagementPage> {
   }
 
   void _updateShop(BuildContext context, ShopEntity updatedShop) {
-    LoadingOverlay.show(context);
+    LoadingOverlayHelper.show(context);
     context.read<ShopContextBloc>().add(UpdateShop(updatedShop));
   }
 

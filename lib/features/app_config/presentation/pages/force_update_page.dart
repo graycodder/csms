@@ -62,7 +62,7 @@ class ForceUpdatePage extends StatelessWidget {
 
               // Description
               Text(
-                'A new version of Business Manager is available. To continue using the app, please update to the latest version.',
+                'A new version of CSMS is available. To continue using the app, please update to the latest version.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16.sp,
