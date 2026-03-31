@@ -26,6 +26,7 @@ import 'package:csms/features/shop_subscription/domain/entities/shop_subscriptio
 
 import 'package:csms/core/utils/loading_overlay.dart';
 import 'package:csms/features/dashboard/presentation/widgets/customer_card.dart';
+import 'package:csms/features/customer/presentation/pages/customer_list_page.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -203,6 +204,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 ],
               ),
               floatingActionButton: FloatingActionButton(
+                heroTag: null,
                 onPressed: () {
                   FocusScope.of(context).unfocus();
                   _searchFocusNode.unfocus();
@@ -491,7 +493,23 @@ class _DashboardPageState extends State<DashboardPage> {
 
   Widget _statsRow(DashboardLoaded state, BusinessTerminology term) {
     return Row(children: [
-      Expanded(child: _statCard('Total', term.customerLabel, state.totalCustomers.toString(), Colors.black)),
+      Expanded(
+        child: GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => CustomerListPage(
+                  state: state,
+                  term: term,
+                  onReturn: _tryLoad,
+                ),
+              ),
+            );
+          },
+          child: _statCard('Total', term.customerLabel, state.totalCustomers.toString(), Colors.black),
+        ),
+      ),
       SizedBox(width: 10.w),
       Expanded(child: _statCard('Active', term.subscriptionLabel, state.activeSubscriptions.toString(), const Color(0xFF27AE60))),
       SizedBox(width: 10.w),

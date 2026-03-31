@@ -16,8 +16,7 @@ class EditSubscriptionPage extends StatefulWidget {
   final String productName;
   final String shopCategory;
   final String customerName;
-  final double customerRegistrationFeeAmount;
-  final String customerRegistrationFeeStatus;
+  final String? priceType;
 
   const EditSubscriptionPage({
     super.key,
@@ -25,8 +24,7 @@ class EditSubscriptionPage extends StatefulWidget {
     required this.productName,
     required this.shopCategory,
     required this.customerName,
-    this.customerRegistrationFeeAmount = 0.0,
-    this.customerRegistrationFeeStatus = 'unpaid',
+    this.priceType,
   });
 
   @override
@@ -35,7 +33,6 @@ class EditSubscriptionPage extends StatefulWidget {
 
 class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
   late TextEditingController _planAmountController;
-  late TextEditingController _registrationFeeController;
   late TextEditingController _paidAmountController;
   late DateTime _selectedDate;
   final _formKey = GlobalKey<FormState>();
@@ -49,9 +46,6 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
     _planAmountController = TextEditingController(
       text: widget.subscription.price.toStringAsFixed(0),
     );
-    _registrationFeeController = TextEditingController(
-      text: widget.customerRegistrationFeeAmount.toStringAsFixed(0),
-    );
     _paidAmountController = TextEditingController(
       text: widget.subscription.paidAmount.toStringAsFixed(0),
     );
@@ -62,7 +56,6 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
   @override
   void dispose() {
     _planAmountController.dispose();
-    _registrationFeeController.dispose();
     _paidAmountController.dispose();
     super.dispose();
   }
@@ -142,9 +135,12 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
                           FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
                           LengthLimitingTextInputFormatter(6),
                         ],
+                        readOnly: widget.priceType == 'fixed',
                         decoration: InputDecoration(
                           hintText: 'Enter plan amount',
                           prefixIcon: Icon(Icons.currency_rupee, size: 18.sp),
+                          filled: widget.priceType == 'fixed',
+                          fillColor: widget.priceType == 'fixed' ? Colors.grey[100] : null,
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -156,24 +152,6 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
                           }
                           return null;
                         },
-                      ),
-                      SizedBox(height: 12.h),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text('Customer Registration Fee', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp)),
-                      ),
-                      SizedBox(height: 5.h),
-                      TextFormField(
-                        controller: _registrationFeeController,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
-                          LengthLimitingTextInputFormatter(6),
-                        ],
-                        decoration: InputDecoration(
-                          hintText: 'Enter registration fee (optional)',
-                          prefixIcon: Icon(Icons.currency_rupee, size: 18.sp),
-                        ),
                       ),
                       SizedBox(height: 12.h),
                       Row(
@@ -334,7 +312,6 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
               Navigator.pop(context); // Close dialog
               
               final planAmt = double.tryParse(_planAmountController.text) ?? widget.subscription.price;
-              final regFee = double.tryParse(_registrationFeeController.text) ?? 0.0;
               final paidAmt = double.tryParse(_paidAmountController.text) ?? widget.subscription.paidAmount;
               
               final authState = context.read<AuthBloc>().state;
@@ -344,7 +321,6 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
                 subscriptionId: widget.subscription.subscriptionId,
                 endDate: _selectedDate,
                 price: planAmt,
-                registrationFeeAmount: regFee,
                 paidAmount: paidAmt,
                 paymentMode: _selectedPaymentMode,
                 updatedById: authState is AuthAuthenticated ? authState.userId : widget.subscription.updatedById,

@@ -28,6 +28,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
     double? paidAmount,
     String? paymentMode,
     required String productName,
+    bool isNewCustomer = false,
   }) async {
     try {
       final startDate = DateTime.now();
@@ -67,6 +68,34 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
       updates['subscriptions/$subId'] = subData;
       
       // Mirror to top-level logs only for global auditing natively
+      final double regFee = registrationFeeAmount.toDouble();
+      final double totalPaid = (paidAmount ?? 0.0).toDouble();
+      final double regPaid = totalPaid >= regFee ? regFee : totalPaid;
+      final double subPaid = totalPaid - regPaid;
+      final double subPrice = price.toDouble();
+      final double subBalance = subPrice - subPaid;
+      final String subPaymentStatus = subBalance <= 0 ? 'paid' : (subPaid <= 0 ? 'unpaid' : 'partial');
+
+      updates['subscriptions/$subId'] = {
+        'subscriptionId': subId,
+        'shopId': shopId,
+        'customerId': customerId,
+        'productId': productId,
+        'startDate': startDate.millisecondsSinceEpoch,
+        'endDate': endDate.millisecondsSinceEpoch,
+        'status': 'active',
+        'createdAt': ServerValue.timestamp,
+        'updatedAt': ServerValue.timestamp,
+        'price': subPrice,
+        'registrationFeeAmount': regFee,
+        'registrationFeePaid': regPaid,
+        'paidAmount': subPaid,
+        'balanceAmount': subBalance,
+        'paymentStatus': subPaymentStatus,
+        'updatedById': updatedById,
+        'ownerId': ownerId,
+      };
+
       updates['subscription_logs/$shopId/$logId'] = {
         'logId': logId,
         'action': 'create',
@@ -77,14 +106,16 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
         'endDate': endDate.millisecondsSinceEpoch,
         'validityValue': validityValue,
         'validityUnit': validityUnit,
-        'price': price,
-        'registrationFeeAmount': registrationFeeAmount,
-        'amountPaid': actualPaid,
+        'price': subPrice,
+        'registrationFeeAmount': regFee,
+        'registrationFeePaid': regPaid,
+        'paidAmount': subPaid,
+        'balanceAmount': subBalance,
         'paymentMode': paymentMode ?? 'Cash',
         'createdAt': ServerValue.timestamp,
         'createdById': updatedById,
-        'updatedById': updatedById, // Redundant but safe for security rules
-        'description': 'Subscription created for $validityValue $validityUnit.',
+        'updatedById': updatedById,
+        'description': 'Subscription created.',
         'subscriptionId': subId,
         'customerId': customerId,
         'shopId': shopId,
@@ -95,8 +126,12 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
       updates['customers/$customerId/assignedProductIds/$productId'] = true;
       updates['customers/$customerId/ownerId'] = ownerId; 
       updates['customers/$customerId/updatedById'] = updatedById;
-      updates['customers/$customerId/registrationFeeAmount'] = registrationFeeAmount;
-      updates['customers/$customerId/registrationFeeStatus'] = actualPaid >= totalAmount ? 'paid' : (actualPaid > price ? 'partial' : 'unpaid');
+
+      if (isNewCustomer) {
+        updates['customers/$customerId/registrationFeeAmount'] = regFee;
+        updates['customers/$customerId/registrationFeeStatus'] = 
+            regFee <= 0 ? 'paid' : (regPaid >= regFee ? 'paid' : (regPaid > 0 ? 'partial' : 'unpaid'));
+      }
 
       await _database.ref().update(updates);
 
@@ -178,6 +213,8 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
         'startDate': newStartDate.millisecondsSinceEpoch,
         'endDate': newEndDate.millisecondsSinceEpoch,
         'price': currentPrice,
+        'registrationFeeAmount': 0.0,
+        'registrationFeePaid': 0.0,
         'paidAmount': actualPaid,
         'balanceAmount': balance,
         'paymentStatus': paymentStatus,
@@ -203,7 +240,8 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
         'validityUnit': validityUnit,
         'price': currentPrice,
         'registrationFeeAmount': 0.0,
-        'amountPaid': actualPaid,
+        'paidAmount': actualPaid,
+        'balanceAmount': balance,
         'paymentMode': paymentMode ?? 'Cash',
         'createdAt': ServerValue.timestamp,
         'createdById': updatedById,
@@ -385,22 +423,25 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
       
       final data = Map<String, dynamic>.from(snapshot.value as Map);
       
-      final newRegFee = registrationFeeAmount ?? (data['registrationFeeAmount'] ?? 0.0).toDouble();
-      final newTotal = price + newRegFee;
-      final newPaid = paidAmount ?? (data['paidAmount'] ?? data['price'] ?? 0.0).toDouble();
-      final newBalance = newTotal - newPaid;
-      final newPaymentStatus = newBalance <= 0 ? 'paid' : (newPaid <= 0 ? 'unpaid' : 'partial');
+      final double regFee = registrationFeeAmount ?? (data['registrationFeeAmount'] ?? 0.0).toDouble();
+      final double totalPaid = paidAmount ?? ( (data['paidAmount'] ?? 0.0) + (data['registrationFeePaid'] ?? 0.0) ).toDouble();
+      final double regPaid = totalPaid >= regFee ? regFee : totalPaid;
+      final double subPaid = totalPaid - regPaid;
+      final double subPrice = price;
+      final double balance = subPrice - subPaid;
+      final String paymentStatus = balance <= 0 ? 'paid' : (subPaid <= 0 ? 'unpaid' : 'partial');
 
       final Map<String, dynamic> updates = {};
       
       updates['subscriptions/$subscriptionId'] = {
         ...data,
         'endDate': endDate.millisecondsSinceEpoch,
-        'price': price,
-        'registrationFeeAmount': newRegFee,
-        'paidAmount': newPaid,
-        'balanceAmount': newBalance,
-        'paymentStatus': newPaymentStatus,
+        'price': subPrice,
+        'registrationFeeAmount': regFee,
+        'registrationFeePaid': regPaid,
+        'paidAmount': subPaid,
+        'balanceAmount': balance,
+        'paymentStatus': paymentStatus,
         'status': status ?? data['status'],
         'updatedAt': ServerValue.timestamp,
         'updatedById': updatedById,
@@ -420,7 +461,8 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
         }
         if (registrationFeeAmount != null) {
           extraUpdates['customers/$customerId/registrationFeeAmount'] = registrationFeeAmount;
-          extraUpdates['customers/$customerId/registrationFeeStatus'] = newPaymentStatus; // Use calculated status
+          extraUpdates['customers/$customerId/registrationFeeStatus'] = 
+              regFee <= 0 ? 'paid' : (regPaid >= regFee ? 'paid' : (regPaid > 0 ? 'partial' : 'unpaid'));
         }
         if (extraUpdates.isNotEmpty) {
           extraUpdates['customers/$customerId/updatedAt'] = ServerValue.timestamp;
@@ -437,8 +479,9 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
         'status': status ?? data['status'],
         'endDate': endDate.millisecondsSinceEpoch,
         'price': price,
-        'registrationFeeAmount': newRegFee,
-        'amountPaid': paidAmount, // Only if explicitly passed in edit
+        'registrationFeeAmount': regFee,
+        'paidAmount': paidAmount, // Only if explicitly passed in edit
+        'balanceAmount': balance,
         'paymentMode': paymentMode,
         'createdAt': ServerValue.timestamp,
         'createdById': updatedById,

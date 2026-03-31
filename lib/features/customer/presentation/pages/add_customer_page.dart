@@ -171,7 +171,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                     updatedById: authState.userId,
                     ownerId: authState.ownerId,
                     registrationFeeAmount: double.tryParse(_registrationFeeController.text.trim()) ?? 0.0,
-                    registrationFeeStatus: (double.tryParse(_paidAmountController.text.trim()) ?? 0) >= ((double.tryParse(_priceController.text.trim()) ?? 0) + (double.tryParse(_registrationFeeController.text.trim()) ?? 0)) ? 'paid' : 'unpaid',
+                    registrationFeeStatus: (double.tryParse(_paidAmountController.text.trim()) ?? 0) >= (double.tryParse(_registrationFeeController.text.trim()) ?? 0) ? 'paid' : 'unpaid',
                   );
 
                   pageContext.read<CustomerBloc>().add(AddCustomerWithSubscription(

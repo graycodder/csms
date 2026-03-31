@@ -214,7 +214,7 @@ class SubscriptionHistoryPage extends StatelessWidget {
                             'Price: ₹${log.price!.toStringAsFixed(0)}',
                             style: TextStyle(
                               fontSize: 12.sp, 
-                              color: const Color(0xFF27AE60),
+                              color: AppColors.textDark,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -228,6 +228,36 @@ class SubscriptionHistoryPage extends StatelessWidget {
                             color: Colors.orange[700],
                             fontWeight: FontWeight.w500,
                           ),
+                        ),
+                      ],
+                      if (log.paidAmount != null) ...[
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Paid: ₹${log.paidAmount!.toStringAsFixed(0)}',
+                              style: TextStyle(
+                                fontSize: 12.sp, 
+                                color: const Color(0xFF27AE60),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                      if (log.balanceAmount != null && log.balanceAmount! > 0) ...[
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Balance: ₹${log.balanceAmount!.toStringAsFixed(0)}',
+                              style: TextStyle(
+                                fontSize: 12.sp, 
+                                color: Colors.red.shade700,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                       if (log.paymentMode != null) ...[

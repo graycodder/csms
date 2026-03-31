@@ -17,6 +17,7 @@ abstract class SubscriptionRepository {
     double? paidAmount,
     String? paymentMode,
     required String productName,
+    bool isNewCustomer = false,
   });
 
   Future<Either<Failure, void>> renewSubscription({

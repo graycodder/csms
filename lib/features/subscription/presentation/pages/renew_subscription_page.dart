@@ -119,56 +119,58 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
         title: Text('Confirm ${TerminologyHelper.getTerminology(widget.shopCategory).renewActionLabel}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Duration: $_selectedLabel', style: TextStyle(fontSize: 15.sp)),
-            SizedBox(height: 8.h),
-            if (isActive) ...[
-              SizedBox(height: 4.h),
-              Container(
-                padding: EdgeInsets.all(10.r),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEFF6FF),
-                  borderRadius: BorderRadius.circular(10.r),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.info_outline, color: AppColors.primary, size: 18.sp),
-                    SizedBox(width: 8.w),
-                    Expanded(
-                      child: Text(
-                        'Active ${TerminologyHelper.getTerminology(widget.shopCategory).subscriptionLabel.toLowerCase()} found — new period will be queued after current expiry.',
-                        style: TextStyle(color: AppColors.primary, fontSize: 13.sp),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Duration: $_selectedLabel', style: TextStyle(fontSize: 15.sp)),
               SizedBox(height: 8.h),
-              Text('Current expiry: ${_fmt(widget.currentEndDate)}',
-                  style: TextStyle(color: AppColors.textLight, fontSize: 13.sp)),
-            ],
-            SizedBox(height: 4.h),
-            if (widget.currentBalance > 0) ...[
-              Text('Carry Forward balance: ₹${widget.currentBalance.toStringAsFixed(0)}',
-                  style: TextStyle(color: Colors.red.shade700, fontSize: 13.sp, fontWeight: FontWeight.w600)),
+              if (isActive) ...[
+                SizedBox(height: 4.h),
+                Container(
+                  padding: EdgeInsets.all(10.r),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEFF6FF),
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.info_outline, color: AppColors.primary, size: 18.sp),
+                      SizedBox(width: 8.w),
+                      Expanded(
+                        child: Text(
+                          'Active ${TerminologyHelper.getTerminology(widget.shopCategory).subscriptionLabel.toLowerCase()} found — new period will be queued after current expiry.',
+                          style: TextStyle(color: AppColors.primary, fontSize: 13.sp),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 8.h),
+                Text('Current expiry: ${_fmt(widget.currentEndDate)}',
+                    style: TextStyle(color: AppColors.textLight, fontSize: 13.sp)),
+              ],
               SizedBox(height: 4.h),
+              if (widget.currentBalance > 0) ...[
+                Text('Carry Forward balance: ₹${widget.currentBalance.toStringAsFixed(0)}',
+                    style: TextStyle(color: Colors.red.shade700, fontSize: 13.sp, fontWeight: FontWeight.w600)),
+                SizedBox(height: 4.h),
+              ],
+              Text('New Plan: ₹${_priceController.text}', style: TextStyle(fontSize: 14.sp)),
+              const Divider(),
+              Text('Total Due: ₹${((double.tryParse(_priceController.text) ?? 0) + widget.currentBalance).toStringAsFixed(0)}',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textDark,
+                      fontSize: 15.sp)),
+              SizedBox(height: 8.h),
+              Text('New expiry: ${_fmt(newEndDate)}',
+                  style: TextStyle(
+                      color: AppColors.textLight,
+                      fontSize: 13.sp)),
             ],
-            Text('New Plan: ₹${_priceController.text}', style: TextStyle(fontSize: 14.sp)),
-            const Divider(),
-            Text('Total Due: ₹${((double.tryParse(_priceController.text) ?? 0) + widget.currentBalance).toStringAsFixed(0)}',
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textDark,
-                    fontSize: 15.sp)),
-            SizedBox(height: 8.h),
-            Text('New expiry: ${_fmt(newEndDate)}',
-                style: TextStyle(
-                    color: AppColors.textLight,
-                    fontSize: 13.sp)),
-          ],
+          ),
         ),
         actions: [
           TextButton(
@@ -477,7 +479,7 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('Pending Balance (incl. carry-forward):', style: TextStyle(color: Colors.red.shade700, fontSize: 13.sp, fontWeight: FontWeight.w600)),
+                            Text('Pending Balance:', style: TextStyle(color: Colors.red.shade700, fontSize: 13.sp, fontWeight: FontWeight.w600)),
                             Text('₹${pending.toStringAsFixed(0)}', style: TextStyle(color: Colors.red.shade700, fontSize: 15.sp, fontWeight: FontWeight.bold)),
                           ],
                         ),

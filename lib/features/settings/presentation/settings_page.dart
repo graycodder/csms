@@ -7,6 +7,9 @@ import 'package:csms/features/product/presentation/pages/product_management_page
 import 'package:csms/features/product/presentation/bloc/product_bloc.dart';
 import 'package:csms/features/staff/presentation/pages/staff_management_page.dart';
 import 'package:csms/features/staff/presentation/bloc/staff_bloc.dart';
+import 'package:csms/features/reports/presentation/pages/report_page.dart';
+import 'package:csms/features/reports/presentation/bloc/report_bloc.dart';
+
 import 'package:csms/core/presentation/pages/webview_page.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_event.dart';
@@ -170,6 +173,22 @@ class SettingsPage extends StatelessWidget {
               builder: (_) => BlocProvider(
                 create: (_) => di.sl<StaffBloc>(),
                 child: const StaffManagementPage(),
+              ),
+            ),
+          ),
+        ),
+        _SettingItem(
+          icon: Icons.bar_chart_outlined,
+          iconBg: const Color(0xFFE3F2FD),
+          iconColor: const Color(0xFF0D47A1),
+          title: 'Business Reports',
+          subtitle: 'View performance & analytics',
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => BlocProvider(
+                create: (_) => di.sl<ReportBloc>(),
+                child: const ReportPage(),
               ),
             ),
           ),

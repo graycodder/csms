@@ -30,20 +30,25 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
   late TextEditingController _phoneController;
+  late TextEditingController _registrationFeeController;
   late String _selectedStatus;
+  late String _selectedRegStatus;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.customer.name);
     _phoneController = TextEditingController(text: widget.customer.mobileNumber);
+    _registrationFeeController = TextEditingController(text: widget.customer.registrationFeeAmount.toStringAsFixed(0));
     _selectedStatus = widget.customer.status;
+    _selectedRegStatus = widget.customer.registrationFeeStatus;
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
+    _registrationFeeController.dispose();
     super.dispose();
   }
 
@@ -85,6 +90,8 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                 name: _nameController.text.trim(),
                 mobileNumber: _phoneController.text.trim(),
                 status: _selectedStatus,
+                registrationFeeAmount: double.tryParse(_registrationFeeController.text.trim()) ?? 0.0,
+                registrationFeeStatus: _selectedRegStatus,
                 updatedAt: DateTime.now(),
               );
 
@@ -256,6 +263,38 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                     ],
                   ),
                   SizedBox(height: 20.h),
+
+                  // Registration Fee
+                  _buildLabel('Registration Fee'),
+                  TextFormField(
+                    controller: _registrationFeeController,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                    ],
+                    decoration: const InputDecoration(
+                      hintText: 'Enter registration fee',
+                      prefixIcon: Icon(Icons.currency_rupee),
+                    ),
+                  ),
+                  SizedBox(height: 20.h),
+
+                  _buildLabel('Registration Status'),
+                  DropdownButtonFormField<String>(
+                    value: _selectedRegStatus,
+                    decoration: const InputDecoration(
+                      prefixIcon: Icon(Icons.assignment_turned_in_outlined),
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: 'paid', child: Text('Paid')),
+                      DropdownMenuItem(value: 'partial', child: Text('Partial')),
+                      DropdownMenuItem(value: 'unpaid', child: Text('Unpaid')),
+                    ],
+                    onChanged: (v) {
+                      if (v != null) setState(() => _selectedRegStatus = v);
+                    },
+                  ),
+                  SizedBox(height: 32.h),
 
                   SizedBox(
                     width: double.infinity,

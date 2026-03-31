@@ -238,6 +238,7 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
           paidAmount: event.paidAmount,
           paymentMode: event.paymentMode,
           productName: event.productName,
+          isNewCustomer: true,
         );
         await subResult.fold(
           (failure) async => emit(CustomerError(failure.message)),

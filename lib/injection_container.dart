@@ -63,7 +63,13 @@ import 'package:csms/features/app_config/domain/repositories/app_config_reposito
 import 'package:csms/features/app_config/data/repositories/app_config_repository_impl.dart';
 import 'package:csms/features/app_config/presentation/bloc/version_bloc.dart';
 
+// Dashboard
 import 'package:csms/features/dashboard/presentation/bloc/dashboard_bloc.dart';
+
+// Reports
+import 'package:csms/features/reports/domain/usecases/get_business_report.dart';
+import 'package:csms/features/reports/presentation/bloc/report_bloc.dart';
+
 
 final sl = GetIt.instance; // sl: Service Locator
 
@@ -165,6 +171,11 @@ Future<void> init() async {
       shopRepository: sl(),
     ),
   );
+
+  //! Features - Reports
+  sl.registerLazySingleton(() => GetBusinessReport());
+  sl.registerFactory(() => ReportBloc(getBusinessReport: sl()));
+
 
   //! External
 

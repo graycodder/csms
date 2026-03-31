@@ -90,7 +90,7 @@ class CustomerDetailsPage extends StatelessWidget {
               return Stack(
                 children: [
                   Container(
-                    height: 300.h,
+                    height: 320.h,
                     decoration: BoxDecoration(
                       color: AppColors.primary,
                       borderRadius: BorderRadius.only(
@@ -108,6 +108,8 @@ class CustomerDetailsPage extends StatelessWidget {
                             padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
                             children: [
                               _buildHeaderInfo(customer),
+                              SizedBox(height: 8.h),
+                              _buildRegistrationFeeCard(customer),
                               SizedBox(height: 24.h),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -159,9 +161,15 @@ class CustomerDetailsPage extends StatelessWidget {
                               ),
                               SizedBox(height: 5.h),
                               if (uniqueSubs.isEmpty)
-                                Center(
-                                  child: Text('No active ${term.planLabel.toLowerCase()}s found', style: TextStyle(color: Colors.white70, fontSize: 14.sp)),
-                                )
+                              Column(children:[
+                                 SizedBox(height: 5.h),
+                                 Center(
+                                  child: 
+                                  Text('No active ${term.planLabel.toLowerCase()}s found', style: TextStyle(color: Colors.white70, fontSize: 14.sp)),
+                                ),
+                                 SizedBox(height: 5.h),
+                              ])
+                               
                               else
                                 ...uniqueSubs.map((sub) {
                                   final prod = state.products.where((p) => p.productId == sub.productId).firstOrNull;
@@ -282,8 +290,7 @@ class CustomerDetailsPage extends StatelessWidget {
                               productName: product.name,
                               shopCategory: state.shop.category,
                               customerName: customer.name,
-                              customerRegistrationFeeAmount: customer.registrationFeeAmount,
-                              customerRegistrationFeeStatus: customer.registrationFeeStatus,
+                              priceType: product.priceType,
                             ),
                           ),
                         ),
@@ -351,14 +358,14 @@ class CustomerDetailsPage extends StatelessWidget {
                             style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 15.sp),
                           ),
                           TextSpan(
-                            text: ' / ₹${(sub.price + sub.registrationFeeAmount).toStringAsFixed(0)}',
+                            text: ' / ₹${sub.price.toStringAsFixed(0)}',
                             style: TextStyle(fontWeight: FontWeight.w500, color: AppColors.textLight, fontSize: 12.sp),
                           ),
                         ],
                       ),
                     )
                   else
-                    Text('₹${(sub.price + sub.registrationFeeAmount).toStringAsFixed(0)}',
+                    Text('₹${sub.price.toStringAsFixed(0)}',
                         style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textDark, fontSize: 15.sp)),
                 ],
               ),
@@ -473,6 +480,50 @@ class CustomerDetailsPage extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildRegistrationFeeCard(CustomerEntity customer) {
+    final status = customer.registrationFeeStatus.toLowerCase();
+    final statusColor = status == 'paid' ? AppColors.success : (status == 'partial' ? Colors.orange : Colors.red);
+    
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: Colors.white.withOpacity(0.2)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.assignment_ind_outlined, color: Colors.white, size: 20.sp),
+              SizedBox(width: 12.w),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Registration Fee', style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 13.sp)),
+                  Text('₹${customer.registrationFeeAmount.toStringAsFixed(0)}', style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold)),
+                ],
+              ),
+            ],
+          ),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+            decoration: BoxDecoration(
+              color: statusColor.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(20.r),
+              border: Border.all(color: statusColor.withOpacity(0.5)),
+            ),
+            child: Text(
+              status.toUpperCase(),
+              style: TextStyle(color: Colors.white, fontSize: 11.sp, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -71,23 +71,23 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               // Top Section
               Container(
-                height: 0.4.sh,
+                height: 0.25.sh,
                 child: Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Container(
-                        padding: EdgeInsets.all(16.r),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20.r),
-                        ),
-                        child: Icon(
-                          Icons.business_rounded,
-                          size: 48.w,
-                          color: AppColors.primary,
-                        ),
-                      ),
+                      // Container(
+                      //   padding: EdgeInsets.all(16.r),
+                      //   decoration: BoxDecoration(
+                      //     color: Colors.white,
+                      //     borderRadius: BorderRadius.circular(20.r),
+                      //   ),
+                      //   child: Icon(
+                      //     Icons.business_rounded,
+                      //     size: 48.w,
+                      //     color: AppColors.primary,
+                      //   ),
+                      // ),
                       SizedBox(height: 24.h),
                       Text(
                         'Business Manager',
