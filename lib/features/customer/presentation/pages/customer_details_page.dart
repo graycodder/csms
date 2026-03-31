@@ -167,7 +167,7 @@ class CustomerDetailsPage extends StatelessWidget {
                                   final prod = state.products.where((p) => p.productId == sub.productId).firstOrNull;
                                   return Padding(
                                     padding: EdgeInsets.only(bottom: 16.h),
-                                    child: _buildSubscriptionCard(context, sub, prod, state, term, customer.name),
+                                    child: _buildSubscriptionCard(context, sub, prod, state, term, customer),
                                   );
                                 }).toList(),
                               SizedBox(height: 100.h),
@@ -192,7 +192,7 @@ class CustomerDetailsPage extends StatelessWidget {
     return '${months[d.month - 1]} ${d.day}, ${d.year}';
   }
 
-  Widget _buildSubscriptionCard(BuildContext context, SubscriptionEntity sub, ProductEntity? product, DashboardLoaded state, BusinessTerminology term, String customerName) {
+  Widget _buildSubscriptionCard(BuildContext context, SubscriptionEntity sub, ProductEntity? product, DashboardLoaded state, BusinessTerminology term, CustomerEntity customer) {
     if (product == null) return const SizedBox.shrink();
     final daysLeft = AppDateUtils.calculateDaysLeft(sub.endDate);
     final isExpired = daysLeft < 0;
@@ -220,12 +220,33 @@ class CustomerDetailsPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      product.name,
-                      //product.name[0].toUpperCase() + product.name.substring(1).toLowerCase(),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: AppColors.textDark),
+                    Row(
+                      children: [
+                        Text(
+                          product.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: AppColors.textDark),
+                        ),
+                        if (sub.paymentStatus != 'paid') ...[
+                          SizedBox(width: 8.w),
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                            decoration: BoxDecoration(
+                              color: sub.paymentStatus == 'unpaid' ? Colors.red.shade100 : Colors.orange.shade100,
+                              borderRadius: BorderRadius.circular(4.r),
+                            ),
+                            child: Text(
+                              sub.paymentStatus.toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 10.sp,
+                                fontWeight: FontWeight.bold,
+                                color: sub.paymentStatus == 'unpaid' ? Colors.red.shade700 : Colors.orange.shade700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                     SizedBox(height: 4.h),
                     Container(
@@ -260,7 +281,9 @@ class CustomerDetailsPage extends StatelessWidget {
                               subscription: sub,
                               productName: product.name,
                               shopCategory: state.shop.category,
-                              customerName: customerName,
+                              customerName: customer.name,
+                              customerRegistrationFeeAmount: customer.registrationFeeAmount,
+                              customerRegistrationFeeStatus: customer.registrationFeeStatus,
                             ),
                           ),
                         ),
@@ -286,7 +309,8 @@ class CustomerDetailsPage extends StatelessWidget {
                                   validityType: product.validityType,
                                   basePrice: product.price,
                                   shopCategory: state.shop.category,
-                                  customerName: customerName,
+                                  customerName: customer.name,
+                                  currentBalance: sub.balanceAmount,
                                 ),
                               ),
                             ),
@@ -316,10 +340,26 @@ class CustomerDetailsPage extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text('Price', style: TextStyle(color: AppColors.textLight, fontSize: 13.sp)),
+                  Text(sub.balanceAmount > 0 ? 'Paid / Total' : 'Price', style: TextStyle(color: AppColors.textLight, fontSize: 13.sp)),
                   SizedBox(height: 4.h),
-                  Text(sub.price.toStringAsFixed(0),
-                      style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textDark, fontSize: 15.sp)),
+                  if (sub.balanceAmount > 0)
+                    RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: '₹${sub.paidAmount.toStringAsFixed(0)}',
+                            style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 15.sp),
+                          ),
+                          TextSpan(
+                            text: ' / ₹${(sub.price + sub.registrationFeeAmount).toStringAsFixed(0)}',
+                            style: TextStyle(fontWeight: FontWeight.w500, color: AppColors.textLight, fontSize: 12.sp),
+                          ),
+                        ],
+                      ),
+                    )
+                  else
+                    Text('₹${(sub.price + sub.registrationFeeAmount).toStringAsFixed(0)}',
+                        style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textDark, fontSize: 15.sp)),
                 ],
               ),
               Column(

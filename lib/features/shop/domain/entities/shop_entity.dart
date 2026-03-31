@@ -7,6 +7,7 @@ class ShopSettings extends Equatable {
   final bool autoArchiveExpired;
   final bool whatsappReminderEnabled;
   final String defaultCountryCode;
+  final bool registrationFeeEnabled;
 
   const ShopSettings({
     required this.notificationDaysBefore,
@@ -15,6 +16,7 @@ class ShopSettings extends Equatable {
     required this.autoArchiveExpired,
     required this.whatsappReminderEnabled,
     this.defaultCountryCode = '91',
+    this.registrationFeeEnabled = false,
   });
 
   factory ShopSettings.fromJson(Map<dynamic, dynamic> json) {
@@ -25,6 +27,7 @@ class ShopSettings extends Equatable {
       autoArchiveExpired: json['autoArchiveExpired'] ?? true,
       whatsappReminderEnabled: json['whatsappReminderEnabled'] ?? false,
       defaultCountryCode: json['defaultCountryCode'] ?? '91',
+      registrationFeeEnabled: json['registrationFeeEnabled'] ?? false,
     );
   }
 
@@ -36,6 +39,7 @@ class ShopSettings extends Equatable {
       'autoArchiveExpired': autoArchiveExpired,
       'whatsappReminderEnabled': whatsappReminderEnabled,
       'defaultCountryCode': defaultCountryCode,
+      'registrationFeeEnabled': registrationFeeEnabled,
     };
   }
 
@@ -46,6 +50,7 @@ class ShopSettings extends Equatable {
     bool? autoArchiveExpired,
     bool? whatsappReminderEnabled,
     String? defaultCountryCode,
+    bool? registrationFeeEnabled,
   }) {
     return ShopSettings(
       notificationDaysBefore: notificationDaysBefore ?? this.notificationDaysBefore,
@@ -54,6 +59,7 @@ class ShopSettings extends Equatable {
       autoArchiveExpired: autoArchiveExpired ?? this.autoArchiveExpired,
       whatsappReminderEnabled: whatsappReminderEnabled ?? this.whatsappReminderEnabled,
       defaultCountryCode: defaultCountryCode ?? this.defaultCountryCode,
+      registrationFeeEnabled: registrationFeeEnabled ?? this.registrationFeeEnabled,
     );
   }
 
@@ -65,6 +71,7 @@ class ShopSettings extends Equatable {
     autoArchiveExpired,
     whatsappReminderEnabled,
     defaultCountryCode,
+    registrationFeeEnabled,
   ];
 }
 

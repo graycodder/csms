@@ -13,6 +13,9 @@ abstract class SubscriptionRepository {
     required int validityValue,
     required String validityUnit,
     required double price,
+    double registrationFeeAmount = 0.0,
+    double? paidAmount,
+    String? paymentMode,
     required String productName,
   });
 
@@ -23,12 +26,17 @@ abstract class SubscriptionRepository {
     required String updatedById,
     required String productName,
     double? price,
+    double? paidAmount,
+    String? paymentMode,
   });
 
   Future<Either<Failure, void>> updateSubscription({
     required String subscriptionId,
     required DateTime endDate,
     required double price,
+    double? registrationFeeAmount,
+    double? paidAmount,
+    String? paymentMode,
     required String updatedById,
     String? status,
   });

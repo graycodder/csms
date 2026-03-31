@@ -16,6 +16,8 @@ class EditSubscriptionPage extends StatefulWidget {
   final String productName;
   final String shopCategory;
   final String customerName;
+  final double customerRegistrationFeeAmount;
+  final String customerRegistrationFeeStatus;
 
   const EditSubscriptionPage({
     super.key,
@@ -23,6 +25,8 @@ class EditSubscriptionPage extends StatefulWidget {
     required this.productName,
     required this.shopCategory,
     required this.customerName,
+    this.customerRegistrationFeeAmount = 0.0,
+    this.customerRegistrationFeeStatus = 'unpaid',
   });
 
   @override
@@ -30,17 +34,26 @@ class EditSubscriptionPage extends StatefulWidget {
 }
 
 class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
-  late TextEditingController _priceController;
+  late TextEditingController _planAmountController;
+  late TextEditingController _registrationFeeController;
+  late TextEditingController _paidAmountController;
   late DateTime _selectedDate;
   final _formKey = GlobalKey<FormState>();
   final _df = DateFormat('MMM dd, yyyy');
   late String _selectedStatus;
+  String _selectedPaymentMode = 'Cash';
 
   @override
   void initState() {
     super.initState();
-    _priceController = TextEditingController(
+    _planAmountController = TextEditingController(
       text: widget.subscription.price.toStringAsFixed(0),
+    );
+    _registrationFeeController = TextEditingController(
+      text: widget.customerRegistrationFeeAmount.toStringAsFixed(0),
+    );
+    _paidAmountController = TextEditingController(
+      text: widget.subscription.paidAmount.toStringAsFixed(0),
     );
     _selectedDate = widget.subscription.endDate;
     _selectedStatus = widget.subscription.status;
@@ -48,7 +61,9 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
 
   @override
   void dispose() {
-    _priceController.dispose();
+    _planAmountController.dispose();
+    _registrationFeeController.dispose();
+    _paidAmountController.dispose();
     super.dispose();
   }
 
@@ -114,37 +129,109 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('${TerminologyHelper.getTerminology(widget.shopCategory).subscriptionLabel} Price *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp)),
-                SizedBox(height: 12.h),
+                Text('Plan Amount *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp)),
+                SizedBox(height: 5.h),
                 Form(
                   key: _formKey,
-                  child: TextFormField(
-                    controller: _priceController,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                      LengthLimitingTextInputFormatter(6),
-                      FilteringTextInputFormatter.deny(RegExp(r'^0')),
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        controller: _planAmountController,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                          LengthLimitingTextInputFormatter(6),
+                        ],
+                        decoration: InputDecoration(
+                          hintText: 'Enter plan amount',
+                          prefixIcon: Icon(Icons.currency_rupee, size: 18.sp),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter an amount';
+                          }
+                          final price = double.tryParse(value) ?? 0;
+                          if (price <= 0) {
+                            return 'Amount must be greater than 0';
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 12.h),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text('Customer Registration Fee', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp)),
+                      ),
+                      SizedBox(height: 5.h),
+                      TextFormField(
+                        controller: _registrationFeeController,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                          LengthLimitingTextInputFormatter(6),
+                        ],
+                        decoration: InputDecoration(
+                          hintText: 'Enter registration fee (optional)',
+                          prefixIcon: Icon(Icons.currency_rupee, size: 18.sp),
+                        ),
+                      ),
+                      SizedBox(height: 12.h),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Amount Paid', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp)),
+                                SizedBox(height: 5.h),
+                                TextFormField(
+                                  controller: _paidAmountController,
+                                  keyboardType: TextInputType.number,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                                  ],
+                                  decoration: InputDecoration(
+                                    hintText: '0',
+                                    prefixIcon: Icon(Icons.currency_rupee, size: 18.sp),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(width: 12.w),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Payment Mode', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp)),
+                                SizedBox(height: 5.h),
+                                DropdownButtonFormField<String>(
+                                  value: _selectedPaymentMode,
+                                  decoration: InputDecoration(
+                                    contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12.r),
+                                      borderSide: const BorderSide(color: AppColors.border),
+                                    ),
+                                  ),
+                                  items: ['Cash', 'UPI', 'Card', 'Bank Transfer'].map((m) {
+                                    return DropdownMenuItem(value: m, child: Text(m, style: TextStyle(fontSize: 14.sp)));
+                                  }).toList(),
+                                  onChanged: (v) => setState(() => _selectedPaymentMode = v ?? 'Cash'),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
-                    decoration: InputDecoration(
-                      hintText: 'Enter price (Max 6 digits)',
-                      prefixIcon: Icon(Icons.currency_rupee, size: 18.sp),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a price';
-                      }
-                      final price = double.tryParse(value) ?? 0;
-                      if (price <= 0) {
-                        return 'Price must be greater than 0';
-                      }
-                      return null;
-                    },
                   ),
                 ),
-                
-                Text('Expiry Date', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp)),
                 SizedBox(height: 12.h),
+                Text('Expiry Date', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp)),
+                SizedBox(height: 5.h),
                 InkWell(
                   onTap: _pickDate,
                   child: Container(
@@ -167,10 +254,10 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
                   ),
                 ),
 
-                SizedBox(height: 24.h),
+                SizedBox(height: 12.h),
                 
                 Text('Status', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp)),
-                SizedBox(height: 12.h),
+                SizedBox(height: 5.h),
                 DropdownButtonFormField<String>(
                   value: _selectedStatus,
                   decoration: InputDecoration(
@@ -246,7 +333,9 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
               FocusManager.instance.primaryFocus?.unfocus();
               Navigator.pop(context); // Close dialog
               
-              final price = double.tryParse(_priceController.text) ?? widget.subscription.price;
+              final planAmt = double.tryParse(_planAmountController.text) ?? widget.subscription.price;
+              final regFee = double.tryParse(_registrationFeeController.text) ?? 0.0;
+              final paidAmt = double.tryParse(_paidAmountController.text) ?? widget.subscription.paidAmount;
               
               final authState = context.read<AuthBloc>().state;
               final name = authState is AuthAuthenticated ? authState.name : 'Staff';
@@ -254,7 +343,10 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
               context.read<CustomerBloc>().add(UpdateSubscription(
                 subscriptionId: widget.subscription.subscriptionId,
                 endDate: _selectedDate,
-                price: price,
+                price: planAmt,
+                registrationFeeAmount: regFee,
+                paidAmount: paidAmt,
+                paymentMode: _selectedPaymentMode,
                 updatedById: authState is AuthAuthenticated ? authState.userId : widget.subscription.updatedById,
                 ownerId: widget.subscription.ownerId,
                 shopId: widget.subscription.shopId,

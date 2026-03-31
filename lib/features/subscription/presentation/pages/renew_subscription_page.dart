@@ -23,6 +23,7 @@ class RenewSubscriptionPage extends StatefulWidget {
   final double basePrice;
   final String shopCategory;
   final String customerName;
+  final double currentBalance;
 
   const RenewSubscriptionPage({
     super.key,
@@ -38,6 +39,7 @@ class RenewSubscriptionPage extends StatefulWidget {
     this.basePrice = 0.0,
     required this.shopCategory,
     required this.customerName,
+    this.currentBalance = 0.0,
   });
 
   @override
@@ -50,6 +52,8 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
   String? _selectedLabel;
   late TextEditingController _priceController;
   late TextEditingController _validityController;
+  final _paidAmountController = TextEditingController();
+  String _selectedPaymentMode = 'Cash';
 
   @override
   void initState() {
@@ -72,6 +76,7 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
   void dispose() {
     _priceController.dispose();
     _validityController.dispose();
+    _paidAmountController.dispose();
     super.dispose();
   }
 
@@ -98,6 +103,8 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
     // Calculate price relative to base plan price and its validity
     final price = (widget.basePrice / widget.validityValue) * value;
     _priceController.text = price.toStringAsFixed(0);
+    // Suggest paying the new plan price by default, but we'll show the total due with carry-forward
+    _paidAmountController.text = price.toStringAsFixed(0);
   }
 
   Future<void> _confirm(BuildContext context) async {
@@ -144,11 +151,23 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
                   style: TextStyle(color: AppColors.textLight, fontSize: 13.sp)),
             ],
             SizedBox(height: 4.h),
-            Text('New expiry: ${_fmt(newEndDate)}',
+            if (widget.currentBalance > 0) ...[
+              Text('Carry Forward balance: ₹${widget.currentBalance.toStringAsFixed(0)}',
+                  style: TextStyle(color: Colors.red.shade700, fontSize: 13.sp, fontWeight: FontWeight.w600)),
+              SizedBox(height: 4.h),
+            ],
+            Text('New Plan: ₹${_priceController.text}', style: TextStyle(fontSize: 14.sp)),
+            const Divider(),
+            Text('Total Due: ₹${((double.tryParse(_priceController.text) ?? 0) + widget.currentBalance).toStringAsFixed(0)}',
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: AppColors.textDark,
-                    fontSize: 14.sp)),
+                    fontSize: 15.sp)),
+            SizedBox(height: 8.h),
+            Text('New expiry: ${_fmt(newEndDate)}',
+                style: TextStyle(
+                    color: AppColors.textLight,
+                    fontSize: 13.sp)),
           ],
         ),
         actions: [
@@ -178,6 +197,8 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
       final authState = context.read<AuthBloc>().state;
       if (authState is AuthAuthenticated) {
           final price = double.tryParse(_priceController.text);
+          final paidAmt = double.tryParse(_paidAmountController.text) ?? price ?? 0.0;
+          
           context.read<CustomerBloc>().add(
             RenewCustomerSubscription(
               subscriptionId: widget.subscriptionId,
@@ -188,6 +209,8 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
               ownerId: widget.ownerId,
               productName: widget.productName,
               price: price,
+              paidAmount: paidAmt,
+              paymentMode: _selectedPaymentMode,
               updatedByName: authState.name,
               customerName: widget.customerName,
             ),
@@ -395,6 +418,74 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
                     ]),
                   ],
                 ],
+
+                SizedBox(height: 24.h),
+                const Divider(),
+                SizedBox(height: 20.h),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Amount Paid', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.sp)),
+                          SizedBox(height: 8.h),
+                          TextFormField(
+                            controller: _paidAmountController,
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(
+                              hintText: '0',
+                              prefixIcon: Icon(Icons.currency_rupee),
+                              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            ),
+                            onChanged: (_) => setState(() {}),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      flex: 3,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Payment Mode', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.sp)),
+                          SizedBox(height: 8.h),
+                          DropdownButtonFormField<String>(
+                            value: _selectedPaymentMode,
+                            decoration: const InputDecoration(
+                              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            ),
+                            items: ['Cash', 'UPI', 'Card', 'Bank Transfer'].map((m) {
+                              return DropdownMenuItem(value: m, child: Text(m, style: TextStyle(fontSize: 14.sp)));
+                            }).toList(),
+                            onChanged: (v) => setState(() => _selectedPaymentMode = v ?? 'Cash'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                Builder(
+                  builder: (context) {
+                    final totalDue = (double.tryParse(_priceController.text) ?? 0) + widget.currentBalance;
+                    final pending = totalDue - (double.tryParse(_paidAmountController.text) ?? 0);
+                    if (pending > 0) {
+                      return Padding(
+                        padding: EdgeInsets.only(top: 16.h),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('Pending Balance (incl. carry-forward):', style: TextStyle(color: Colors.red.shade700, fontSize: 13.sp, fontWeight: FontWeight.w600)),
+                            Text('₹${pending.toStringAsFixed(0)}', style: TextStyle(color: Colors.red.shade700, fontSize: 15.sp, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
+                ),
 
                 // New end date preview
                 if (newEndDate != null) ...[

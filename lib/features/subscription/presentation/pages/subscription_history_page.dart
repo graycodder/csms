@@ -200,18 +200,54 @@ class SubscriptionHistoryPage extends StatelessWidget {
                   SizedBox(height: 4.h),
                 ],
                 if (log.price != null && log.price! > 0) ...[
-                  Row(
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 8.w,
+                    runSpacing: 4.h,
                     children: [
-                      Icon(Icons.payments_outlined, size: 14.sp, color: Colors.grey[500]),
-                      SizedBox(width: 4.w),
-                      Text(
-                        'Price: ₹${log.price!.toStringAsFixed(0)}',
-                        style: TextStyle(
-                          fontSize: 12.sp, 
-                          color: const Color(0xFF27AE60),
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.payments_outlined, size: 14.sp, color: Colors.grey[500]),
+                          SizedBox(width: 4.w),
+                          Text(
+                            'Price: ₹${log.price!.toStringAsFixed(0)}',
+                            style: TextStyle(
+                              fontSize: 12.sp, 
+                              color: const Color(0xFF27AE60),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
+                      if (log.registrationFeeAmount != null && log.registrationFeeAmount! > 0) ...[
+                        Text(
+                          '(Incl. ₹${log.registrationFeeAmount!.toStringAsFixed(0)} Reg Fee)',
+                          style: TextStyle(
+                            fontSize: 11.sp, 
+                            color: Colors.orange[700],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                      if (log.paymentMode != null) ...[
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            borderRadius: BorderRadius.circular(4.r),
+                            border: Border.all(color: Colors.grey[300]!),
+                          ),
+                          child: Text(
+                            log.paymentMode!,
+                            style: TextStyle(
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey[700],
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                   SizedBox(height: 4.h),

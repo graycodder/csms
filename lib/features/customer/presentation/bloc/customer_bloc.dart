@@ -19,6 +19,9 @@ class AddCustomerWithSubscription extends CustomerEvent {
   final int validityValue;
   final String validityUnit;
   final double price;
+  final double registrationFeeAmount;
+  final double? paidAmount;
+  final String? paymentMode;
   final String productName;
   final String updatedByName;
 
@@ -28,12 +31,15 @@ class AddCustomerWithSubscription extends CustomerEvent {
     required this.validityValue,
     required this.validityUnit,
     required this.price,
+    this.registrationFeeAmount = 0.0,
+    this.paidAmount,
+    this.paymentMode,
     required this.productName,
     required this.updatedByName,
   });
 
   @override
-  List<Object?> get props => [customer, productId, validityValue, validityUnit, price, productName, updatedByName];
+  List<Object?> get props => [customer, productId, validityValue, validityUnit, price, registrationFeeAmount, paidAmount, paymentMode, productName, updatedByName];
 }
 
 class UpdateCustomerInfo extends CustomerEvent {
@@ -54,6 +60,9 @@ class AddSubscription extends CustomerEvent {
   final int validityValue;
   final String validityUnit;
   final double price;
+  final double registrationFeeAmount;
+  final double? paidAmount;
+  final String? paymentMode;
   final String customerName;
   final String productName;
   final String updatedByName;
@@ -67,6 +76,9 @@ class AddSubscription extends CustomerEvent {
     required this.validityValue,
     required this.validityUnit,
     required this.price,
+    this.registrationFeeAmount = 0.0,
+    this.paidAmount,
+    this.paymentMode,
     required this.customerName,
     required this.productName,
     required this.updatedByName,
@@ -82,6 +94,9 @@ class AddSubscription extends CustomerEvent {
     validityValue,
     validityUnit,
     price,
+    registrationFeeAmount,
+    paidAmount,
+    paymentMode,
     customerName,
     productName,
     updatedByName,
@@ -103,6 +118,8 @@ class RenewCustomerSubscription extends CustomerEvent {
   final String updatedById;
   final String ownerId;
   final double? price;
+  final double? paidAmount;
+  final String? paymentMode;
   final String productName;
   final String updatedByName;
   final String customerName;
@@ -118,10 +135,12 @@ class RenewCustomerSubscription extends CustomerEvent {
     required this.updatedByName,
     required this.customerName,
     this.price,
+    this.paidAmount,
+    this.paymentMode,
   });
 
   @override
-  List<Object?> get props => [subscriptionId, shopId, validityValue, validityUnit, updatedById, ownerId, price, productName, updatedByName, customerName];
+  List<Object?> get props => [subscriptionId, shopId, validityValue, validityUnit, updatedById, ownerId, price, paidAmount, paymentMode, productName, updatedByName, customerName];
 }
 
 class UpdateSubscription extends CustomerEvent {
@@ -133,6 +152,9 @@ class UpdateSubscription extends CustomerEvent {
   final String shopId;
   final String updatedByName;
   final String customerName;
+  final double? registrationFeeAmount;
+  final double? paidAmount;
+  final String? paymentMode;
   final String? status;
 
   const UpdateSubscription({
@@ -144,11 +166,14 @@ class UpdateSubscription extends CustomerEvent {
     required this.shopId,
     required this.updatedByName,
     required this.customerName,
+    this.registrationFeeAmount,
+    this.paidAmount,
+    this.paymentMode,
     this.status,
   });
 
   @override
-  List<Object?> get props => [subscriptionId, endDate, price, updatedById, ownerId, shopId, updatedByName, customerName, status];
+  List<Object?> get props => [subscriptionId, endDate, price, registrationFeeAmount, paidAmount, paymentMode, updatedById, ownerId, shopId, updatedByName, customerName, status];
 }
 
 class ResetCustomer extends CustomerEvent {}
@@ -209,6 +234,9 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
           validityValue: event.validityValue,
           validityUnit: event.validityUnit,
           price: event.price,
+          registrationFeeAmount: event.registrationFeeAmount,
+          paidAmount: event.paidAmount,
+          paymentMode: event.paymentMode,
           productName: event.productName,
         );
         await subResult.fold(
@@ -258,6 +286,8 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
       validityUnit: event.validityUnit,
       updatedById: event.updatedById,
       price: event.price,
+      paidAmount: event.paidAmount,
+      paymentMode: event.paymentMode,
       productName: event.productName,
     );
     await result.fold(
@@ -282,6 +312,9 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
       subscriptionId: event.subscriptionId,
       endDate: event.endDate,
       price: event.price,
+      registrationFeeAmount: event.registrationFeeAmount,
+      paidAmount: event.paidAmount,
+      paymentMode: event.paymentMode,
       updatedById: event.updatedById,
       status: event.status,
     );
@@ -312,6 +345,9 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
       validityValue: event.validityValue,
       validityUnit: event.validityUnit,
       price: event.price,
+      registrationFeeAmount: event.registrationFeeAmount,
+      paidAmount: event.paidAmount,
+      paymentMode: event.paymentMode,
       productName: event.productName,
     );
 

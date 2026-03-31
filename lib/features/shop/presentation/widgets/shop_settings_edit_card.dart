@@ -22,12 +22,14 @@ class ShopSettingsEditCard extends StatefulWidget {
 
 class _ShopSettingsEditCardState extends State<ShopSettingsEditCard> {
   late bool _whatsappReminderEnabled;
+  late bool _registrationFeeEnabled;
   late TextEditingController _expiredDaysController;
 
   @override
   void initState() {
     super.initState();
     _whatsappReminderEnabled = widget.settings.whatsappReminderEnabled;
+    _registrationFeeEnabled = widget.settings.registrationFeeEnabled;
     _expiredDaysController = TextEditingController(
       text: widget.settings.expiredDaysBefore.toString(),
     );
@@ -69,6 +71,13 @@ class _ShopSettingsEditCardState extends State<ShopSettingsEditCard> {
             value: _whatsappReminderEnabled,
             onChanged: (v) => setState(() => _whatsappReminderEnabled = v),
           ),
+          Divider(height: 32.h, color: const Color(0xFFF2F4F7)),
+          _buildSwitchRow(
+            title: 'Registration Fee',
+            subtitle: 'Collect fee during customer onboarding',
+            value: _registrationFeeEnabled,
+            onChanged: (v) => setState(() => _registrationFeeEnabled = v),
+          ),
           SizedBox(height: 32.h),
           Row(
             children: [
@@ -109,6 +118,7 @@ class _ShopSettingsEditCardState extends State<ShopSettingsEditCard> {
                     final updated = widget.settings.copyWith(
                       expiredDaysBefore: expDays,
                       whatsappReminderEnabled: _whatsappReminderEnabled,
+                      registrationFeeEnabled: _registrationFeeEnabled,
                     );
                     widget.onSave(updated);
                   },

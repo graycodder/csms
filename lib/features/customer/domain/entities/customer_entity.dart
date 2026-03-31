@@ -14,6 +14,8 @@ class CustomerEntity extends Equatable {
 
   final String status; // 'active' or 'inactive'
   final String owner_createdAt; // composite key
+  final double registrationFeeAmount;
+  final String registrationFeeStatus;
 
   const CustomerEntity({
     required this.customerId,
@@ -28,6 +30,8 @@ class CustomerEntity extends Equatable {
     required this.ownerId,
     this.status = 'active',
     this.owner_createdAt = '',
+    this.registrationFeeAmount = 0.0,
+    this.registrationFeeStatus = 'unpaid',
   });
 
   CustomerEntity copyWith({
@@ -43,6 +47,8 @@ class CustomerEntity extends Equatable {
     String? ownerId,
     String? status,
     String? owner_createdAt,
+    double? registrationFeeAmount,
+    String? registrationFeeStatus,
   }) {
     return CustomerEntity(
       customerId: customerId ?? this.customerId,
@@ -57,6 +63,8 @@ class CustomerEntity extends Equatable {
       ownerId: ownerId ?? this.ownerId,
       status: status ?? this.status,
       owner_createdAt: owner_createdAt ?? this.owner_createdAt,
+      registrationFeeAmount: registrationFeeAmount ?? this.registrationFeeAmount,
+      registrationFeeStatus: registrationFeeStatus ?? this.registrationFeeStatus,
     );
   }
 
@@ -74,5 +82,7 @@ class CustomerEntity extends Equatable {
     ownerId,
     status,
     owner_createdAt,
+    registrationFeeAmount,
+    registrationFeeStatus,
   ];
 }

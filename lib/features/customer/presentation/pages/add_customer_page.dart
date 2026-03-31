@@ -26,14 +26,18 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _priceController = TextEditingController();
+  final _registrationFeeController = TextEditingController();
   final _validityController = TextEditingController();
+  final _paidAmountController = TextEditingController();
   late String _customValidityUnit;
+  String _selectedPaymentMode = 'Cash';
 
   ProductEntity? _selectedProduct;
 
   @override
   void initState() {
     super.initState();
+    _customValidityUnit = 'months';
     // Ensure we only work with active products
     final activeProducts = widget.products
         .where((p) => p.status.toLowerCase() == 'active')
@@ -44,10 +48,17 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
     }
   }
 
+  double get _totalAmount {
+    final baseAmt = double.tryParse(_priceController.text.trim()) ?? 0.0;
+    final regFee = double.tryParse(_registrationFeeController.text.trim()) ?? 0.0;
+    return baseAmt + regFee;
+  }
+
   void _updateControllers(ProductEntity p) {
     _priceController.text = p.price.toStringAsFixed(0);
     _validityController.text = p.validityValue.toString();
     _customValidityUnit = p.validityUnit;
+    _paidAmountController.text = _computedAmount.toStringAsFixed(0);
   }
 
   @override
@@ -55,16 +66,28 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
     _nameController.dispose();
     _phoneController.dispose();
     _priceController.dispose();
+    _registrationFeeController.dispose();
     _validityController.dispose();
+    _paidAmountController.dispose();
     super.dispose();
   }
 
   double get _computedAmount {
-    if (_selectedProduct == null) return 0.0;
-    if (_selectedProduct!.priceType == 'flexible') {
-      return double.tryParse(_priceController.text.trim()) ?? 0.0;
+    double baseAmt = 0.0;
+    if (_selectedProduct != null) {
+      if (_selectedProduct!.priceType == 'flexible') {
+        baseAmt = double.tryParse(_priceController.text.trim()) ?? 0.0;
+      } else {
+        baseAmt = _selectedProduct!.price;
+      }
     }
-    return _selectedProduct!.price;
+
+    final shopState = context.read<ShopContextBloc>().state;
+    if (shopState is ShopSelected && shopState.selectedShop.settings.registrationFeeEnabled) {
+      baseAmt += double.tryParse(_registrationFeeController.text.trim()) ?? 0.0;
+    }
+
+    return baseAmt;
   }
 
   DateTime get _computedExpiryDate {
@@ -147,6 +170,8 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                     updatedAt: DateTime.now(),
                     updatedById: authState.userId,
                     ownerId: authState.ownerId,
+                    registrationFeeAmount: double.tryParse(_registrationFeeController.text.trim()) ?? 0.0,
+                    registrationFeeStatus: (double.tryParse(_paidAmountController.text.trim()) ?? 0) >= ((double.tryParse(_priceController.text.trim()) ?? 0) + (double.tryParse(_registrationFeeController.text.trim()) ?? 0)) ? 'paid' : 'unpaid',
                   );
 
                   pageContext.read<CustomerBloc>().add(AddCustomerWithSubscription(
@@ -158,7 +183,12 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                     validityUnit: _selectedProduct!.validityType == 'flexible'
                         ? _customValidityUnit
                         : _selectedProduct!.validityUnit,
-                    price: _computedAmount,
+                    price: _selectedProduct!.priceType == 'flexible'
+                        ? (double.tryParse(_priceController.text.trim()) ?? 0.0)
+                        : _selectedProduct!.price,
+                    registrationFeeAmount: double.tryParse(_registrationFeeController.text.trim()) ?? 0.0,
+                    paidAmount: double.tryParse(_paidAmountController.text.trim()) ?? _totalAmount,
+                    paymentMode: _selectedPaymentMode,
                     productName: _selectedProduct!.name,
                     updatedByName: authState.name,
                   ));
@@ -169,6 +199,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                   if (_selectedProduct?.priceType == 'flexible') {
                     _priceController.clear();
                   }
+                  _registrationFeeController.clear();
                   if (_selectedProduct?.validityType == 'flexible') {
                     _validityController.clear();
                   }
@@ -445,6 +476,33 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                     ),
                   SizedBox(height: 24.h),
 
+                  BlocBuilder<ShopContextBloc, ShopContextState>(
+                    builder: (context, state) {
+                      if (state is ShopSelected && state.selectedShop.settings.registrationFeeEnabled) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildLabel('Registration Fee'),
+                            TextFormField(
+                              controller: _registrationFeeController,
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                              ],
+                              decoration: const InputDecoration(
+                                hintText: 'Enter registration fee (optional)',
+                                prefixIcon: Icon(Icons.currency_rupee),
+                              ),
+                              onChanged: (_) => setState(() {}),
+                            ),
+                            SizedBox(height: 20.h),
+                          ],
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
+
                   // Summary Box
                   Container(
                     padding: EdgeInsets.all(20.r),
@@ -475,14 +533,81 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                             ),
                           ],
                         ),
-                        SizedBox(height: 8.h),
+                        SizedBox(height: 12.h),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Total Amount:', style: TextStyle(color: AppColors.textLight)),
+                            Text('Total Amount:', style: TextStyle(color: AppColors.textDark, fontSize: 15.sp, fontWeight: FontWeight.w600)),
+                            Text('₹${_computedAmount.toStringAsFixed(0)}', style: TextStyle(color: AppColors.primary, fontSize: 16.sp, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                        SizedBox(height: 16.h),
+                        const Divider(),
+                        SizedBox(height: 16.h),
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 2,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildLabel('Amount Paid'),
+                                  TextFormField(
+                                    controller: _paidAmountController,
+                                    keyboardType: TextInputType.number,
+                                    decoration: const InputDecoration(
+                                      hintText: '0',
+                                      prefixIcon: Icon(Icons.currency_rupee),
+                                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    ),
+                                    onChanged: (_) => setState(() {}),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(width: 12.w),
+                            Expanded(
+                              flex: 3,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildLabel('Payment Mode'),
+                                  DropdownButtonFormField<String>(
+                                    value: _selectedPaymentMode,
+                                    decoration: const InputDecoration(
+                                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    ),
+                                    items: ['Cash', 'UPI', 'Card', 'Bank Transfer'].map((m) {
+                                      return DropdownMenuItem(value: m, child: Text(m, style: TextStyle(fontSize: 14.sp)));
+                                    }).toList(),
+                                    onChanged: (v) => setState(() => _selectedPaymentMode = v ?? 'Cash'),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (_computedAmount - (double.tryParse(_paidAmountController.text) ?? 0) > 0) ...[
+                          SizedBox(height: 16.h),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('Pending Balance:', style: TextStyle(color: Colors.red.shade700, fontSize: 14.sp, fontWeight: FontWeight.w600)),
+                              Text('₹${(_computedAmount - (double.tryParse(_paidAmountController.text) ?? 0)).toStringAsFixed(0)}', style: TextStyle(color: Colors.red.shade700, fontSize: 16.sp, fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                        ],
+                        Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8.h),
+                          child: const Divider(),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('Total Amount:', style: TextStyle(color: AppColors.textDark, fontWeight: FontWeight.bold)),
                             Text(
-                              '${_computedAmount.toStringAsFixed(0)}',
-                              style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 14.sp),
+                              '₹${_computedAmount.toStringAsFixed(0)}',
+                              style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 16.sp),
                             ),
                           ],
                         ),

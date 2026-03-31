@@ -21,13 +21,40 @@ class StaffItemCard extends StatelessWidget {
     
     return Container(
       margin: EdgeInsets.only(bottom: 12.h),
-      padding: EdgeInsets.all(16.r),
+      padding: EdgeInsets.all(10.r),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(color: AppColors.border.withOpacity(0.5)),
       ),
-      child: Row(
+      child: Column(children: [
+        Align(
+          alignment: Alignment.centerRight,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              GestureDetector(
+                onTap: onEdit,
+                child: Icon(
+                  Icons.edit_outlined,
+                  color: isActive ? AppColors.primary : Colors.grey[400],
+                  size: 20.sp,
+                ),
+              ),
+              SizedBox(width: 16.w),
+              GestureDetector(
+                onTap: onToggleStatus,
+                child: Icon(
+                  isActive ? Icons.toggle_on : Icons.toggle_off,
+                  color: isActive ? Colors.green : Colors.grey[400],
+                  size: 45.sp,
+                ),
+              ),
+            ],
+          ),
+        ),
+     
+      Row(
         children: [
           // Avatar circle
           Container(
@@ -58,12 +85,17 @@ class StaffItemCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Text(
-                      staff.name[0].toUpperCase() + staff.name.substring(1).toLowerCase(),
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15.sp,
-                        color: isActive ? const Color(0xFF1A1A2E) : Colors.grey[600],
+                    Flexible(
+                      child: Text(
+                        staff.name,
+                       // staff.name[0].toUpperCase() + staff.name.substring(1).toLowerCase(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15.sp,
+                          color: isActive ? const Color(0xFF1A1A2E) : Colors.grey[600],
+                        ),
                       ),
                     ),
                     SizedBox(width: 8.w),
@@ -103,30 +135,10 @@ class StaffItemCard extends StatelessWidget {
               ],
             ),
           ),
-          // Action buttons
-          Row(
-            children: [
-              GestureDetector(
-                onTap: onEdit,
-                child: Icon(
-                  Icons.edit_outlined,
-                  color: isActive ? AppColors.primary : Colors.grey[400],
-                  size: 20.sp,
-                ),
-              ),
-              SizedBox(width: 16.w),
-              GestureDetector(
-                onTap: onToggleStatus,
-                child: Icon(
-                  isActive ? Icons.toggle_on : Icons.toggle_off,
-                  color: isActive ? Colors.green : Colors.grey[400],
-                  size: 45.sp,
-                ),
-              ),
-            ],
-          ),
+
         ],
       ),
+      ]),
     );
   }
 }

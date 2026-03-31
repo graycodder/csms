@@ -60,6 +60,7 @@ class _ShopManagementPageState extends State<ShopManagementPage> {
                         SizedBox(height: 20.h),
                         ShopSettingsCard(
                           settings: shop.settings,
+                          shopCategory: shop.category,
                           onEdit: () {
                             Navigator.push(
                               context,

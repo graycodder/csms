@@ -36,6 +36,7 @@ class _SplashScreenState extends State<SplashScreen> {
         BlocListener<AuthBloc, AuthState>(
           listener: (context, state) {
             if (state is AuthAuthenticated) {
+              print('DEBUG: SplashScreen - AuthAuthenticated: ${state.userId}');
               // Start loading shops immediately natively
               context.read<ShopContextBloc>().add(
                     LoadShops(
@@ -45,6 +46,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     ),
                   );
             } else if (state is AuthUnauthenticated || state is AuthError) {
+              print('DEBUG: SplashScreen - Unauthenticated or Error');
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (_) => const LoginPage()),
@@ -54,19 +56,23 @@ class _SplashScreenState extends State<SplashScreen> {
         ),
         BlocListener<ShopContextBloc, ShopContextState>(
           listener: (context, state) {
+            print('DEBUG: SplashScreen - ShopContextState: $state');
             if (state is ShopSelected) {
+              print('DEBUG: SplashScreen - Navigating to Dashboard');
               // Only one shop or shop already selected - go to dashboard natively
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (_) => DashboardPage()),
               );
             } else if (state is ShopContextLoaded) {
+              print('DEBUG: SplashScreen - Multiple shops found');
               // Multiple shops found - let user pick natively
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (_) => const ShopSelectionPage()),
               );
-            } else if (state is ShopContextEmpty) {
+            }
+            else if (state is ShopContextEmpty) {
                // Handle no shops (could be a new owner) natively
                Navigator.pushReplacement(
                 context,
@@ -90,8 +96,8 @@ class _SplashScreenState extends State<SplashScreen> {
               SizedBox(height: 32.h),
               Lottie.asset(
                 'assets/animations/loading.json',
-                width: 120.w,
-                height: 120.w,
+                width: 80.w,
+                height: 80.w,
               ),
             ],
           ),

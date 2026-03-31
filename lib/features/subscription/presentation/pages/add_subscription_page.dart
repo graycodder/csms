@@ -41,6 +41,8 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
   late String _selectedUnit;
   final _validityController = TextEditingController(text: '1');
   final _priceController = TextEditingController();
+  final _paidAmountController = TextEditingController();
+  String _selectedPaymentMode = 'Cash';
 
   @override
   void initState() {
@@ -57,6 +59,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
 
   void _updateControllers(ProductEntity p) {
     _priceController.text = p.price.toStringAsFixed(0);
+    _paidAmountController.text = p.price.toStringAsFixed(0);
     _validityController.text = p.validityValue.toString();
     final unit = p.validityUnit.toLowerCase();
     if (_units.contains(unit)) {
@@ -70,6 +73,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
   void dispose() {
     _validityController.dispose();
     _priceController.dispose();
+    _paidAmountController.dispose();
     super.dispose();
   }
 
@@ -246,6 +250,59 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                     ),
                   ),
                 ],
+                const SizedBox(height: 24),
+                
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Amount Paid', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                          const SizedBox(height: 12),
+                          TextFormField(
+                            controller: _paidAmountController,
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(
+                              hintText: '0',
+                              prefixIcon: Icon(Icons.currency_rupee),
+                            ),
+                            onChanged: (_) => setState(() {}),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      flex: 3,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Payment Mode', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                          const SizedBox(height: 12),
+                          DropdownButtonFormField<String>(
+                            value: _selectedPaymentMode,
+                            items: ['Cash', 'UPI', 'Card', 'Bank Transfer'].map((m) {
+                              return DropdownMenuItem(value: m, child: Text(m));
+                            }).toList(),
+                            onChanged: (v) => setState(() => _selectedPaymentMode = v ?? 'Cash'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                if ((double.tryParse(_priceController.text) ?? 0) - (double.tryParse(_paidAmountController.text) ?? 0) > 0) ...[
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Pending Balance:', style: TextStyle(color: Colors.red.shade700, fontSize: 14, fontWeight: FontWeight.w600)),
+                      Text('₹${((double.tryParse(_priceController.text) ?? 0) - (double.tryParse(_paidAmountController.text) ?? 0)).toStringAsFixed(0)}', style: TextStyle(color: Colors.red.shade700, fontSize: 16, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 40),
                 
                 SizedBox(
@@ -325,6 +382,9 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
               Navigator.pop(context); // Close dialog
               
               final val = int.tryParse(_validityController.text) ?? 1;
+              final price = double.tryParse(_priceController.text) ?? (_selectedProduct?.price ?? 0.0);
+              final paidAmt = double.tryParse(_paidAmountController.text) ?? price;
+
               context.read<CustomerBloc>().add(AddSubscription(
                     shopId: widget.shopId,
                     customerId: widget.customerId,
@@ -334,8 +394,9 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                     updatedByName: widget.updatedByName,
                     validityValue: val,
                     validityUnit: _selectedUnit,
-                    price: double.tryParse(_priceController.text) ??
-                        (_selectedProduct?.price ?? 0.0),
+                    price: price,
+                    paidAmount: paidAmt,
+                    paymentMode: _selectedPaymentMode,
                     customerName: widget.customerName,
                     productName: _selectedProduct!.name,
                   ));

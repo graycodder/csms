@@ -2,14 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:csms/core/theme/app_colors.dart';
 import 'package:csms/features/shop/domain/entities/shop_entity.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:csms/core/utils/terminology_helper.dart';
 
 class ShopSettingsCard extends StatelessWidget {
   final ShopSettings settings;
+  final String shopCategory;
   final VoidCallback onEdit;
 
   const ShopSettingsCard({
     super.key,
     required this.settings,
+    required this.shopCategory,
     required this.onEdit,
   });
 
@@ -67,8 +70,8 @@ class ShopSettingsCard extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 24.h),
-          Divider(height: 32.h, color: const Color(0xFFF2F4F7)),
+          SizedBox(height: 10.h),
+          Divider(height: 20.h, color: const Color(0xFFF2F4F7)),
           _buildSettingsRow(
             title: 'Reminder Days',
             subtitle: 'Days before expiration to notify',
@@ -81,7 +84,7 @@ class ShopSettingsCard extends StatelessWidget {
               ),
             ),
           ),
-          Divider(height: 32.h, color: const Color(0xFFF2F4F7)),
+          Divider(height: 20.h, color: const Color(0xFFF2F4F7)),
           _buildSettingsRow(
             title: 'WhatsApp Reminder',
             subtitle: 'Send WhatsApp reminder for renewals',
@@ -89,6 +92,16 @@ class ShopSettingsCard extends StatelessWidget {
               settings.whatsappReminderEnabled ? 'Enabled' : 'Disabled',
               settings.whatsappReminderEnabled ? const Color(0xFFE8F5E9) : const Color(0xFFF2F4F7),
               settings.whatsappReminderEnabled ? const Color(0xFF2E7D32) : const Color(0xFF5F6368),
+            ),
+          ),
+          Divider(height: 20.h, color: const Color(0xFFF2F4F7)),
+          _buildSettingsRow(
+            title: 'Registration Fee',
+            subtitle: 'Registration fee for new ${TerminologyHelper.getTerminology(shopCategory).customerLabel}',
+            trailing: _buildBadge(
+              settings.registrationFeeEnabled ? 'Enabled' : 'Disabled',
+              settings.registrationFeeEnabled ? const Color(0xFFE8F5E9) : const Color(0xFFF2F4F7),
+              settings.registrationFeeEnabled ? const Color(0xFF2E7D32) : const Color(0xFF5F6368),
             ),
           ),
         ],

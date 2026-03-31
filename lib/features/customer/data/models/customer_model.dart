@@ -14,6 +14,8 @@ class CustomerModel extends CustomerEntity {
     required super.ownerId,
     super.status = 'active',
     super.owner_createdAt = '',
+    super.registrationFeeAmount = 0.0,
+    super.registrationFeeStatus = 'unpaid',
   });
 
   factory CustomerModel.fromJson(Map<dynamic, dynamic> json, String id) {
@@ -39,6 +41,8 @@ class CustomerModel extends CustomerEntity {
       ownerId: json['ownerId'] ?? '',
       status: json['status'] ?? 'active',
       owner_createdAt: json['owner_createdAt'] ?? '',
+      registrationFeeAmount: (json['registrationFeeAmount'] ?? 0.0).toDouble(),
+      registrationFeeStatus: json['registrationFeeStatus'] ?? 'unpaid',
     );
   }
 
@@ -61,6 +65,8 @@ class CustomerModel extends CustomerEntity {
       'ownerId': ownerId,
       'status': status,
       'owner_createdAt': owner_createdAt.isNotEmpty ? owner_createdAt : '${ownerId}_${createdAt.millisecondsSinceEpoch}',
+      'registrationFeeAmount': registrationFeeAmount,
+      'registrationFeeStatus': registrationFeeStatus,
     };
   }
 }

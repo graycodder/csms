@@ -31,6 +31,7 @@ class ShopModel extends ShopEntity {
               autoArchiveExpired: true,
               whatsappReminderEnabled: false,
               defaultCountryCode: '91',
+              registrationFeeEnabled: false,
             ),
       createdAt: json['createdAt'] != null
           ? DateTime.fromMillisecondsSinceEpoch(json['createdAt'])

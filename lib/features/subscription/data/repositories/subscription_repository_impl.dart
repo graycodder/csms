@@ -24,6 +24,9 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
     required int validityValue,
     required String validityUnit,
     required double price,
+    double registrationFeeAmount = 0.0,
+    double? paidAmount,
+    String? paymentMode,
     required String productName,
   }) async {
     try {
@@ -37,6 +40,11 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
 
       final logId = _database.ref().push().key ?? 'initial';
       
+        final totalAmount = price + registrationFeeAmount;
+        final actualPaid = paidAmount ?? totalAmount;
+        final balance = totalAmount - actualPaid;
+        final paymentStatus = balance <= 0 ? 'paid' : (actualPaid <= 0 ? 'unpaid' : 'partial');
+
       final subData = {
         'subscriptionId': subId,
         'shopId': shopId,
@@ -45,6 +53,10 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
         'startDate': startDate.millisecondsSinceEpoch,
         'endDate': endDate.millisecondsSinceEpoch,
         'price': price,
+        'registrationFeeAmount': registrationFeeAmount,
+        'paidAmount': actualPaid,
+        'balanceAmount': balance,
+        'paymentStatus': paymentStatus,
         'status': 'active',
         'createdAt': ServerValue.timestamp,
         'updatedAt': ServerValue.timestamp,
@@ -66,6 +78,9 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
         'validityValue': validityValue,
         'validityUnit': validityUnit,
         'price': price,
+        'registrationFeeAmount': registrationFeeAmount,
+        'amountPaid': actualPaid,
+        'paymentMode': paymentMode ?? 'Cash',
         'createdAt': ServerValue.timestamp,
         'createdById': updatedById,
         'updatedById': updatedById, // Redundant but safe for security rules
@@ -76,10 +91,12 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
         'ownerId': ownerId,
       };
 
-      // Update customer's assigned products
+      // Update customer's assigned products and registration fee
       updates['customers/$customerId/assignedProductIds/$productId'] = true;
-      updates['customers/$customerId/ownerId'] = ownerId; // Ensure ownerId persists for security rules
-      updates['customers/$customerId/updatedById'] = updatedById; // Explicitly set to verify writer identity in rules
+      updates['customers/$customerId/ownerId'] = ownerId; 
+      updates['customers/$customerId/updatedById'] = updatedById;
+      updates['customers/$customerId/registrationFeeAmount'] = registrationFeeAmount;
+      updates['customers/$customerId/registrationFeeStatus'] = actualPaid >= totalAmount ? 'paid' : (actualPaid > price ? 'partial' : 'unpaid');
 
       await _database.ref().update(updates);
 
@@ -119,6 +136,8 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
     required String updatedById,
     required String productName,
     double? price,
+    double? paidAmount,
+    String? paymentMode,
   }) async {
     try {
       // 1. Get current subscription to find current endDate and other details
@@ -144,6 +163,13 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
       final productId = currentData['productId'] ?? '';
       final ownerId = currentData['ownerId'] ?? '';
 
+      final currentPrice = price ?? (currentData['price'] as num? ?? 0.0).toDouble();
+      final previousBalance = (currentData['balanceAmount'] as num? ?? 0.0).toDouble();
+      final totalAmount = currentPrice + previousBalance;
+      final actualPaid = paidAmount ?? currentPrice;
+      final balance = totalAmount - actualPaid;
+      final paymentStatus = balance <= 0 ? 'paid' : (actualPaid <= 0 ? 'unpaid' : 'partial');
+
       updates['subscriptions/$newSubId'] = {
         'subscriptionId': newSubId,
         'shopId': shopId,
@@ -151,7 +177,10 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
         'productId': productId,
         'startDate': newStartDate.millisecondsSinceEpoch,
         'endDate': newEndDate.millisecondsSinceEpoch,
-        'price': price ?? (currentData['price'] as num? ?? 0.0).toDouble(),
+        'price': currentPrice,
+        'paidAmount': actualPaid,
+        'balanceAmount': balance,
+        'paymentStatus': paymentStatus,
         'status': 'active', // Mark as active so it shows in current plans
         'createdAt': ServerValue.timestamp,
         'updatedAt': ServerValue.timestamp,
@@ -172,7 +201,10 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
         'endDate': newEndDate.millisecondsSinceEpoch,
         'validityValue': validityValue,
         'validityUnit': validityUnit,
-        'price': price ?? (currentData['price'] as num? ?? 0.0).toDouble(),
+        'price': currentPrice,
+        'registrationFeeAmount': 0.0,
+        'amountPaid': actualPaid,
+        'paymentMode': paymentMode ?? 'Cash',
         'createdAt': ServerValue.timestamp,
         'createdById': updatedById,
         'updatedById': updatedById,
@@ -335,74 +367,92 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
-
   @override
   Future<Either<Failure, void>> updateSubscription({
     required String subscriptionId,
     required DateTime endDate,
     required double price,
+    double? registrationFeeAmount,
+    double? paidAmount,
+    String? paymentMode,
     required String updatedById,
     String? status,
   }) async {
     try {
-      final subRef = _database
-          .ref()
-          .child('subscriptions')
-          .child(subscriptionId);
+      final subRef = _database.ref().child('subscriptions').child(subscriptionId);
+      final snapshot = await subRef.get();
+      if (!snapshot.exists) return Left(ServerFailure("Subscription not found"));
+      
+      final data = Map<String, dynamic>.from(snapshot.value as Map);
+      
+      final newRegFee = registrationFeeAmount ?? (data['registrationFeeAmount'] ?? 0.0).toDouble();
+      final newTotal = price + newRegFee;
+      final newPaid = paidAmount ?? (data['paidAmount'] ?? data['price'] ?? 0.0).toDouble();
+      final newBalance = newTotal - newPaid;
+      final newPaymentStatus = newBalance <= 0 ? 'paid' : (newPaid <= 0 ? 'unpaid' : 'partial');
 
-      final Map<String, dynamic> subUpdate = {
+      final Map<String, dynamic> updates = {};
+      
+      updates['subscriptions/$subscriptionId'] = {
+        ...data,
         'endDate': endDate.millisecondsSinceEpoch,
         'price': price,
+        'registrationFeeAmount': newRegFee,
+        'paidAmount': newPaid,
+        'balanceAmount': newBalance,
+        'paymentStatus': newPaymentStatus,
+        'status': status ?? data['status'],
         'updatedAt': ServerValue.timestamp,
         'updatedById': updatedById,
       };
 
-      if (status != null) {
-        subUpdate['status'] = status;
-      }
+      final shopId = data['shopId'] ?? '';
+      final customerId = data['customerId'] ?? '';
+      final productId = data['productId'] ?? '';
+      final logId = _database.ref().push().key ?? DateTime.now().millisecondsSinceEpoch.toString();
 
-      await subRef.update(subUpdate);
+      final Map<String, dynamic> extraUpdates = {};
 
-      // Get current data for logging and customer update
-      final snapshot = await subRef.get();
-      if (snapshot.exists) {
-        final data = Map<String, dynamic>.from(snapshot.value as Map);
-        final shopId = data['shopId'] ?? '';
-        final customerId = data['customerId'] ?? '';
-        final productId = data['productId'] ?? '';
-        final logId = _database.ref().push().key ?? DateTime.now().millisecondsSinceEpoch.toString();
-
-        final Map<String, dynamic> extraUpdates = {};
-
-        // Update customer's assigned product status if status was provided
-        if (status != null && customerId.isNotEmpty && productId.isNotEmpty) {
+      // Update customer record if status or registration fee was provided
+      if (customerId.isNotEmpty) {
+        if (status != null && productId.isNotEmpty) {
           extraUpdates['customers/$customerId/assignedProductIds/$productId'] = status;
+        }
+        if (registrationFeeAmount != null) {
+          extraUpdates['customers/$customerId/registrationFeeAmount'] = registrationFeeAmount;
+          extraUpdates['customers/$customerId/registrationFeeStatus'] = newPaymentStatus; // Use calculated status
+        }
+        if (extraUpdates.isNotEmpty) {
           extraUpdates['customers/$customerId/updatedAt'] = ServerValue.timestamp;
           extraUpdates['customers/$customerId/updatedById'] = updatedById;
         }
-
-        // Add log
-        extraUpdates['subscription_logs/$shopId/$logId'] = {
-          'logId': logId,
-          'subscriptionId': subscriptionId,
-          'customerId': customerId,
-          'shopId': shopId,
-          'action': 'edit',
-          'status': status ?? data['status'],
-          'newEndDate': endDate.millisecondsSinceEpoch,
-          'newPrice': price,
-          'createdAt': ServerValue.timestamp,
-          'createdById': updatedById,
-          'updatedById': updatedById,
-          'description': 'Subscription details corrected.',
-          'ownerId': data['ownerId'] ?? '',
-          'productId': productId,
-        };
-
-        if (extraUpdates.isNotEmpty) {
-          await _database.ref().update(extraUpdates);
-        }
       }
+
+      extraUpdates['subscription_logs/$shopId/$logId'] = {
+        'logId': logId,
+        'subscriptionId': subscriptionId,
+        'customerId': customerId,
+        'shopId': shopId,
+        'action': 'edit',
+        'status': status ?? data['status'],
+        'endDate': endDate.millisecondsSinceEpoch,
+        'price': price,
+        'registrationFeeAmount': newRegFee,
+        'amountPaid': paidAmount, // Only if explicitly passed in edit
+        'paymentMode': paymentMode,
+        'createdAt': ServerValue.timestamp,
+        'createdById': updatedById,
+        'updatedById': updatedById,
+        'description': 'Subscription details corrected.',
+        'ownerId': data['ownerId'] ?? '',
+        'productId': productId,
+      };
+
+      if (extraUpdates.isNotEmpty) {
+        updates.addAll(extraUpdates); // Add to the main update call if possible?
+      }
+
+      await _database.ref().update(updates);
 
       return const Right(null);
     } catch (e) {

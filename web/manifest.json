@@ -1,6 +1,6 @@
 {
-    "name": "csms",
-    "short_name": "csms",
+    "name": "CSMS",
+    "short_name": "CSMS",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

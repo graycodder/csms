@@ -11,6 +11,9 @@ class SubscriptionLogEntity extends Equatable {
   final DateTime? startDate;
   final DateTime? endDate;
   final double? price;
+  final double? registrationFeeAmount;
+  final double? amountPaid;
+  final String? paymentMode;
   final String? productName;
   final String? productId;
   final String? status;
@@ -26,6 +29,9 @@ class SubscriptionLogEntity extends Equatable {
     this.startDate,
     this.endDate,
     this.price,
+    this.registrationFeeAmount,
+    this.amountPaid,
+    this.paymentMode,
     this.productName,
     this.productId,
     this.status,
@@ -43,6 +49,9 @@ class SubscriptionLogEntity extends Equatable {
     startDate,
     endDate,
     price,
+    registrationFeeAmount,
+    amountPaid,
+    paymentMode,
     productName,
     productId,
     status,

@@ -225,13 +225,28 @@ class CustomerCard extends StatelessWidget {
                   ),
                 ),
                // const Spacer(),
-                Text(
-                  price,
-                  style: TextStyle(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF1A1A1A),
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      price,
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF1A1A1A),
+                      ),
+                    ),
+                    if (sub != null && sub.balanceAmount > 0) ...[
+                      Text(
+                        'Bal: ₹${sub.balanceAmount.toStringAsFixed(0)}',
+                        style: TextStyle(
+                          fontSize: 11.sp,
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ],
             ),

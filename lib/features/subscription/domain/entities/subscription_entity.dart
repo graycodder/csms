@@ -13,6 +13,10 @@ class SubscriptionEntity extends Equatable {
   final DateTime createdAt;
   final DateTime updatedAt;
   final double price;
+  final double registrationFeeAmount;
+  final double paidAmount;
+  final double balanceAmount;
+  final String paymentStatus;
   final String updatedById;
   final String ownerId;
 
@@ -28,6 +32,10 @@ class SubscriptionEntity extends Equatable {
     required this.createdAt,
     required this.updatedAt,
     required this.price,
+    this.registrationFeeAmount = 0.0,
+    this.paidAmount = 0.0,
+    this.balanceAmount = 0.0,
+    this.paymentStatus = 'paid',
     required this.updatedById,
     required this.ownerId,
   });
@@ -45,6 +53,10 @@ class SubscriptionEntity extends Equatable {
     createdAt,
     updatedAt,
     price,
+    registrationFeeAmount,
+    paidAmount,
+    balanceAmount,
+    paymentStatus,
     updatedById,
     ownerId,
   ];
