@@ -320,7 +320,10 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
                 final endDate = subData['endDate'] as int? ?? 0;
                 final sId = subData['shopId'] ?? '';
 
-                if (status == 'active' && endDate <= threshold && sId == shopId) {
+                if (status == 'active' && 
+                    endDate <= threshold && 
+                    endDate >= now.millisecondsSinceEpoch && 
+                    sId == shopId) {
                   expiringSubs.add(
                     SubscriptionModel.fromJson(subData, key.toString()),
                   );

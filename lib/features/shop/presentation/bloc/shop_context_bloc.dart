@@ -154,14 +154,20 @@ class ShopContextBloc extends Bloc<ShopContextEvent, ShopContextState> {
   }
 
   Future<void> _onUpdateShop(UpdateShop event, Emitter<ShopContextState> emit) async {
-    // No need to emit loading here as it might flicker the UI incorrectly 
-    // since the stream will eventually push the update.
-    // However, for immediate feedback on the management page, we can stay in current state or show overlay.
     final result = await repository.updateShop(event.shop);
     result.fold(
       (failure) => emit(ShopContextError(failure.message)),
-      (_) => null,
+      (_) {
+        // Emit the updated shop explicitly so that UI listeners (e.g. ShopEditPage)
+        // receive a state change and can close their LoadingOverlay.
+        if (state is ShopSelected) {
+          final curState = state as ShopSelected;
+          emit(ShopSelected(event.shop, curState.shops));
+        } else if (state is ShopContextLoaded) {
+          final curState = state as ShopContextLoaded;
+          emit(ShopContextLoaded(curState.shops.map((s) => s.shopId == event.shop.shopId ? event.shop : s).toList()));
+        }
+      },
     );
-    // Logic: Repository update happens -> Firebase onValue triggers -> _onLoadShops emits new ShopSelected
   }
 }

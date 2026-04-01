@@ -1,23 +1,33 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
 class LoadingOverlayHelper {
   static OverlayEntry? _overlayEntry;
+  static Timer? _timeoutTimer;
 
   static void show(BuildContext context) {
     if (_overlayEntry != null) return;
 
     _overlayEntry = OverlayEntry(
       builder: (context) => Container(
-        color: Colors.black.withOpacity(0.3),
+        color: Colors.black.withValues(alpha: 0.3),
         child: const LoadingOverlay(),
       ),
     );
 
     Overlay.of(context).insert(_overlayEntry!);
+
+    // Start a safety timeout to prevent permanent loading screens
+    _timeoutTimer?.cancel();
+    _timeoutTimer = Timer(const Duration(seconds: 25), () {
+      hide();
+    });
   }
 
   static void hide() {
+    _timeoutTimer?.cancel();
+    _timeoutTimer = null;
     if (_overlayEntry == null) return;
     try {
       _overlayEntry?.remove();
@@ -57,7 +67,7 @@ class LoadingOverlay extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
