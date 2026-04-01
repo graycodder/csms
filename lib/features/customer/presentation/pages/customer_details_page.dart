@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -11,11 +12,11 @@ import 'package:csms/features/customer/domain/entities/customer_entity.dart';
 import 'package:csms/features/subscription/domain/entities/subscription_entity.dart';
 import 'package:csms/features/product/domain/entities/product_entity.dart';
 import 'package:csms/features/customer/presentation/bloc/customer_bloc.dart';
-import 'package:csms/injection_container.dart' as di;
+// import 'package:csms/injection_container.dart' as di;
 import 'package:csms/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_state.dart';
 import 'package:csms/features/subscription/presentation/pages/subscription_history_page.dart';
-import 'package:csms/features/subscription/presentation/bloc/subscription_bloc.dart';
+// import 'package:csms/features/subscription/presentation/bloc/subscription_bloc.dart';
 import 'package:csms/features/shop/presentation/bloc/shop_context_bloc.dart';
 import 'package:csms/core/utils/date_utils.dart';
 import 'package:csms/core/utils/launcher_utils.dart';
@@ -25,10 +26,7 @@ import 'package:csms/core/utils/loading_overlay.dart';
 class CustomerDetailsPage extends StatelessWidget {
   final String customerId;
 
-  const CustomerDetailsPage({
-    super.key,
-    required this.customerId,
-  });
+  const CustomerDetailsPage({super.key, required this.customerId});
 
   @override
   Widget build(BuildContext context) {
@@ -64,12 +62,14 @@ class CustomerDetailsPage extends StatelessWidget {
         child: BlocBuilder<DashboardBloc, DashboardState>(
           builder: (context, state) {
             if (state is DashboardLoaded) {
-              final customer = state.customers.where((c) => c.customerId == customerId).firstOrNull;
+              final customer = state.customers
+                  .where((c) => c.customerId == customerId)
+                  .firstOrNull;
               final customerSubs = [
                 ...state.activeSubs.where((s) => s.customerId == customerId),
                 ...state.expiringSoon.where((s) => s.customerId == customerId),
               ];
-              
+
               final Map<String, SubscriptionEntity> latestSubsPerProduct = {};
               for (var sub in customerSubs) {
                 final current = latestSubsPerProduct[sub.productId];
@@ -78,7 +78,9 @@ class CustomerDetailsPage extends StatelessWidget {
                 }
               }
               final uniqueSubs = latestSubsPerProduct.values.toList();
-              final term = TerminologyHelper.getTerminology(state.shop.category);
+              final term = TerminologyHelper.getTerminology(
+                state.shop.category,
+              );
 
               if (customer == null) {
                 return Scaffold(
@@ -86,7 +88,7 @@ class CustomerDetailsPage extends StatelessWidget {
                   body: Center(child: Text("${term.customerLabel} not found.")),
                 );
               }
-  
+
               return Stack(
                 children: [
                   Container(
@@ -105,54 +107,99 @@ class CustomerDetailsPage extends StatelessWidget {
                         _buildAppBar(context, customer, state.products, state),
                         Expanded(
                           child: ListView(
-                            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 20.w,
+                              vertical: 20.h,
+                            ),
                             children: [
                               _buildHeaderInfo(customer),
                               SizedBox(height: 8.h),
                               _buildRegistrationFeeCard(customer),
                               SizedBox(height: 24.h),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     'Active ${term.planLabel}s',
-                                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.white),
+                                    style: TextStyle(
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
                                   ),
                                   BlocBuilder<AuthBloc, AuthState>(
                                     builder: (context, authState) {
-                                      final existingProductIds = uniqueSubs.map((s) => s.productId).toList();
-                                      final availableProducts = state.products.where((p) {
-                                        return p.status == 'active' && !existingProductIds.contains(p.productId);
-                                      }).toList();
-                                      
-                                      if (availableProducts.isEmpty) return const SizedBox.shrink();
+                                      final existingProductIds = uniqueSubs
+                                          .map((s) => s.productId)
+                                          .toList();
+                                      final availableProducts = state.products
+                                          .where((p) {
+                                            return p.status == 'active' &&
+                                                !existingProductIds.contains(
+                                                  p.productId,
+                                                );
+                                          })
+                                          .toList();
+
+                                      if (availableProducts.isEmpty)
+                                        return const SizedBox.shrink();
 
                                       return TextButton.icon(
                                         onPressed: () => Navigator.push(
                                           context,
                                           MaterialPageRoute(
                                             builder: (_) => BlocProvider.value(
-                                              value: context.read<CustomerBloc>(),
+                                              value: context
+                                                  .read<CustomerBloc>(),
                                               child: AddSubscriptionPage(
                                                 customerId: customer.customerId,
                                                 customerName: customer.name,
                                                 shopId: customer.shopId,
                                                 ownerId: customer.ownerId,
-                                                updatedById: authState is AuthAuthenticated ? authState.userId : '',
-                                                updatedByName: authState is AuthAuthenticated ? authState.name : 'Staff',
+                                                updatedById:
+                                                    authState
+                                                        is AuthAuthenticated
+                                                    ? authState.userId
+                                                    : '',
+                                                updatedByName:
+                                                    authState
+                                                        is AuthAuthenticated
+                                                    ? authState.name
+                                                    : 'Staff',
                                                 products: state.products,
-                                                shopCategory: state.shop.category,
-                                                existingProductIds: existingProductIds,
+                                                shopCategory:
+                                                    state.shop.category,
+                                                existingProductIds:
+                                                    existingProductIds,
                                               ),
                                             ),
                                           ),
                                         ),
-                                        icon: Icon(Icons.add, color: Colors.white, size: 18.sp),
-                                        label: Text('Add New ${term.planLabel}', style: TextStyle(color: Colors.white, fontSize: 13.sp)),
+                                        icon: Icon(
+                                          Icons.add,
+                                          color: Colors.white,
+                                          size: 18.sp,
+                                        ),
+                                        label: Text(
+                                          'Add New ${term.planLabel}',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 13.sp,
+                                          ),
+                                        ),
                                         style: TextButton.styleFrom(
-                                          backgroundColor: Colors.white.withOpacity(0.2),
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-                                          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                                          backgroundColor: Colors.white
+                                              .withOpacity(0.2),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              12.r,
+                                            ),
+                                          ),
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: 12.w,
+                                            vertical: 8.h,
+                                          ),
                                         ),
                                       );
                                     },
@@ -161,21 +208,38 @@ class CustomerDetailsPage extends StatelessWidget {
                               ),
                               SizedBox(height: 5.h),
                               if (uniqueSubs.isEmpty)
-                              Column(children:[
-                                 SizedBox(height: 5.h),
-                                 Center(
-                                  child: 
-                                  Text('No active ${term.planLabel.toLowerCase()}s found', style: TextStyle(color: Colors.white70, fontSize: 14.sp)),
-                                ),
-                                 SizedBox(height: 5.h),
-                              ])
-                               
+                                Column(
+                                  children: [
+                                    SizedBox(height: 5.h),
+                                    Center(
+                                      child: Text(
+                                        'No active ${term.planLabel.toLowerCase()}s found',
+                                        style: TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 14.sp,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: 5.h),
+                                  ],
+                                )
                               else
                                 ...uniqueSubs.map((sub) {
-                                  final prod = state.products.where((p) => p.productId == sub.productId).firstOrNull;
+                                  final prod = state.products
+                                      .where(
+                                        (p) => p.productId == sub.productId,
+                                      )
+                                      .firstOrNull;
                                   return Padding(
                                     padding: EdgeInsets.only(bottom: 16.h),
-                                    child: _buildSubscriptionCard(context, sub, prod, state, term, customer),
+                                    child: _buildSubscriptionCard(
+                                      context,
+                                      sub,
+                                      prod,
+                                      state,
+                                      term,
+                                      customer,
+                                    ),
                                   );
                                 }).toList(),
                               SizedBox(height: 100.h),
@@ -196,11 +260,31 @@ class CustomerDetailsPage extends StatelessWidget {
   }
 
   String _fmt(DateTime d) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     return '${months[d.month - 1]} ${d.day}, ${d.year}';
   }
 
-  Widget _buildSubscriptionCard(BuildContext context, SubscriptionEntity sub, ProductEntity? product, DashboardLoaded state, BusinessTerminology term, CustomerEntity customer) {
+  Widget _buildSubscriptionCard(
+    BuildContext context,
+    SubscriptionEntity sub,
+    ProductEntity? product,
+    DashboardLoaded state,
+    BusinessTerminology term,
+    CustomerEntity customer,
+  ) {
     if (product == null) return const SizedBox.shrink();
     final daysLeft = AppDateUtils.calculateDaysLeft(sub.endDate);
     final isExpired = daysLeft < 0;
@@ -234,14 +318,23 @@ class CustomerDetailsPage extends StatelessWidget {
                           product.name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: AppColors.textDark),
+                          style: TextStyle(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textDark,
+                          ),
                         ),
                         if (sub.paymentStatus != 'paid') ...[
                           SizedBox(width: 8.w),
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 8.w,
+                              vertical: 2.h,
+                            ),
                             decoration: BoxDecoration(
-                              color: sub.paymentStatus == 'unpaid' ? Colors.red.shade100 : Colors.orange.shade100,
+                              color: sub.paymentStatus == 'unpaid'
+                                  ? Colors.red.shade100
+                                  : Colors.orange.shade100,
                               borderRadius: BorderRadius.circular(4.r),
                             ),
                             child: Text(
@@ -249,7 +342,9 @@ class CustomerDetailsPage extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 10.sp,
                                 fontWeight: FontWeight.bold,
-                                color: sub.paymentStatus == 'unpaid' ? Colors.red.shade700 : Colors.orange.shade700,
+                                color: sub.paymentStatus == 'unpaid'
+                                    ? Colors.red.shade700
+                                    : Colors.orange.shade700,
                               ),
                             ),
                           ),
@@ -258,7 +353,10 @@ class CustomerDetailsPage extends StatelessWidget {
                     ),
                     SizedBox(height: 4.h),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10.w,
+                        vertical: 4.h,
+                      ),
                       decoration: BoxDecoration(
                         color: isExpired ? Colors.red[50] : Colors.green[50],
                         borderRadius: BorderRadius.circular(8.r),
@@ -294,7 +392,11 @@ class CustomerDetailsPage extends StatelessWidget {
                             ),
                           ),
                         ),
-                        icon: Icon(Icons.edit_outlined, color: Colors.grey[600], size: 20.sp),
+                        icon: Icon(
+                          Icons.edit_outlined,
+                          color: Colors.grey[600],
+                          size: 20.sp,
+                        ),
                         tooltip: 'Correct Details',
                       ),
                       IconButton(
@@ -308,7 +410,9 @@ class CustomerDetailsPage extends StatelessWidget {
                                   subscriptionId: sub.subscriptionId,
                                   shopId: sub.shopId,
                                   currentEndDate: sub.endDate,
-                                  ownerId: authState is AuthAuthenticated ? authState.ownerId : '',
+                                  ownerId: authState is AuthAuthenticated
+                                      ? authState.ownerId
+                                      : '',
                                   productName: product.name,
                                   validityUnit: product.validityUnit,
                                   validityValue: product.validityValue,
@@ -323,7 +427,11 @@ class CustomerDetailsPage extends StatelessWidget {
                             ),
                           );
                         },
-                        icon: Icon(Icons.autorenew, color: AppColors.primary, size: 24.sp),
+                        icon: Icon(
+                          Icons.autorenew,
+                          color: AppColors.primary,
+                          size: 24.sp,
+                        ),
                         tooltip: 'Renew Plan',
                       ),
                     ],
@@ -339,40 +447,94 @@ class CustomerDetailsPage extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Expiry Date', style: TextStyle(color: AppColors.textLight, fontSize: 13.sp)),
+                  Text(
+                    'Expiry Date',
+                    style: TextStyle(
+                      color: AppColors.textLight,
+                      fontSize: 13.sp,
+                    ),
+                  ),
                   SizedBox(height: 4.h),
-                  Text(_fmt(sub.endDate), style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.textDark, fontSize: 15.sp)),
+                  Text(
+                    _fmt(sub.endDate),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textDark,
+                      fontSize: 15.sp,
+                    ),
+                  ),
                 ],
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(sub.balanceAmount > 0 ? 'Paid / Total' : 'Price', style: TextStyle(color: AppColors.textLight, fontSize: 13.sp)),
-                  SizedBox(height: 4.h),
-                  if (sub.balanceAmount > 0)
-                    RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: '₹${sub.paidAmount.toStringAsFixed(0)}',
-                            style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 15.sp),
-                          ),
-                          TextSpan(
-                            text: ' / ₹${sub.price.toStringAsFixed(0)}',
-                            style: TextStyle(fontWeight: FontWeight.w500, color: AppColors.textLight, fontSize: 12.sp),
-                          ),
-                        ],
+              InkWell(
+                onTap: sub.balanceAmount > 0
+                    ? () => _showBalanceCollectionDialog(context, sub, customer)
+                    : null,
+                borderRadius: BorderRadius.circular(8.r),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        sub.balanceAmount > 0 ? 'Collect Balance' : 'Price',
+                        style: TextStyle(
+                          color: sub.balanceAmount > 0
+                              ? AppColors.primary
+                              : AppColors.textLight,
+                          fontSize: 13.sp,
+                          fontWeight: sub.balanceAmount > 0
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                        ),
                       ),
-                    )
-                  else
-                    Text('₹${sub.price.toStringAsFixed(0)}',
-                        style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textDark, fontSize: 15.sp)),
-                ],
+                      SizedBox(height: 4.h),
+                      if (sub.balanceAmount > 0)
+                        RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: '₹${sub.paidAmount.toStringAsFixed(0)}',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                  fontSize: 15.sp,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                              TextSpan(
+                                text: ' / ₹${sub.price.toStringAsFixed(0)}',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.textLight,
+                                  fontSize: 12.sp,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      else
+                        Text(
+                          '₹${sub.price.toStringAsFixed(0)}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textDark,
+                            fontSize: 15.sp,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text('Days Left', style: TextStyle(color: AppColors.textLight, fontSize: 13.sp)),
+                  Text(
+                    'Days Left',
+                    style: TextStyle(
+                      color: AppColors.textLight,
+                      fontSize: 13.sp,
+                    ),
+                  ),
                   SizedBox(height: 4.h),
                   Text(
                     isExpired ? '0 days' : '$daysLeft days',
@@ -391,18 +553,30 @@ class CustomerDetailsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildAppBar(BuildContext context, CustomerEntity customer, List<ProductEntity> products, DashboardLoaded state) {
+  Widget _buildAppBar(
+    BuildContext context,
+    CustomerEntity customer,
+    List<ProductEntity> products,
+    DashboardLoaded state,
+  ) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _buildCircleIconButton(Icons.arrow_back, () => Navigator.pop(context)),
+          _buildCircleIconButton(
+            Icons.arrow_back,
+            () => Navigator.pop(context),
+          ),
           Expanded(
             child: Center(
               child: Text(
                 "${TerminologyHelper.getTerminology(state.shop.category).customerLabel} Details",
-                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: Colors.white),
+                style: TextStyle(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
@@ -451,7 +625,10 @@ class CustomerDetailsPage extends StatelessWidget {
       borderRadius: BorderRadius.circular(20.r),
       child: Container(
         padding: EdgeInsets.all(8.r),
-        decoration: BoxDecoration(color: Colors.white.withOpacity(0.15), shape: BoxShape.circle),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.15),
+          shape: BoxShape.circle,
+        ),
         child: Icon(icon, color: Colors.white, size: 24.sp),
       ),
     );
@@ -466,16 +643,30 @@ class CustomerDetailsPage extends StatelessWidget {
           //customer.name[0].toUpperCase() + customer.name.substring(1).toLowerCase(),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(color: Colors.white, fontSize: 18.sp, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18.sp,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-      //  SizedBox(height: 8.h),
+        //  SizedBox(height: 8.h),
         InkWell(
           onTap: () => AppLauncherUtils.makePhoneCall(customer.mobileNumber),
           child: Row(
             children: [
-              Icon(Icons.call, color: Colors.white.withOpacity(0.9), size: 18.sp),
+              Icon(
+                Icons.call,
+                color: Colors.white.withOpacity(0.9),
+                size: 18.sp,
+              ),
               SizedBox(width: 8.w),
-              Text(customer.mobileNumber, style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 16.sp)),
+              Text(
+                customer.mobileNumber,
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.9),
+                  fontSize: 16.sp,
+                ),
+              ),
             ],
           ),
         ),
@@ -483,10 +674,215 @@ class CustomerDetailsPage extends StatelessWidget {
     );
   }
 
+  void _showBalanceCollectionDialog(
+    BuildContext pageContext,
+    SubscriptionEntity sub,
+    CustomerEntity customer,
+  ) {
+    if (sub.balanceAmount <= 0) return;
+
+    final TextEditingController amountController = TextEditingController();
+    String selectedPaymentMode = 'Cash';
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: pageContext,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16.r),
+              ),
+              title: Text(
+                'Collect Balance',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp),
+              ),
+              content: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Plan Amount:',
+                          style: TextStyle(
+                            color: AppColors.textLight,
+                            fontSize: 13.sp,
+                          ),
+                        ),
+                        Text(
+                          '₹${sub.price.toStringAsFixed(0)}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14.sp,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8.h),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Pending Balance:',
+                          style: TextStyle(
+                            color: AppColors.textLight,
+                            fontSize: 13.sp,
+                          ),
+                        ),
+                        Text(
+                          '₹${sub.balanceAmount.toStringAsFixed(0)}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
+                            fontSize: 14.sp,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16.h),
+                    Text(
+                      'Received Amount *',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13.sp,
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    TextFormField(
+                      controller: amountController,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d*\.?\d*'),
+                        ),
+                      ],
+                      autofocus: true,
+                      decoration: InputDecoration(
+                        hintText: 'Enter amount',
+                        prefixIcon: const Icon(Icons.currency_rupee, size: 18),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12.w,
+                          vertical: 8.h,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty)
+                          return 'Enter amount';
+                        final amt = double.tryParse(value);
+                        if (amt == null || amt <= 0) return 'Invalid amount';
+                        if (amt > sub.balanceAmount)
+                          return 'Cannot exceed pending balance';
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 16.h),
+                    Text(
+                      'Payment Mode *',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13.sp,
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    DropdownButtonFormField<String>(
+                      value: selectedPaymentMode,
+                      decoration: InputDecoration(
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12.w,
+                          vertical: 8.h,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
+                      ),
+                      items: ['Cash', 'UPI', 'Card', 'Bank Transfer'].map((m) {
+                        return DropdownMenuItem(
+                          value: m,
+                          child: Text(m, style: TextStyle(fontSize: 14.sp)),
+                        );
+                      }).toList(),
+                      onChanged: (v) =>
+                          setState(() => selectedPaymentMode = v ?? 'Cash'),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: AppColors.textLight),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    if (formKey.currentState?.validate() ?? false) {
+                      final addedAmt = double.parse(amountController.text);
+                      final newPaidAmount = sub.paidAmount + addedAmt;
+
+                      final authState = pageContext.read<AuthBloc>().state;
+                      final updatedByName = authState is AuthAuthenticated
+                          ? authState.name
+                          : 'Staff';
+                      final updatedById = authState is AuthAuthenticated
+                          ? authState.userId
+                          : sub.updatedById;
+
+                      pageContext.read<CustomerBloc>().add(
+                        UpdateSubscription(
+                          subscriptionId: sub.subscriptionId,
+                          endDate: sub.endDate,
+                          price: sub.price,
+                          paidAmount: newPaidAmount,
+                          paymentMode: selectedPaymentMode,
+                          updatedById: updatedById,
+                          ownerId: sub.ownerId,
+                          shopId: sub.shopId,
+                          updatedByName: updatedByName,
+                          customerName: customer.name,
+                          status: sub.status,
+                        ),
+                      );
+
+                      Navigator.pop(dialogContext);
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                  ),
+                  child: const Text(
+                    'Confirm',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   Widget _buildRegistrationFeeCard(CustomerEntity customer) {
     final status = customer.registrationFeeStatus.toLowerCase();
-    final statusColor = status == 'paid' ? AppColors.success : (status == 'partial' ? Colors.orange : Colors.red);
-    
+    final statusColor = status == 'paid'
+        ? AppColors.success
+        : (status == 'partial' ? Colors.orange : Colors.red);
+
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       decoration: BoxDecoration(
@@ -499,13 +895,30 @@ class CustomerDetailsPage extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.assignment_ind_outlined, color: Colors.white, size: 20.sp),
+              Icon(
+                Icons.assignment_ind_outlined,
+                color: Colors.white,
+                size: 20.sp,
+              ),
               SizedBox(width: 12.w),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Registration Fee', style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 13.sp)),
-                  Text('₹${customer.registrationFeeAmount.toStringAsFixed(0)}', style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.bold)),
+                  Text(
+                    'Registration Fee',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.8),
+                      fontSize: 13.sp,
+                    ),
+                  ),
+                  Text(
+                    '₹${customer.registrationFeeAmount.toStringAsFixed(0)}',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -519,7 +932,11 @@ class CustomerDetailsPage extends StatelessWidget {
             ),
             child: Text(
               status.toUpperCase(),
-              style: TextStyle(color: Colors.white, fontSize: 11.sp, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 11.sp,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],

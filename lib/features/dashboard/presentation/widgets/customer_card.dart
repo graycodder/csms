@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:csms/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:csms/features/auth/presentation/bloc/auth_state.dart';
+import 'package:csms/features/customer/presentation/bloc/customer_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:csms/core/theme/app_colors.dart';
 import 'package:csms/core/utils/date_utils.dart';
@@ -237,12 +242,21 @@ class CustomerCard extends StatelessWidget {
                       ),
                     ),
                     if (sub != null && sub.balanceAmount > 0) ...[
-                      Text(
-                        'Bal: ₹${sub.balanceAmount.toStringAsFixed(0)}',
-                        style: TextStyle(
-                          fontSize: 11.sp,
-                          color: Colors.red,
-                          fontWeight: FontWeight.bold,
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => _showBalanceCollectionDialog(context, sub, customer),
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 2.h),
+                          child: Text(
+                            'Bal: ₹${sub.balanceAmount.toStringAsFixed(0)}',
+                            style: TextStyle(
+                              fontSize: 11.sp,
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                              decoration: TextDecoration.underline,
+                              decorationColor: Colors.red,
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -265,6 +279,209 @@ class CustomerCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  void _showBalanceCollectionDialog(
+    BuildContext pageContext,
+    SubscriptionEntity sub,
+    CustomerEntity customer,
+  ) {
+    if (sub.balanceAmount <= 0) return;
+
+    final TextEditingController amountController = TextEditingController();
+    String selectedPaymentMode = 'Cash';
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: pageContext,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16.r),
+              ),
+              title: Text(
+                'Collect Balance',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp),
+              ),
+              content: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Plan Amount:',
+                          style: TextStyle(
+                            color: AppColors.textLight,
+                            fontSize: 13.sp,
+                          ),
+                        ),
+                        Text(
+                          '₹${sub.price.toStringAsFixed(0)}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14.sp,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8.h),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Pending Balance:',
+                          style: TextStyle(
+                            color: AppColors.textLight,
+                            fontSize: 13.sp,
+                          ),
+                        ),
+                        Text(
+                          '₹${sub.balanceAmount.toStringAsFixed(0)}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
+                            fontSize: 14.sp,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16.h),
+                    Text(
+                      'Received Amount *',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13.sp,
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    TextFormField(
+                      controller: amountController,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d*\.?\d*'),
+                        ),
+                      ],
+                      autofocus: true,
+                      decoration: InputDecoration(
+                        hintText: 'Enter amount',
+                        prefixIcon: const Icon(Icons.currency_rupee, size: 18),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12.w,
+                          vertical: 8.h,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty)
+                          return 'Enter amount';
+                        final amt = double.tryParse(value);
+                        if (amt == null || amt <= 0) return 'Invalid amount';
+                        if (amt > sub.balanceAmount)
+                          return 'Cannot exceed pending balance';
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 16.h),
+                    Text(
+                      'Payment Mode *',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13.sp,
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    DropdownButtonFormField<String>(
+                      value: selectedPaymentMode,
+                      decoration: InputDecoration(
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12.w,
+                          vertical: 8.h,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
+                      ),
+                      items: ['Cash', 'UPI', 'Card', 'Bank Transfer'].map((m) {
+                        return DropdownMenuItem(
+                          value: m,
+                          child: Text(m, style: TextStyle(fontSize: 14.sp)),
+                        );
+                      }).toList(),
+                      onChanged: (v) =>
+                          setState(() => selectedPaymentMode = v ?? 'Cash'),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: AppColors.textLight),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    if (formKey.currentState?.validate() ?? false) {
+                      final addedAmt = double.parse(amountController.text);
+                      final newPaidAmount = sub.paidAmount + addedAmt;
+
+                      final authState = pageContext.read<AuthBloc>().state;
+                      final updatedByName = authState is AuthAuthenticated
+                          ? authState.name
+                          : 'Staff';
+                      final updatedById = authState is AuthAuthenticated
+                          ? authState.userId
+                          : sub.updatedById;
+
+                      pageContext.read<CustomerBloc>().add(
+                        UpdateSubscription(
+                          subscriptionId: sub.subscriptionId,
+                          endDate: sub.endDate,
+                          price: sub.price,
+                          paidAmount: newPaidAmount,
+                          paymentMode: selectedPaymentMode,
+                          updatedById: updatedById,
+                          ownerId: sub.ownerId,
+                          shopId: sub.shopId,
+                          updatedByName: updatedByName,
+                          customerName: customer.name,
+                          status: sub.status,
+                        ),
+                      );
+
+                      Navigator.pop(dialogContext);
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                  ),
+                  child: const Text(
+                    'Confirm',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }

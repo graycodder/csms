@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:csms/core/theme/app_theme.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:csms/features/auth/presentation/pages/login_page.dart';
 import 'package:csms/features/splash_screen.dart';
 import 'package:csms/features/shop/presentation/bloc/shop_context_bloc.dart';
 import 'package:csms/features/dashboard/presentation/bloc/dashboard_bloc.dart';
@@ -28,10 +27,8 @@ Future<void> bootstrap(AppConfig config) async {
 
   try {
     // Initialize Firebase with environment-specific options
-    await Firebase.initializeApp(
-      options: config.firebaseOptions,
-    );
-    
+    await Firebase.initializeApp(options: config.firebaseOptions);
+
     // Pass all uncaught "fatal" errors from the framework to Crashlytics
     FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
 
@@ -49,7 +46,7 @@ Future<void> bootstrap(AppConfig config) async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
   PlatformDispatcher.instance.onError = (error, stack) {
     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
@@ -57,16 +54,19 @@ void main() async {
   };
 
   // Default to production if run directly from main.dart
-  await bootstrap(AppConfig(
-    environment: Environment.production,
-    firebaseOptions: DefaultFirebaseOptions.currentPlatform,
-    appTitle: 'CSMS',
-  ));
+  await bootstrap(
+    AppConfig(
+      environment: Environment.production,
+      firebaseOptions: DefaultFirebaseOptions.currentPlatform,
+      appTitle: 'CSMS',
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   final AppConfig config;
-  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
 
   const MyApp({super.key, required this.config});
 
@@ -87,7 +87,9 @@ class MyApp extends StatelessWidget {
             BlocProvider(create: (_) => di.sl<ProductBloc>()),
             BlocProvider(create: (_) => di.sl<StaffBloc>()),
             BlocProvider(create: (_) => di.sl<ShopSubscriptionBloc>()),
-            BlocProvider(create: (_) => di.sl<VersionBloc>()..add(MonitorVersion())),
+            BlocProvider(
+              create: (_) => di.sl<VersionBloc>()..add(MonitorVersion()),
+            ),
           ],
           child: MaterialApp(
             navigatorKey: navigatorKey,
@@ -102,9 +104,7 @@ class MyApp extends StatelessWidget {
               // values proportionally larger than the design intent.
               final mediaQuery = MediaQuery.of(context);
               Widget content = MediaQuery(
-                data: mediaQuery.copyWith(
-                  textScaler: TextScaler.noScaling,
-                ),
+                data: mediaQuery.copyWith(textScaler: TextScaler.noScaling),
                 child: child!,
               );
 
@@ -118,9 +118,7 @@ class MyApp extends StatelessWidget {
               }
 
               return GlobalVersionGuard(
-                child: GlobalSubscriptionGuard(
-                  child: content,
-                ),
+                child: GlobalSubscriptionGuard(child: content),
               );
             },
           ),

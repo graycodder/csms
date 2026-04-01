@@ -7,6 +7,7 @@ class MockFirebaseDatabase extends Mock implements FirebaseDatabase {}
 class MockDatabaseReference extends Mock implements DatabaseReference {}
 class MockQuery extends Mock implements Query {}
 class MockDataSnapshot extends Mock implements DataSnapshot {}
+class MockDatabaseEvent extends Mock implements DatabaseEvent {}
 
 void main() {
   late CustomerRepositoryImpl repository;
@@ -38,10 +39,14 @@ void main() {
   group('CustomerRepositoryImpl', () {
     test('getCustomers should build the correct paginated query', () async {
       // Arrange
+      final mockEvent = MockDatabaseEvent();
+      when(() => mockQuery.onValue).thenAnswer((_) => Stream.value(mockEvent));
+      when(() => mockEvent.snapshot).thenReturn(mockSnapshot);
       when(() => mockSnapshot.value).thenReturn(null);
 
       // Act
-      await repository.getCustomers(shopId: 'shop1', ownerId: 'owner1');
+      final resultStream = repository.getCustomers(shopId: 'shop1', ownerId: 'owner1', limit: 20);
+      await resultStream.first;
 
       // Assert
       verify(() => mockRef.child('customers')).called(greaterThanOrEqualTo(1));
@@ -51,36 +56,34 @@ void main() {
       verify(() => mockQuery.limitToLast(20)).called(1);
     });
 
-    test('getCustomers should trigger legacy fallback if first page is empty', () async {
+    test('getCustomers should return list of customers successfully', () async {
       // Arrange
-      // First query (paginated) returns null
-      when(() => mockSnapshot.value).thenReturn(null);
+      final mockEvent = MockDatabaseEvent();
+      when(() => mockQuery.onValue).thenAnswer((_) => Stream.value(mockEvent));
+      when(() => mockEvent.snapshot).thenReturn(mockSnapshot);
       
-      // Setup legacy query mocks
-      final mockLegacyQuery = MockQuery();
-      final mockLegacySnapshot = MockDataSnapshot();
-      
-      // Use specific matcher to differentiate from default orderByChild
-      when(() => mockRef.orderByChild('ownerId')).thenReturn(mockLegacyQuery);
-      when(() => mockLegacyQuery.equalTo(any())).thenReturn(mockLegacyQuery);
-      when(() => mockLegacyQuery.get()).thenAnswer((_) async => mockLegacySnapshot);
-      when(() => mockLegacySnapshot.value).thenReturn({'c1': {'name': 'Legacy', 'shopId': 'shop1'}});
+      when(() => mockSnapshot.value).thenReturn({
+        'c1': {
+          'name': 'Customer 1',
+          'shopId': 'shop1',
+          'owner_createdAt': '2023-01-02'
+        },
+        'c2': {
+          'name': 'Customer 2',
+          'shopId': 'shop2', // Different shopId, should be filtered out
+          'owner_createdAt': '2023-01-01'
+        }
+      });
 
       // Act
-      final result = await repository.getCustomers(shopId: 'shop1', ownerId: 'owner1');
+      final resultStream = repository.getCustomers(shopId: 'shop1', ownerId: 'owner1');
+      final result = await resultStream.first;
 
       // Assert
-      if (result.isLeft()) {
-        result.fold((l) => print('REPOS_FAILURE: ${l.message}'), (r) => null);
-      }
       expect(result.isRight(), true);
       final customers = result.getOrElse(() => []);
       expect(customers.length, 1);
-      expect(customers.first.name, 'Legacy');
-      
-      // Verify legacy query was called
-      verify(() => mockRef.orderByChild('ownerId')).called(1);
-      verify(() => mockLegacyQuery.equalTo('owner1')).called(1);
+      expect(customers.first.name, 'Customer 1');
     });
   });
 }

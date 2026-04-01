@@ -33,4 +33,3 @@ class UserEntity extends Equatable {
     ownerId,
   ];
 }
-```
