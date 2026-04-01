@@ -48,8 +48,12 @@ class CustomerModel extends CustomerEntity {
 
   static DateTime _parseDate(dynamic date) {
     if (date is int) return DateTime.fromMillisecondsSinceEpoch(date, isUtc: true);
-    if (date is String) return DateTime.tryParse(date)?.toUtc() ?? DateTime.now().toUtc();
-    return DateTime.now().toUtc();
+    if (date is String) {
+      final parsedInt = int.tryParse(date);
+      if (parsedInt != null) return DateTime.fromMillisecondsSinceEpoch(parsedInt, isUtc: true);
+      return DateTime.tryParse(date)?.toUtc() ?? DateTime.fromMillisecondsSinceEpoch(0).toUtc();
+    }
+    return DateTime.fromMillisecondsSinceEpoch(0).toUtc();
   }
 
   Map<String, dynamic> toJson() {

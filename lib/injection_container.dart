@@ -67,6 +67,8 @@ import 'package:csms/features/app_config/presentation/bloc/version_bloc.dart';
 import 'package:csms/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 
 // Reports
+import 'package:csms/features/reports/domain/repositories/report_repository.dart';
+import 'package:csms/features/reports/data/repositories/report_repository_impl.dart';
 import 'package:csms/features/reports/domain/usecases/get_business_report.dart';
 import 'package:csms/features/reports/presentation/bloc/report_bloc.dart';
 
@@ -173,7 +175,9 @@ Future<void> init() async {
   );
 
   //! Features - Reports
-  sl.registerLazySingleton(() => GetBusinessReport());
+  sl.registerLazySingleton<ReportRepository>(
+      () => ReportRepositoryImpl(database: sl()));
+  sl.registerLazySingleton(() => GetBusinessReport(sl()));
   sl.registerFactory(() => ReportBloc(getBusinessReport: sl()));
 
 

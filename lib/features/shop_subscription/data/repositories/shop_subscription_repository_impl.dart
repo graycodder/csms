@@ -16,9 +16,11 @@ class ShopSubscriptionRepositoryImpl implements ShopSubscriptionRepository {
   @override
   Future<Either<Failure, ShopSubscriptionEntity>> getShopSubscriptionStatus(String shopId) async {
     try {
+      print('DEBUG: Fetching subscription for shopId: $shopId');
       final snapshot = await _database.ref().child('shop_subscriptions').child(shopId).get();
+      print('DEBUG: Snapshot exists: ${snapshot.exists}, Value: ${snapshot.value}');
       if (!snapshot.exists) {
-        return Left(ServerFailure('Shop subscription not found'));
+        return Left(ServerFailure('Shop subscription not found for $shopId'));
       }
       final data = Map<String, dynamic>.from(snapshot.value as Map);
       
@@ -42,9 +44,10 @@ class ShopSubscriptionRepositoryImpl implements ShopSubscriptionRepository {
   Stream<Either<Failure, ShopSubscriptionEntity>> getShopSubscriptionStatusStream(String shopId) {
     return _database.ref().child('shop_subscriptions').child(shopId).onValue.asyncMap((event) async {
       try {
+        print('DEBUG: Stream event for shopId: $shopId, Data: ${event.snapshot.value}');
         final data = event.snapshot.value;
         if (data == null) {
-          return Left<Failure, ShopSubscriptionEntity>(ServerFailure('Shop subscription not found'));
+          return Left<Failure, ShopSubscriptionEntity>(ServerFailure('Shop subscription not found for $shopId'));
         }
         final mapData = Map<String, dynamic>.from(data as Map);
         

@@ -6,6 +6,7 @@ import 'package:csms/core/error/failures.dart';
 import 'package:csms/features/customer/domain/entities/customer_entity.dart';
 import 'package:csms/features/product/domain/entities/product_entity.dart';
 import 'package:csms/features/subscription/domain/entities/subscription_entity.dart';
+import 'package:csms/features/subscription/domain/entities/subscription_log_entity.dart';
 import 'package:csms/features/shop/domain/entities/shop_entity.dart';
 import 'package:csms/features/customer/domain/repositories/customer_repository.dart';
 import 'package:csms/features/product/domain/repositories/product_repository.dart';
@@ -53,6 +54,7 @@ class DashboardLoaded extends DashboardState {
   final List<ProductEntity> products;
   final List<SubscriptionEntity> expiringSoon;
   final List<SubscriptionEntity> activeSubs;
+  final List<SubscriptionLogEntity> logs;
   final int totalCustomers;
   final int activeSubscriptions;
   final ShopEntity shop;
@@ -64,6 +66,7 @@ class DashboardLoaded extends DashboardState {
     required this.products,
     required this.expiringSoon,
     required this.activeSubs,
+    required this.logs,
     required this.totalCustomers,
     required this.activeSubscriptions,
     required this.shop,
@@ -77,6 +80,7 @@ class DashboardLoaded extends DashboardState {
     products,
     expiringSoon,
     activeSubs,
+    logs,
     totalCustomers,
     activeSubscriptions,
     shop,
@@ -123,7 +127,14 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
           (shop) {
             final warningThreshold = shop.settings.expiredDaysBefore;
 
-            return Rx.combineLatest4(
+            return Rx.combineLatest5<
+              Either<Failure, List<CustomerEntity>>,
+              Either<Failure, List<ProductEntity>>,
+              Either<Failure, List<SubscriptionEntity>>,
+              Either<Failure, List<SubscriptionEntity>>,
+              Either<Failure, List<SubscriptionLogEntity>>,
+              DashboardState
+            >(
               customerRepository.getCustomers(
                 shopId: event.shopId,
                 ownerId: event.ownerId,
@@ -141,13 +152,18 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
                 shopId: event.shopId,
                 ownerId: event.ownerId,
               ),
-              (customersResult, productsResult, expiringResult, activeSubsResult) {
+              Stream.fromFuture(subscriptionRepository.getSubscriptionLogs(
+                shopId: event.shopId,
+                ownerId: event.ownerId,
+              )),
+              (customersResult, productsResult, expiringResult, activeSubsResult, logsResult) {
                 return _combineToDashboardState(
                   shop: shop,
                   customersResult: customersResult,
                   productsResult: productsResult,
                   expiringResult: expiringResult,
                   activeSubsResult: activeSubsResult,
+                  logsResult: logsResult,
                 );
               },
             );
@@ -164,6 +180,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     required Either<Failure, List<ProductEntity>> productsResult,
     required Either<Failure, List<SubscriptionEntity>> expiringResult,
     required Either<Failure, List<SubscriptionEntity>> activeSubsResult,
+    required Either<Failure, List<SubscriptionLogEntity>> logsResult,
   }) {
     return customersResult.fold(
       (failure) => DashboardError(failure.message),
@@ -177,16 +194,22 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
                 return activeSubsResult.fold(
                   (failure) => DashboardError(failure.message),
                   (activeSubs) {
-                    return DashboardLoaded(
-                      customers: customers,
-                      products: products,
-                      expiringSoon: expiringSubs,
-                      activeSubs: activeSubs,
-                      totalCustomers: customers.length,
-                      activeSubscriptions: activeSubs.length,
-                      shop: shop,
-                      hasMore: customers.length >= _customerPageSize,
-                      lastDoc: customers.isNotEmpty ? customers.last.owner_createdAt : null,
+                    return logsResult.fold(
+                      (failure) => DashboardError(failure.message),
+                      (logs) {
+                        return DashboardLoaded(
+                          customers: customers,
+                          products: products,
+                          expiringSoon: expiringSubs,
+                          activeSubs: activeSubs,
+                          logs: logs,
+                          totalCustomers: customers.length,
+                          activeSubscriptions: activeSubs.length,
+                          shop: shop,
+                          hasMore: customers.length >= _customerPageSize,
+                          lastDoc: customers.isNotEmpty ? customers.last.owner_createdAt : null,
+                        );
+                      },
                     );
                   },
                 );
@@ -241,6 +264,7 @@ extension on DashboardLoaded {
       products: products,
       expiringSoon: expiringSoon,
       activeSubs: activeSubs,
+      logs: logs,
       totalCustomers: totalCustomers,
       activeSubscriptions: activeSubscriptions,
       shop: shop,

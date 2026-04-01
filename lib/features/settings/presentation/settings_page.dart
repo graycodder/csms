@@ -58,9 +58,9 @@ class SettingsPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.primary,
         borderRadius: BorderRadius.only(
-        bottomLeft: Radius.circular(28.r),
-        bottomRight: Radius.circular(28.r),
-      ),
+          bottomLeft: Radius.circular(28.r),
+          bottomRight: Radius.circular(28.r),
+        ),
       ),
       child: Row(
         children: [
@@ -73,11 +73,7 @@ class SettingsPage extends StatelessWidget {
                 color: Colors.white.withOpacity(0.2),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                Icons.arrow_back,
-                color: Colors.white,
-                size: 22.sp,
-              ),
+              child: Icon(Icons.arrow_back, color: Colors.white, size: 22.sp),
             ),
           ),
           SizedBox(width: 16.w),
@@ -96,10 +92,7 @@ class SettingsPage extends StatelessWidget {
               SizedBox(height: 2.h),
               Text(
                 'Manage your app settings',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 13.sp,
-                ),
+                style: TextStyle(color: Colors.white70, fontSize: 13.sp),
               ),
             ],
           ),
@@ -114,8 +107,9 @@ class SettingsPage extends StatelessWidget {
     if (authState is AuthAuthenticated) {
       role = authState.role.toLowerCase();
     }
-    
-    final bool isAdminOrManager = role == 'owner' || role == 'admin' || role == 'manager';
+
+    final bool isAdminOrManager =
+        role == 'owner' || role == 'admin' || role == 'manager';
 
     final items = <_SettingItem>[
       _SettingItem(
@@ -128,7 +122,9 @@ class SettingsPage extends StatelessWidget {
           if (authState is AuthAuthenticated) {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => ProfilePage(userId: authState.userId)),
+              MaterialPageRoute(
+                builder: (_) => ProfilePage(userId: authState.userId),
+              ),
             );
           }
         },
@@ -281,8 +277,7 @@ class SettingsPage extends StatelessWidget {
                 )
               : BorderRadius.zero,
           child: Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             child: Row(
               children: [
                 Container(
@@ -345,23 +340,17 @@ class SettingsPage extends StatelessWidget {
       builder: (context, snapshot) {
         final version = snapshot.data?.version ?? '1.0.0';
         final buildNumber = snapshot.data?.buildNumber ?? '1';
-        
+
         return Column(
           children: [
             Text(
               'Version $version',
-              style: TextStyle(
-                fontSize: 13.sp,
-                color: const Color(0xFFBDBDBD),
-              ),
+              style: TextStyle(fontSize: 13.sp, color: const Color(0xFFBDBDBD)),
             ),
             SizedBox(height: 4.h),
             Text(
               '© 2026 Business Manager',
-              style: TextStyle(
-                fontSize: 12.sp,
-                color: const Color(0xFFBDBDBD),
-              ),
+              style: TextStyle(fontSize: 12.sp, color: const Color(0xFFBDBDBD)),
             ),
           ],
         );

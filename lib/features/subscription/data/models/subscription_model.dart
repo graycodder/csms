@@ -46,7 +46,8 @@ class SubscriptionModel extends SubscriptionEntity {
       price: (json['price'] as num? ?? 0.0).toDouble(),
       registrationFeeAmount: (json['registrationFeeAmount'] ?? 0.0).toDouble(),
       registrationFeePaid: (json['registrationFeePaid'] ?? 0.0).toDouble(),
-      paidAmount: (json['paidAmount'] ?? (json['price'] ?? 0.0)).toDouble(), // Default to price for legacy
+      paidAmount: (json['paidAmount'] ?? (json['price'] ?? 0.0))
+          .toDouble(), // Default to price for legacy
       balanceAmount: (json['balanceAmount'] ?? 0.0).toDouble(),
       paymentStatus: json['paymentStatus'] ?? 'paid',
       updatedById: json['updatedById'] ?? '',
@@ -55,16 +56,23 @@ class SubscriptionModel extends SubscriptionEntity {
   }
 
   static DateTime _parseDate(dynamic date) {
-    if (date is int) return DateTime.fromMillisecondsSinceEpoch(date);
-    if (date is String) return DateTime.tryParse(date) ?? DateTime.now();
-    return DateTime.now();
+    if (date is int) {
+      return DateTime.fromMillisecondsSinceEpoch(date, isUtc: true);
+    }
+    if (date is String) {
+      final parsedInt = int.tryParse(date);
+      if (parsedInt != null) {
+        return DateTime.fromMillisecondsSinceEpoch(parsedInt, isUtc: true);
+      }
+      return DateTime.tryParse(date)?.toUtc() ??
+          DateTime.fromMillisecondsSinceEpoch(0).toUtc();
+    }
+    return DateTime.fromMillisecondsSinceEpoch(0).toUtc();
   }
 
   Map<String, dynamic> toJson() {
     final logsMap = {
-      for (var log in logs)
-        (log as SubscriptionLogModel).logId: (log as SubscriptionLogModel)
-            .toJson(),
+      for (var log in logs) (log as SubscriptionLogModel).logId: (log).toJson(),
     };
     return {
       'shopId': shopId,

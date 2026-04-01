@@ -1,16 +1,14 @@
 import 'package:equatable/equatable.dart';
 
-enum ReportFilter { today, thisMonth, allTime }
+enum ReportFilter { daily, monthly }
 
 extension ReportFilterLabel on ReportFilter {
   String get label {
     switch (this) {
-      case ReportFilter.today:
-        return 'Today';
-      case ReportFilter.thisMonth:
-        return 'This Month';
-      case ReportFilter.allTime:
-        return 'All Time';
+      case ReportFilter.daily:
+        return 'Daily Report';
+      case ReportFilter.monthly:
+        return 'Monthly Report';
     }
   }
 }
@@ -27,14 +25,20 @@ class ReportEntity extends Equatable {
   final int expiredSubscriptions;
 
   // ── Activity (date-filtered) ───────────────────────────────────────────────
+  // ── Activity (date-filtered) ───────────────────────────────────────────────
   final int newJoiners;
   final int newSubscriptions;
   final double registrationFeeCollected;
   final double registrationFeePending;
   final double totalPendingBalance;
+  final double subscriptionRevenueCollected;
+  final double totalRevenueCollected;
+  final List<ChartDataPoint> revenueChartData;
 
   // ── Applied filter ─────────────────────────────────────────────────────────
   final ReportFilter filter;
+  final DateTime? customStartDate;
+  final DateTime? customEndDate;
 
   // ── Per-product breakdown ──────────────────────────────────────────────────
   final List<ProductReportEntry> productBreakdown;
@@ -51,26 +55,46 @@ class ReportEntity extends Equatable {
     required this.registrationFeeCollected,
     required this.registrationFeePending,
     required this.totalPendingBalance,
+    required this.subscriptionRevenueCollected,
+    required this.totalRevenueCollected,
+    required this.revenueChartData,
     required this.filter,
+    this.customStartDate,
+    this.customEndDate,
     required this.productBreakdown,
   });
 
   @override
   List<Object?> get props => [
-        totalCustomers,
-        activeCustomers,
-        inactiveCustomers,
-        activeSubscriptions,
-        expiringSoonSubscriptions,
-        expiredSubscriptions,
-        newJoiners,
-        newSubscriptions,
-        registrationFeeCollected,
-        registrationFeePending,
-        totalPendingBalance,
-        filter,
-        productBreakdown,
-      ];
+    totalCustomers,
+    activeCustomers,
+    inactiveCustomers,
+    activeSubscriptions,
+    expiringSoonSubscriptions,
+    expiredSubscriptions,
+    newJoiners,
+    newSubscriptions,
+    registrationFeeCollected,
+    registrationFeePending,
+    totalPendingBalance,
+    subscriptionRevenueCollected,
+    totalRevenueCollected,
+    revenueChartData,
+    filter,
+    customStartDate,
+    customEndDate,
+    productBreakdown,
+  ];
+}
+
+class ChartDataPoint extends Equatable {
+  final String label;
+  final double value;
+
+  const ChartDataPoint(this.label, this.value);
+
+  @override
+  List<Object?> get props => [label, value];
 }
 
 class ProductReportEntry extends Equatable {
@@ -89,6 +113,11 @@ class ProductReportEntry extends Equatable {
   });
 
   @override
-  List<Object?> get props =>
-      [productId, productName, activeCount, expiringCount, expiredCount];
+  List<Object?> get props => [
+    productId,
+    productName,
+    activeCount,
+    expiringCount,
+    expiredCount,
+  ];
 }

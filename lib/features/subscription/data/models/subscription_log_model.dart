@@ -12,7 +12,8 @@ class SubscriptionLogModel extends SubscriptionLogEntity {
     super.startDate,
     super.endDate,
     required super.price,
-    required super.registrationFeeAmount,
+    super.registrationFeeAmount,
+    super.registrationFeePaid,
     required super.paidAmount,
     super.balanceAmount,
     super.paymentMode,
@@ -41,6 +42,7 @@ class SubscriptionLogModel extends SubscriptionLogEntity {
       endDate: json['endDate'] != null ? DateTime.fromMillisecondsSinceEpoch(json['endDate']) : null,
       price: json['price'] != null ? (json['price'] is int ? (json['price'] as int).toDouble() : json['price']) : null,
       registrationFeeAmount: json['registrationFeeAmount'] != null ? (json['registrationFeeAmount'] is int ? (json['registrationFeeAmount'] as int).toDouble() : json['registrationFeeAmount']) : null,
+      registrationFeePaid: json['registrationFeePaid'] != null ? (json['registrationFeePaid'] is int ? (json['registrationFeePaid'] as int).toDouble() : json['registrationFeePaid']) : null,
       paidAmount: paidAmt,
       balanceAmount: json['balanceAmount'] != null ? (json['balanceAmount'] is int ? (json['balanceAmount'] as int).toDouble() : json['balanceAmount']) : null,
       paymentMode: json['paymentMode'] as String?,
@@ -51,9 +53,13 @@ class SubscriptionLogModel extends SubscriptionLogEntity {
   }
 
   static DateTime _parseDate(dynamic date) {
-    if (date is int) return DateTime.fromMillisecondsSinceEpoch(date);
-    if (date is String) return DateTime.tryParse(date) ?? DateTime.now();
-    return DateTime.now();
+    if (date is int) return DateTime.fromMillisecondsSinceEpoch(date, isUtc: true);
+    if (date is String) {
+      final parsedInt = int.tryParse(date);
+      if (parsedInt != null) return DateTime.fromMillisecondsSinceEpoch(parsedInt, isUtc: true);
+      return DateTime.tryParse(date)?.toUtc() ?? DateTime.fromMillisecondsSinceEpoch(0).toUtc();
+    }
+    return DateTime.fromMillisecondsSinceEpoch(0).toUtc();
   }
 
   Map<String, dynamic> toJson() {
