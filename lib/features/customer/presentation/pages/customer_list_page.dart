@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:csms/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:csms/features/customer/domain/entities/customer_entity.dart';
 import 'package:csms/core/utils/terminology_helper.dart';
 import 'package:csms/core/theme/app_colors.dart';
 import 'package:csms/features/dashboard/presentation/widgets/customer_card.dart';
+import 'package:csms/core/utils/loading_overlay.dart';
 
 class CustomerListPage extends StatefulWidget {
-  final DashboardLoaded state;
   final BusinessTerminology term;
   final VoidCallback onReturn;
 
   const CustomerListPage({
     super.key,
-    required this.state,
     required this.term,
     required this.onReturn,
   });
@@ -36,21 +36,49 @@ class _CustomerListPageState extends State<CustomerListPage> {
 
   @override
   Widget build(BuildContext context) {
-    List<CustomerEntity> filteredCustomers = List.from(widget.state.customers);
+    return BlocListener<DashboardBloc, DashboardState>(
+      listener: (context, state) {
+        if (state is DashboardLoading) {
+          LoadingOverlayHelper.show(context);
+        } else {
+          LoadingOverlayHelper.hide();
+        }
+      },
+      child: BlocBuilder<DashboardBloc, DashboardState>(
+        builder: (context, state) {
+          if (state is DashboardLoaded) {
+            return _buildScaffold(context, state);
+          } else if (state is DashboardLoading && state.lastLoadedState != null) {
+            return _buildScaffold(context, state.lastLoadedState!);
+          } else if (state is DashboardError) {
+            return Scaffold(
+              appBar: AppBar(title: const Text('Error')),
+              body: Center(child: Text(state.message)),
+            );
+          }
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+        },
+      ),
+    );
+  }
+
+  Widget _buildScaffold(BuildContext context, DashboardLoaded state) {
+    List<CustomerEntity> filteredCustomers = List.from(state.customers);
 
     if (_searchQuery.isNotEmpty) {
       filteredCustomers = filteredCustomers.where((c) {
         final matchesName = c.name.toLowerCase().contains(_searchQuery);
-        final matchesPhone = c.mobileNumber.toLowerCase().contains(_searchQuery);
+        final matchesPhone =
+            c.mobileNumber.toLowerCase().contains(_searchQuery);
         return matchesName || matchesPhone;
       }).toList();
     }
 
     // Sort: Inactive (no subs) customers at the bottom, then by name
     filteredCustomers.sort((a, b) {
-      final aHasSubs = _hasAnySubscription(a);
-      final bHasSubs = _hasAnySubscription(b);
-      
+      final aHasSubs = _hasAnySubscription(a, state);
+      final bHasSubs = _hasAnySubscription(b, state);
+
       if (aHasSubs != bHasSubs) {
         return aHasSubs ? -1 : 1;
       }
@@ -64,7 +92,11 @@ class _CustomerListPageState extends State<CustomerListPage> {
         elevation: 0,
         title: Text(
           'All ${widget.term.customerLabel}s',
-          style: TextStyle(color: Colors.white, fontSize: 18.sp, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18.sp,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -83,7 +115,7 @@ class _CustomerListPageState extends State<CustomerListPage> {
                     itemBuilder: (context, index) {
                       return CustomerCard(
                         customer: filteredCustomers[index],
-                        state: widget.state,
+                        state: state,
                         term: widget.term,
                         selectedProductId: '', // Show most urgent or first
                         formatDate: _formatDate,
@@ -97,9 +129,9 @@ class _CustomerListPageState extends State<CustomerListPage> {
     );
   }
 
-  bool _hasAnySubscription(CustomerEntity customer) {
-    return widget.state.activeSubs.any((s) => s.customerId == customer.customerId) ||
-           widget.state.expiringSoon.any((s) => s.customerId == customer.customerId);
+  bool _hasAnySubscription(CustomerEntity customer, DashboardLoaded state) {
+    return state.activeSubs.any((s) => s.customerId == customer.customerId) ||
+        state.expiringSoon.any((s) => s.customerId == customer.customerId);
   }
 
   Widget _buildSearchBox() {

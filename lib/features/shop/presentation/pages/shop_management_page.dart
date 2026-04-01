@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:csms/core/theme/app_colors.dart';
-import 'package:csms/features/shop/domain/entities/shop_entity.dart';
 import 'package:csms/features/shop/presentation/bloc/shop_context_bloc.dart';
 import 'package:csms/features/shop/presentation/widgets/shop_info_card.dart';
 import 'package:csms/features/shop/presentation/widgets/shop_settings_card.dart';
@@ -19,7 +18,6 @@ class ShopManagementPage extends StatefulWidget {
 }
 
 class _ShopManagementPageState extends State<ShopManagementPage> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -65,7 +63,8 @@ class _ShopManagementPageState extends State<ShopManagementPage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => ShopSettingsEditPage(shop: shop),
+                                builder: (context) =>
+                                    ShopSettingsEditPage(shop: shop),
                               ),
                             );
                           },
@@ -96,11 +95,6 @@ class _ShopManagementPageState extends State<ShopManagementPage> {
     );
   }
 
-  void _updateShop(BuildContext context, ShopEntity updatedShop) {
-    LoadingOverlayHelper.show(context);
-    context.read<ShopContextBloc>().add(UpdateShop(updatedShop));
-  }
-
   Widget _buildHeader(BuildContext context) {
     return Container(
       padding: EdgeInsets.only(
@@ -127,11 +121,7 @@ class _ShopManagementPageState extends State<ShopManagementPage> {
                 color: Colors.white.withOpacity(0.2),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                Icons.arrow_back,
-                color: Colors.white,
-                size: 22.sp,
-              ),
+              child: Icon(Icons.arrow_back, color: Colors.white, size: 22.sp),
             ),
           ),
           SizedBox(width: 16.w),
@@ -151,10 +141,7 @@ class _ShopManagementPageState extends State<ShopManagementPage> {
                 SizedBox(height: 2.h),
                 Text(
                   'Configure and manage',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 13.sp,
-                  ),
+                  style: TextStyle(color: Colors.white70, fontSize: 13.sp),
                 ),
               ],
             ),

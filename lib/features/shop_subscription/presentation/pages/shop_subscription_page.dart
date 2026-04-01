@@ -37,7 +37,8 @@ class ShopSubscriptionPage extends StatelessWidget {
         ),
         body: BlocBuilder<ShopSubscriptionBloc, ShopSubscriptionState>(
           builder: (context, state) {
-            if (state is ShopSubscriptionLoading || state is ShopSubscriptionInitial) {
+            if (state is ShopSubscriptionLoading ||
+                state is ShopSubscriptionInitial) {
               return const LoadingOverlay();
             }
 
@@ -54,10 +55,17 @@ class ShopSubscriptionPage extends StatelessWidget {
               final status = state.status;
               final active = status.activePlan;
               final now = DateTime.now();
-              final isExpired = active == null || active.status == 'expired' || active.endDate.isBefore(now);
+              final isExpired =
+                  active == null ||
+                  active.status == 'expired' ||
+                  active.endDate.isBefore(now);
 
-              final Color statusColor = isExpired ? AppColors.errorText : AppColors.success;
-              final Color statusBg = isExpired ? AppColors.errorBg : AppColors.successBg;
+              final Color _ = isExpired
+                  ? AppColors.errorText
+                  : AppColors.success;
+              final Color _ = isExpired
+                  ? AppColors.errorBg
+                  : AppColors.successBg;
 
               return SingleChildScrollView(
                 padding: EdgeInsets.all(20.r),
@@ -81,16 +89,18 @@ class ShopSubscriptionPage extends StatelessWidget {
                       ),
                       child: Column(
                         children: [
-                            _buildInfoRow(
+                          _buildInfoRow(
                             'Plan Name',
-                           active?.planName ?? 'N/A',
-                            Icons.note_alt_outlined ,
+                            active?.planName ?? 'N/A',
+                            Icons.note_alt_outlined,
                           ),
                           SizedBox(height: 16.h),
                           _buildInfoRow(
                             'Start Date',
                             active != null
-                                ? DateFormat('MMMM dd, yyyy').format(active.startDate)
+                                ? DateFormat(
+                                    'MMMM dd, yyyy',
+                                  ).format(active.startDate)
                                 : 'N/A',
                             Icons.calendar_today_outlined,
                           ),
@@ -98,14 +108,18 @@ class ShopSubscriptionPage extends StatelessWidget {
                           _buildInfoRow(
                             'Expiry Date',
                             active != null
-                                ? DateFormat('MMMM dd, yyyy').format(active.endDate)
+                                ? DateFormat(
+                                    'MMMM dd, yyyy',
+                                  ).format(active.endDate)
                                 : 'No active plan',
                             Icons.event_available_outlined,
                           ),
                           SizedBox(height: 16.h),
                           _buildInfoRow(
                             'Status',
-                            active != null ? active.status.toUpperCase() : 'N/A',
+                            active != null
+                                ? active.status.toUpperCase()
+                                : 'N/A',
                             Icons.check_circle_outline_rounded,
                           ),
                           if (active != null) ...[
@@ -165,10 +179,7 @@ class ShopSubscriptionPage extends StatelessWidget {
         SizedBox(width: 12.w),
         Text(
           label,
-          style: TextStyle(
-            color: AppColors.textLight,
-            fontSize: 14.sp,
-          ),
+          style: TextStyle(color: AppColors.textLight, fontSize: 14.sp),
         ),
         const Spacer(),
         Text(
@@ -234,7 +245,11 @@ class ShopSubscriptionPage extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: AppColors.textLight, size: 20.w),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textLight,
+              size: 20.w,
+            ),
           ],
         ),
       ),

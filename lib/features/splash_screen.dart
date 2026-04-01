@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:csms/core/theme/app_colors.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_event.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_state.dart';
@@ -9,7 +8,6 @@ import 'package:csms/features/auth/presentation/pages/login_page.dart';
 import 'package:csms/features/shop/presentation/pages/shop_selection_page.dart';
 import 'package:csms/features/shop/presentation/bloc/shop_context_bloc.dart';
 import 'package:csms/features/dashboard/presentation/pages/dashboard_page.dart';
-import 'package:csms/features/auth/presentation/pages/onboarding_page.dart';
 import 'package:lottie/lottie.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -42,12 +40,12 @@ class _SplashScreenState extends State<SplashScreen> {
         return;
       } else if (authState is AuthAuthenticated) {
         context.read<ShopContextBloc>().add(
-              LoadShops(
-                ownerId: authState.ownerId,
-                shopId: authState.shopId,
-                role: authState.role,
-              ),
-            );
+          LoadShops(
+            ownerId: authState.ownerId,
+            shopId: authState.shopId,
+            role: authState.role,
+          ),
+        );
         return;
       }
 
@@ -65,12 +63,12 @@ class _SplashScreenState extends State<SplashScreen> {
               print('DEBUG: SplashScreen - AuthAuthenticated: ${state.userId}');
               // Start loading shops immediately natively
               context.read<ShopContextBloc>().add(
-                    LoadShops(
-                      ownerId: state.ownerId,
-                      shopId: state.shopId,
-                      role: state.role,
-                    ),
-                  );
+                LoadShops(
+                  ownerId: state.ownerId,
+                  shopId: state.shopId,
+                  role: state.role,
+                ),
+              );
             } else if (state is AuthUnauthenticated || state is AuthError) {
               print('DEBUG: SplashScreen - Unauthenticated or Error');
               Navigator.pushReplacement(
@@ -97,12 +95,13 @@ class _SplashScreenState extends State<SplashScreen> {
                 context,
                 MaterialPageRoute(builder: (_) => const ShopSelectionPage()),
               );
-            }
-            else if (state is ShopContextEmpty) {
-               // Handle no shops (could be a new owner) natively
-               Navigator.pushReplacement(
+            } else if (state is ShopContextEmpty) {
+              // Handle no shops (could be a new owner) natively
+              Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (_) => const LoginPage()), // Or Onboarding natives
+                MaterialPageRoute(
+                  builder: (_) => const LoginPage(),
+                ), // Or Onboarding natives
               );
             }
           },

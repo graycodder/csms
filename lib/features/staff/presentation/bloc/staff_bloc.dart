@@ -1,9 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:dartz/dartz.dart';
 import 'package:csms/features/staff/domain/entities/staff_entity.dart';
 import 'package:csms/features/staff/domain/repositories/staff_repository.dart';
-import 'package:csms/core/error/failures.dart';
 
 // ─── Events ──────────────────────────────────────────────────────────────────
 
@@ -26,7 +24,12 @@ class AddStaff extends StaffEvent {
   final String ownerId;
   final StaffEntity staff;
   final String password;
-  const AddStaff({required this.shopId, required this.ownerId, required this.staff, required this.password});
+  const AddStaff({
+    required this.shopId,
+    required this.ownerId,
+    required this.staff,
+    required this.password,
+  });
   @override
   List<Object?> get props => [shopId, ownerId, staff, password];
 }
@@ -35,7 +38,11 @@ class UpdateStaff extends StaffEvent {
   final String shopId;
   final String ownerId;
   final StaffEntity staff;
-  const UpdateStaff({required this.shopId, required this.ownerId, required this.staff});
+  const UpdateStaff({
+    required this.shopId,
+    required this.ownerId,
+    required this.staff,
+  });
   @override
   List<Object?> get props => [shopId, ownerId, staff];
 }
@@ -44,7 +51,11 @@ class ToggleStaffStatus extends StaffEvent {
   final String shopId;
   final String ownerId;
   final StaffEntity staff;
-  const ToggleStaffStatus({required this.shopId, required this.ownerId, required this.staff});
+  const ToggleStaffStatus({
+    required this.shopId,
+    required this.ownerId,
+    required this.staff,
+  });
   @override
   List<Object?> get props => [shopId, ownerId, staff];
 }
@@ -107,25 +118,34 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
 
   Future<void> _onAddStaff(AddStaff event, Emitter<StaffState> emit) async {
     emit(StaffOperationInProgress());
-    final result = await repository.addStaff(event.shopId, event.ownerId, event.staff, password: event.password);
-    result.fold(
-      (failure) => emit(StaffError(failure.message)),
-      (_) => null,
+    final result = await repository.addStaff(
+      event.shopId,
+      event.ownerId,
+      event.staff,
+      password: event.password,
     );
+    result.fold((failure) => emit(StaffError(failure.message)), (_) => null);
     // No need to manually load, stream will update
   }
 
-  Future<void> _onUpdateStaff(UpdateStaff event, Emitter<StaffState> emit) async {
+  Future<void> _onUpdateStaff(
+    UpdateStaff event,
+    Emitter<StaffState> emit,
+  ) async {
     emit(StaffOperationInProgress());
-    final result = await repository.updateStaff(event.shopId, event.ownerId, event.staff);
-    result.fold(
-      (failure) => emit(StaffError(failure.message)),
-      (_) => null,
+    final result = await repository.updateStaff(
+      event.shopId,
+      event.ownerId,
+      event.staff,
     );
+    result.fold((failure) => emit(StaffError(failure.message)), (_) => null);
     // No need to manually load, stream will update
   }
 
-  Future<void> _onToggleStaffStatus(ToggleStaffStatus event, Emitter<StaffState> emit) async {
+  Future<void> _onToggleStaffStatus(
+    ToggleStaffStatus event,
+    Emitter<StaffState> emit,
+  ) async {
     emit(StaffOperationInProgress());
     final newStatus = event.staff.status == 'active' ? 'inactive' : 'active';
     final updatedStaff = StaffEntity(
@@ -139,11 +159,12 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
       status: newStatus,
       createdAt: event.staff.createdAt,
     );
-    final result = await repository.updateStaff(event.shopId, event.ownerId, updatedStaff);
-    result.fold(
-      (failure) => emit(StaffError(failure.message)),
-      (_) => null,
+    final result = await repository.updateStaff(
+      event.shopId,
+      event.ownerId,
+      updatedStaff,
     );
+    result.fold((failure) => emit(StaffError(failure.message)), (_) => null);
     // No need to manually load, stream will update
   }
 }

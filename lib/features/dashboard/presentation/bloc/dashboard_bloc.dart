@@ -47,7 +47,13 @@ abstract class DashboardState extends Equatable {
 
 class DashboardInitial extends DashboardState {}
 
-class DashboardLoading extends DashboardState {}
+class DashboardLoading extends DashboardState {
+  final DashboardLoaded? lastLoadedState;
+  const DashboardLoading([this.lastLoadedState]);
+
+  @override
+  List<Object?> get props => [lastLoadedState];
+}
 
 class DashboardLoaded extends DashboardState {
   final List<CustomerEntity> customers;
@@ -118,7 +124,8 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     LoadDashboardData event,
     Emitter<DashboardState> emit,
   ) async {
-    emit(DashboardLoading());
+    final currentState = state;
+    emit(DashboardLoading(currentState is DashboardLoaded ? currentState : null));
 
     await emit.forEach<DashboardState>(
       shopRepository.getShop(event.shopId).switchMap((shopResult) {

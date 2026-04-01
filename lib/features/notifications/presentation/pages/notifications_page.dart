@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:csms/core/theme/app_colors.dart';
-import 'package:csms/features/dashboard/presentation/bloc/dashboard_bloc.dart';
-import 'package:csms/features/customer/presentation/pages/customer_details_page.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_state.dart';
 import 'package:csms/features/shop/presentation/bloc/shop_context_bloc.dart';
@@ -31,9 +29,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
           if (state is NotificationListening) {
             final notifications = state.notifications;
             final shopState = context.watch<ShopContextBloc>().state;
-            final category = shopState is ShopSelected ? shopState.selectedShop.category : '';
+            final category = shopState is ShopSelected
+                ? shopState.selectedShop.category
+                : '';
             final term = TerminologyHelper.getTerminology(category);
-            
+
             return Column(
               children: [
                 _buildHeader(notifications),
@@ -47,15 +47,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
     );
   }
 
-  String _fmt(DateTime d) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return '${months[d.month - 1]} ${d.day}';
-  }
-
   Widget _buildHeader(List<NotificationEntity> notifications) {
     int allCount = notifications.length;
     int unreadCount = notifications.where((n) => !n.isRead).length;
-    int readCount = allCount - unreadCount;
 
     return Container(
       padding: EdgeInsets.only(
@@ -172,7 +166,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
     );
   }
 
-  Widget _buildBody(List<NotificationEntity> notifications, BusinessTerminology term) {
+  Widget _buildBody(
+    List<NotificationEntity> notifications,
+    BusinessTerminology term,
+  ) {
     List<NotificationEntity> filteredList;
     if (_selectedTab == 1) {
       filteredList = notifications.where((n) => !n.isRead).toList();
@@ -219,10 +216,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     ? 'No unread notifications'
                     : 'Your notification inbox is empty',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: AppColors.textLight,
-                  fontSize: 14.sp,
-                ),
+                style: TextStyle(color: AppColors.textLight, fontSize: 14.sp),
               ),
             ],
           ),
@@ -233,12 +227,17 @@ class _NotificationsPageState extends State<NotificationsPage> {
     return ListView(
       padding: EdgeInsets.all(20.r),
       children: [
-        ...filteredList.map((notification) => _buildNotificationCard(notification, term)).toList(),
+        ...filteredList
+            .map((notification) => _buildNotificationCard(notification, term))
+            .toList(),
       ],
     );
   }
 
-  Widget _buildNotificationCard(NotificationEntity notification, BusinessTerminology term) {
+  Widget _buildNotificationCard(
+    NotificationEntity notification,
+    BusinessTerminology term,
+  ) {
     bool isUnread = !notification.isRead;
     Color statusColor = isUnread ? AppColors.primary : AppColors.textLight;
     Color cardBgColor = isUnread ? const Color(0xFFEFF6FF) : Colors.white;
@@ -247,7 +246,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
       onTap: () {
         final authState = context.read<AuthBloc>().state;
         if (authState is AuthAuthenticated) {
-          context.read<NotificationBloc>().add(MarkNotificationAsRead(authState.ownerId, notification.id));
+          context.read<NotificationBloc>().add(
+            MarkNotificationAsRead(authState.ownerId, notification.id),
+          );
         }
       },
       child: Container(
@@ -272,11 +273,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
             Container(
               padding: EdgeInsets.all(10.r),
               decoration: BoxDecoration(
-                color: isUnread ? AppColors.primary.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+                color: isUnread
+                    ? AppColors.primary.withOpacity(0.1)
+                    : Colors.grey.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                notification.type == 'subscription' ? Icons.person_add_outlined : Icons.notifications_none_outlined,
+                notification.type == 'subscription'
+                    ? Icons.person_add_outlined
+                    : Icons.notifications_none_outlined,
                 color: statusColor,
                 size: 20.sp,
               ),
@@ -292,13 +297,24 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       Expanded(
                         child: Text(
                           notification.title
-                              .replaceAll('Subscription', term.subscriptionLabel)
-                              .replaceAll('subscription', term.subscriptionLabel.toLowerCase())
+                              .replaceAll(
+                                'Subscription',
+                                term.subscriptionLabel,
+                              )
+                              .replaceAll(
+                                'subscription',
+                                term.subscriptionLabel.toLowerCase(),
+                              )
                               .replaceAll('Customer', term.customerLabel)
-                              .replaceAll('customer', term.customerLabel.toLowerCase()),
+                              .replaceAll(
+                                'customer',
+                                term.customerLabel.toLowerCase(),
+                              ),
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontWeight: isUnread ? FontWeight.bold : FontWeight.w600,
+                            fontWeight: isUnread
+                                ? FontWeight.bold
+                                : FontWeight.w600,
                             fontSize: 16.sp,
                             color: AppColors.textDark,
                           ),
@@ -315,8 +331,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     ],
                   ),
                   Text(
-                    notification.body
-                      .replaceAll('customer', term.customerLabel.toLowerCase()),
+                    notification.body.replaceAll(
+                      'customer',
+                      term.customerLabel.toLowerCase(),
+                    ),
                     style: TextStyle(
                       color: AppColors.textLight,
                       fontSize: 14.sp,

@@ -1,5 +1,4 @@
 import 'package:get_it/get_it.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -72,7 +71,6 @@ import 'package:csms/features/reports/data/repositories/report_repository_impl.d
 import 'package:csms/features/reports/domain/usecases/get_business_report.dart';
 import 'package:csms/features/reports/presentation/bloc/report_bloc.dart';
 
-
 final sl = GetIt.instance; // sl: Service Locator
 
 Future<void> init() async {
@@ -109,11 +107,13 @@ Future<void> init() async {
   sl.registerLazySingleton<CustomerRepository>(
     () => CustomerRepositoryImpl(database: sl()),
   );
-  sl.registerFactory(() => CustomerBloc(
-        customerRepository: sl(),
-        subscriptionRepository: sl(),
-        notificationRepository: sl(),
-      ));
+  sl.registerFactory(
+    () => CustomerBloc(
+      customerRepository: sl(),
+      subscriptionRepository: sl(),
+      notificationRepository: sl(),
+    ),
+  );
 
   //! Features - Subscription
   sl.registerLazySingleton<SubscriptionRepository>(
@@ -129,12 +129,14 @@ Future<void> init() async {
   sl.registerLazySingleton(() => StreamShopSubscriptionStatus(sl()));
   sl.registerLazySingleton(() => GetShopSubscriptionHistory(sl()));
   sl.registerLazySingleton(() => RenewShopSubscription(sl()));
-  sl.registerFactory(() => ShopSubscriptionBloc(
-        getStatus: sl(),
-        streamStatus: sl(),
-        getHistory: sl(),
-        renewSubscription: sl(),
-      ));
+  sl.registerFactory(
+    () => ShopSubscriptionBloc(
+      getStatus: sl(),
+      streamStatus: sl(),
+      getHistory: sl(),
+      renewSubscription: sl(),
+    ),
+  );
 
   //! Features - Notifications
   sl.registerLazySingleton<NotificationRepository>(
@@ -176,10 +178,10 @@ Future<void> init() async {
 
   //! Features - Reports
   sl.registerLazySingleton<ReportRepository>(
-      () => ReportRepositoryImpl(database: sl()));
+    () => ReportRepositoryImpl(database: sl()),
+  );
   sl.registerLazySingleton(() => GetBusinessReport(sl()));
   sl.registerFactory(() => ReportBloc(getBusinessReport: sl()));
-
 
   //! External
 

@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'package:csms/features/customer/domain/entities/customer_entity.dart';
-import 'package:csms/features/subscription/domain/entities/subscription_entity.dart';
 import 'package:csms/features/product/domain/entities/product_entity.dart';
 import 'package:csms/features/customer/presentation/bloc/customer_bloc.dart';
 import 'package:csms/core/utils/loading_overlay.dart';
@@ -38,8 +37,12 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.customer.name);
-    _phoneController = TextEditingController(text: widget.customer.mobileNumber);
-    _registrationFeeController = TextEditingController(text: widget.customer.registrationFeeAmount.toStringAsFixed(0));
+    _phoneController = TextEditingController(
+      text: widget.customer.mobileNumber,
+    );
+    _registrationFeeController = TextEditingController(
+      text: widget.customer.registrationFeeAmount.toStringAsFixed(0),
+    );
     _selectedStatus = widget.customer.status;
     _selectedRegStatus = widget.customer.registrationFeeStatus;
   }
@@ -50,12 +53,6 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
     _phoneController.dispose();
     _registrationFeeController.dispose();
     super.dispose();
-  }
-
-  String _fmt(DateTime? d) {
-    if (d == null) return 'N/A';
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return '${months[d.month - 1]} ${d.day}, ${d.year}';
   }
 
   void _submit() {
@@ -69,8 +66,13 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
-        title: Text('Confirm Changes', style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        title: Text(
+          'Confirm Changes',
+          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+        ),
         content: Text(
           'Are you sure you want to save the changes for "${_nameController.text.trim()}"?',
         ),
@@ -80,7 +82,10 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
               FocusManager.instance.primaryFocus?.unfocus();
               Navigator.pop(context);
             },
-            child: Text('Cancel', style: TextStyle(color: AppColors.textLight, fontSize: 14.sp)),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: AppColors.textLight, fontSize: 14.sp),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
@@ -90,18 +95,27 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                 name: _nameController.text.trim(),
                 mobileNumber: _phoneController.text.trim(),
                 status: _selectedStatus,
-                registrationFeeAmount: double.tryParse(_registrationFeeController.text.trim()) ?? 0.0,
+                registrationFeeAmount:
+                    double.tryParse(_registrationFeeController.text.trim()) ??
+                    0.0,
                 registrationFeeStatus: _selectedRegStatus,
                 updatedAt: DateTime.now(),
               );
 
-              context.read<CustomerBloc>().add(UpdateCustomerInfo(customer: updated));
+              context.read<CustomerBloc>().add(
+                UpdateCustomerInfo(customer: updated),
+              );
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.r),
+              ),
             ),
-            child: Text('Confirm', style: TextStyle(color: Colors.white, fontSize: 14.sp)),
+            child: Text(
+              'Confirm',
+              style: TextStyle(color: Colors.white, fontSize: 14.sp),
+            ),
           ),
         ],
       ),
@@ -154,7 +168,9 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
             LoadingOverlayHelper.hide();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('${TerminologyHelper.getTerminology(widget.shopCategory).customerLabel} updated successfully!'),
+                content: Text(
+                  '${TerminologyHelper.getTerminology(widget.shopCategory).customerLabel} updated successfully!',
+                ),
                 backgroundColor: Colors.green,
                 behavior: SnackBarBehavior.floating,
               ),
@@ -166,13 +182,30 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
               showDialog(
                 context: context,
                 builder: (ctx) => AlertDialog(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
-                  title: Text('Number Already Used', style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
-                  content: Text(state.message, style: TextStyle(fontSize: 14.sp)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16.r),
+                  ),
+                  title: Text(
+                    'Number Already Used',
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  content: Text(
+                    state.message,
+                    style: TextStyle(fontSize: 14.sp),
+                  ),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(ctx),
-                      child: Text('OK', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp)),
+                      child: Text(
+                        'OK',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14.sp,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -180,7 +213,7 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('${state.message}'), 
+                  content: Text('${state.message}'),
                   backgroundColor: Colors.red,
                   behavior: SnackBarBehavior.floating,
                 ),
@@ -196,23 +229,31 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildLabel('${TerminologyHelper.getTerminology(widget.shopCategory).customerLabel} Name *'),
+                  _buildLabel(
+                    '${TerminologyHelper.getTerminology(widget.shopCategory).customerLabel} Name *',
+                  ),
                   TextFormField(
                     controller: _nameController,
                     maxLength: 20,
                     inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9\s]')),
+                      FilteringTextInputFormatter.allow(
+                        RegExp(r'[a-zA-Z0-9\s]'),
+                      ),
                     ],
                     decoration: InputDecoration(
-                      hintText: 'Enter ${TerminologyHelper.getTerminology(widget.shopCategory).customerLabel.toLowerCase()} name',
+                      hintText:
+                          'Enter ${TerminologyHelper.getTerminology(widget.shopCategory).customerLabel.toLowerCase()} name',
                       prefixIcon: const Icon(Icons.person_outline),
                       counterText: '',
                     ),
                     validator: (v) {
-                      if (v == null || v.trim().isEmpty) return 'Name is required';
+                      if (v == null || v.trim().isEmpty)
+                        return 'Name is required';
                       if (v.length > 20) return 'Maximum 20 characters';
-                      if (RegExp(r'[!@#<>?":_`~;[\]\\|=+)(*&^%/-]').hasMatch(v)) {
-                         return 'Special characters not allowed';
+                      if (RegExp(
+                        r'[!@#<>?":_`~;[\]\\|=+)(*&^%/-]',
+                      ).hasMatch(v)) {
+                        return 'Special characters not allowed';
                       }
                       return null;
                     },
@@ -224,9 +265,7 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                     controller: _phoneController,
                     keyboardType: TextInputType.number,
                     maxLength: 10,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                    ],
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: const InputDecoration(
                       hintText: 'Enter 10-digit phone number',
                       prefixIcon: Icon(Icons.phone_outlined),
@@ -235,7 +274,8 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                     validator: (v) {
                       if (v == null || v.isEmpty) return 'Phone is required';
                       if (v.length != 10) return 'Must be exactly 10 digits';
-                      if (!RegExp(r'^[0-9]+$').hasMatch(v)) return 'Numbers only';
+                      if (!RegExp(r'^[0-9]+$').hasMatch(v))
+                        return 'Numbers only';
                       return null;
                     },
                   ),
@@ -249,7 +289,8 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                         child: _statusButton(
                           label: 'Active',
                           isActive: _selectedStatus.toLowerCase() == 'active',
-                          onPressed: () => setState(() => _selectedStatus = 'active'),
+                          onPressed: () =>
+                              setState(() => _selectedStatus = 'active'),
                         ),
                       ),
                       SizedBox(width: 12.w),
@@ -257,7 +298,8 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                         child: _statusButton(
                           label: 'Inactive',
                           isActive: _selectedStatus.toLowerCase() == 'inactive',
-                          onPressed: () => setState(() => _selectedStatus = 'inactive'),
+                          onPressed: () =>
+                              setState(() => _selectedStatus = 'inactive'),
                         ),
                       ),
                     ],
@@ -268,7 +310,9 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                   _buildLabel('Registration Fee'),
                   TextFormField(
                     controller: _registrationFeeController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
                     ],
@@ -287,7 +331,10 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                     ),
                     items: const [
                       DropdownMenuItem(value: 'paid', child: Text('Paid')),
-                      DropdownMenuItem(value: 'partial', child: Text('Partial')),
+                      DropdownMenuItem(
+                        value: 'partial',
+                        child: Text('Partial'),
+                      ),
                       DropdownMenuItem(value: 'unpaid', child: Text('Unpaid')),
                     ],
                     onChanged: (v) {
@@ -338,12 +385,14 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 12.h),
         decoration: BoxDecoration(
-          color: isActive 
-              ? (label == 'Active' ? AppColors.success.withOpacity(0.1) : Colors.red.withOpacity(0.1))
+          color: isActive
+              ? (label == 'Active'
+                    ? AppColors.success.withOpacity(0.1)
+                    : Colors.red.withOpacity(0.1))
               : Colors.transparent,
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
-            color: isActive 
+            color: isActive
                 ? (label == 'Active' ? AppColors.success : Colors.red)
                 : AppColors.border,
             width: 1.5,
@@ -353,7 +402,7 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
           child: Text(
             label,
             style: TextStyle(
-              color: isActive 
+              color: isActive
                   ? (label == 'Active' ? AppColors.success : Colors.red)
                   : AppColors.textLight,
               fontWeight: FontWeight.bold,

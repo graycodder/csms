@@ -4,7 +4,6 @@ import 'package:csms/features/customer/domain/entities/customer_entity.dart';
 import 'package:csms/features/customer/domain/repositories/customer_repository.dart';
 import 'package:csms/features/subscription/domain/repositories/subscription_repository.dart';
 import 'package:csms/features/notifications/domain/repositories/notification_repository.dart';
-import 'package:csms/core/error/failures.dart';
 
 // Events
 abstract class CustomerEvent extends Equatable {
@@ -39,14 +38,25 @@ class AddCustomerWithSubscription extends CustomerEvent {
   });
 
   @override
-  List<Object?> get props => [customer, productId, validityValue, validityUnit, price, registrationFeeAmount, paidAmount, paymentMode, productName, updatedByName];
+  List<Object?> get props => [
+    customer,
+    productId,
+    validityValue,
+    validityUnit,
+    price,
+    registrationFeeAmount,
+    paidAmount,
+    paymentMode,
+    productName,
+    updatedByName,
+  ];
 }
 
 class UpdateCustomerInfo extends CustomerEvent {
   final CustomerEntity customer;
 
   const UpdateCustomerInfo({required this.customer});
-  
+
   @override
   List<Object?> get props => [customer];
 }
@@ -123,11 +133,11 @@ class RenewCustomerSubscription extends CustomerEvent {
   final String productName;
   final String updatedByName;
   final String customerName;
-  
+
   const RenewCustomerSubscription({
-    required this.subscriptionId, 
+    required this.subscriptionId,
     required this.shopId,
-    required this.validityValue, 
+    required this.validityValue,
     required this.validityUnit,
     required this.updatedById,
     required this.ownerId,
@@ -140,7 +150,20 @@ class RenewCustomerSubscription extends CustomerEvent {
   });
 
   @override
-  List<Object?> get props => [subscriptionId, shopId, validityValue, validityUnit, updatedById, ownerId, price, paidAmount, paymentMode, productName, updatedByName, customerName];
+  List<Object?> get props => [
+    subscriptionId,
+    shopId,
+    validityValue,
+    validityUnit,
+    updatedById,
+    ownerId,
+    price,
+    paidAmount,
+    paymentMode,
+    productName,
+    updatedByName,
+    customerName,
+  ];
 }
 
 class UpdateSubscription extends CustomerEvent {
@@ -173,7 +196,20 @@ class UpdateSubscription extends CustomerEvent {
   });
 
   @override
-  List<Object?> get props => [subscriptionId, endDate, price, registrationFeeAmount, paidAmount, paymentMode, updatedById, ownerId, shopId, updatedByName, customerName, status];
+  List<Object?> get props => [
+    subscriptionId,
+    endDate,
+    price,
+    registrationFeeAmount,
+    paidAmount,
+    paymentMode,
+    updatedById,
+    ownerId,
+    shopId,
+    updatedByName,
+    customerName,
+    status,
+  ];
 }
 
 class ResetCustomer extends CustomerEvent {}
@@ -186,8 +222,11 @@ abstract class CustomerState extends Equatable {
 }
 
 class CustomerInitial extends CustomerState {}
+
 class CustomerLoading extends CustomerState {}
+
 class CustomerSuccess extends CustomerState {}
+
 class CustomerError extends CustomerState {
   final String message;
   const CustomerError(this.message);
@@ -221,7 +260,7 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
   ) async {
     emit(CustomerLoading());
     final customerResult = await customerRepository.addCustomer(event.customer);
-    
+
     await customerResult.fold(
       (failure) async => emit(CustomerError(failure.message)),
       (customerId) async {
@@ -247,7 +286,8 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
               ownerId: event.customer.ownerId,
               shopId: event.customer.shopId,
               title: 'New Membership',
-              body: "${event.customer.name}'s membership was added by ${event.updatedByName}",
+              body:
+                  "${event.customer.name}'s membership was added by ${event.updatedByName}",
               type: 'subscription',
               updatedById: event.customer.updatedById,
             );
@@ -258,20 +298,28 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
     );
   }
 
-  Future<void> _onUpdateCustomerInfo(UpdateCustomerInfo event, Emitter<CustomerState> emit) async {
+  Future<void> _onUpdateCustomerInfo(
+    UpdateCustomerInfo event,
+    Emitter<CustomerState> emit,
+  ) async {
     emit(CustomerLoading());
     final result = await customerRepository.updateCustomer(event.customer);
-    
+
     result.fold(
       (failure) => emit(CustomerError(failure.message)),
       (_) => emit(CustomerSuccess()),
     );
   }
 
-  Future<void> _onDeleteCustomer(DeleteCustomer event, Emitter<CustomerState> emit) async {
+  Future<void> _onDeleteCustomer(
+    DeleteCustomer event,
+    Emitter<CustomerState> emit,
+  ) async {
     emit(CustomerLoading());
     // Safe clearance of associated subscriptions first
-    await subscriptionRepository.deleteSubscriptionsForCustomer(event.customerId);
+    await subscriptionRepository.deleteSubscriptionsForCustomer(
+      event.customerId,
+    );
     final result = await customerRepository.deleteCustomer(event.customerId);
     result.fold(
       (failure) => emit(CustomerError(failure.message)),
@@ -279,10 +327,13 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
     );
   }
 
-  Future<void> _onRenewCustomerSubscription(RenewCustomerSubscription event, Emitter<CustomerState> emit) async {
+  Future<void> _onRenewCustomerSubscription(
+    RenewCustomerSubscription event,
+    Emitter<CustomerState> emit,
+  ) async {
     emit(CustomerLoading());
     final result = await subscriptionRepository.renewSubscription(
-      subscriptionId: event.subscriptionId, 
+      subscriptionId: event.subscriptionId,
       validityValue: event.validityValue,
       validityUnit: event.validityUnit,
       updatedById: event.updatedById,
@@ -291,23 +342,26 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
       paymentMode: event.paymentMode,
       productName: event.productName,
     );
-    await result.fold(
-      (failure) async => emit(CustomerError(failure.message)),
-      (_) async {
-        await notificationRepository.pushNotification(
-          ownerId: event.ownerId,
-          shopId: event.shopId,
-          title: 'Membership Renewed',
-          body: "${event.customerName}'s membership for ${event.productName} has been renewed by ${event.updatedByName}",
-          type: 'renewal',
-          updatedById: event.updatedById,
-        );
-        emit(CustomerSuccess());
-      },
-    );
+    await result.fold((failure) async => emit(CustomerError(failure.message)), (
+      _,
+    ) async {
+      await notificationRepository.pushNotification(
+        ownerId: event.ownerId,
+        shopId: event.shopId,
+        title: 'Membership Renewed',
+        body:
+            "${event.customerName}'s membership for ${event.productName} has been renewed by ${event.updatedByName}",
+        type: 'renewal',
+        updatedById: event.updatedById,
+      );
+      emit(CustomerSuccess());
+    });
   }
 
-  Future<void> _onUpdateSubscription(UpdateSubscription event, Emitter<CustomerState> emit) async {
+  Future<void> _onUpdateSubscription(
+    UpdateSubscription event,
+    Emitter<CustomerState> emit,
+  ) async {
     emit(CustomerLoading());
     final result = await subscriptionRepository.updateSubscription(
       subscriptionId: event.subscriptionId,
@@ -319,23 +373,26 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
       updatedById: event.updatedById,
       status: event.status,
     );
-    await result.fold(
-      (failure) async => emit(CustomerError(failure.message)),
-      (_) async {
-        await notificationRepository.pushNotification(
-          ownerId: event.ownerId,
-          shopId: event.shopId,
-          title: 'Membership Corrected',
-          body: "${event.customerName}'s membership details have been corrected by ${event.updatedByName}",
-          type: 'edit',
-          updatedById: event.updatedById,
-        );
-        emit(CustomerSuccess());
-      },
-    );
+    await result.fold((failure) async => emit(CustomerError(failure.message)), (
+      _,
+    ) async {
+      await notificationRepository.pushNotification(
+        ownerId: event.ownerId,
+        shopId: event.shopId,
+        title: 'Membership Corrected',
+        body:
+            "${event.customerName}'s membership details have been corrected by ${event.updatedByName}",
+        type: 'edit',
+        updatedById: event.updatedById,
+      );
+      emit(CustomerSuccess());
+    });
   }
 
-  Future<void> _onAddSubscription(AddSubscription event, Emitter<CustomerState> emit) async {
+  Future<void> _onAddSubscription(
+    AddSubscription event,
+    Emitter<CustomerState> emit,
+  ) async {
     emit(CustomerLoading());
     final result = await subscriptionRepository.createSubscription(
       shopId: event.shopId,
@@ -352,19 +409,19 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
       productName: event.productName,
     );
 
-    await result.fold(
-      (failure) async => emit(CustomerError(failure.message)),
-      (_) async {
-        await notificationRepository.pushNotification(
-          ownerId: event.ownerId,
-          shopId: event.shopId,
-          title: 'New Membership Added',
-          body: "${event.customerName}'s membership for ${event.productName} was added by ${event.updatedByName}",
-          type: 'subscription',
-          updatedById: event.updatedById,
-        );
-        emit(CustomerSuccess());
-      },
-    );
+    await result.fold((failure) async => emit(CustomerError(failure.message)), (
+      _,
+    ) async {
+      await notificationRepository.pushNotification(
+        ownerId: event.ownerId,
+        shopId: event.shopId,
+        title: 'New Membership Added',
+        body:
+            "${event.customerName}'s membership for ${event.productName} was added by ${event.updatedByName}",
+        type: 'subscription',
+        updatedById: event.updatedById,
+      );
+      emit(CustomerSuccess());
+    });
   }
 }

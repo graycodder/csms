@@ -9,12 +9,9 @@ import 'package:csms/features/staff/presentation/pages/staff_management_page.dar
 import 'package:csms/features/staff/presentation/bloc/staff_bloc.dart';
 import 'package:csms/features/reports/presentation/pages/report_page.dart';
 import 'package:csms/features/reports/presentation/bloc/report_bloc.dart';
-
 import 'package:csms/core/presentation/pages/webview_page.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:csms/features/auth/presentation/bloc/auth_event.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_state.dart';
-import 'package:csms/features/auth/presentation/pages/login_page.dart';
 import 'package:csms/features/profile/presentation/pages/profile_page.dart';
 import 'package:csms/features/shop_subscription/presentation/pages/shop_subscription_page.dart';
 import 'package:csms/injection_container.dart' as di;
@@ -339,7 +336,6 @@ class SettingsPage extends StatelessWidget {
       future: PackageInfo.fromPlatform(),
       builder: (context, snapshot) {
         final version = snapshot.data?.version ?? '1.0.0';
-        final buildNumber = snapshot.data?.buildNumber ?? '1';
 
         return Column(
           children: [
@@ -355,38 +351,6 @@ class SettingsPage extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-
-  void _confirmLogout(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Log Out'),
-        content: const Text('Are you sure you want to sign out?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              context.read<AuthBloc>().add(SignOutRequested());
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (_) => const LoginPage()),
-                (route) => false,
-              );
-            },
-            child: const Text(
-              'Log Out',
-              style: TextStyle(color: Color(0xFFE53935)),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -407,8 +371,7 @@ class _SettingItem {
     required this.iconColor,
     required this.title,
     required this.subtitle,
-    this.titleColor,
     required this.onTap,
-    this.isLast = false,
-  });
+  }) : isLast = false,
+       titleColor = null;
 }

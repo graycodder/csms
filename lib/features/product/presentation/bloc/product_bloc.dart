@@ -1,9 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:dartz/dartz.dart';
 import 'package:csms/features/product/domain/entities/product_entity.dart';
 import 'package:csms/features/product/domain/repositories/product_repository.dart';
-import 'package:csms/core/error/failures.dart';
 
 // ─── Events ──────────────────────────────────────────────────────────────────
 
@@ -38,7 +36,6 @@ class UpdateProduct extends ProductEvent {
 }
 
 class ResetProduct extends ProductEvent {}
-
 
 // ─── States ──────────────────────────────────────────────────────────────────
 
@@ -81,43 +78,41 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   }
 
   Future<void> _onLoadProducts(
-      LoadProducts event, Emitter<ProductState> emit) async {
+    LoadProducts event,
+    Emitter<ProductState> emit,
+  ) async {
     emit(ProductLoading());
     await emit.forEach<ProductState>(
       repository.getProducts(event.shopId, event.ownerId).map((result) {
-        return result.fold(
-          (failure) => ProductError(failure.message),
-          (products) {
-            // Sort new first
-            products.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-            return ProductLoaded(products);
-          },
-        );
+        return result.fold((failure) => ProductError(failure.message), (
+          products,
+        ) {
+          // Sort new first
+          products.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          return ProductLoaded(products);
+        });
       }),
       onData: (state) => state,
     );
   }
 
   Future<void> _onAddProduct(
-      AddProduct event, Emitter<ProductState> emit) async {
+    AddProduct event,
+    Emitter<ProductState> emit,
+  ) async {
     emit(ProductOperationInProgress());
     final result = await repository.addProduct(event.product);
-    result.fold(
-      (failure) => emit(ProductError(failure.message)),
-      (_) => null,
-    );
+    result.fold((failure) => emit(ProductError(failure.message)), (_) => null);
     // No need to manually load, stream will update
   }
 
   Future<void> _onUpdateProduct(
-      UpdateProduct event, Emitter<ProductState> emit) async {
+    UpdateProduct event,
+    Emitter<ProductState> emit,
+  ) async {
     emit(ProductOperationInProgress());
     final result = await repository.updateProduct(event.product);
-    result.fold(
-      (failure) => emit(ProductError(failure.message)),
-      (_) => null,
-    );
+    result.fold((failure) => emit(ProductError(failure.message)), (_) => null);
     // No need to manually load, stream will update
   }
-
 }

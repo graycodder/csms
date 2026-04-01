@@ -18,7 +18,6 @@ class MonthlyReportView extends StatefulWidget {
 }
 
 class _MonthlyReportViewState extends State<MonthlyReportView> {
-
   DateTime _referenceDate = DateTime.now();
   DashboardLoaded? _lastDashState;
 
@@ -238,12 +237,12 @@ class _MonthlyReportViewState extends State<MonthlyReportView> {
                 } else if (reportState is ReportError) {
                   return Center(child: Text('Error: ${reportState.message}'));
                 }
-                return const Center(child: CircularProgressIndicator());
+                return const SizedBox.shrink();
               },
             ),
           );
         }
-        return const Center(child: CircularProgressIndicator());
+        return const SizedBox.shrink();
       },
     );
   }
@@ -723,65 +722,6 @@ class _MonthlyReportViewState extends State<MonthlyReportView> {
           minY: 0,
           maxY: yLimit,
         ),
-      ),
-    );
-  }
-
-  Widget _buildDetailedBreakdown(ReportEntity report) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: const Color(0xFFF3F4F6)),
-      ),
-      child: Column(
-        children: report.revenueChartData.reversed.map((point) {
-          return Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(
-                  color: const Color(0xFFF3F4F6),
-                  width: point == report.revenueChartData.first ? 0 : 1,
-                ),
-              ),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: EdgeInsets.all(8.r),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.show_chart,
-                    size: 14.sp,
-                    color: AppColors.primary,
-                  ),
-                ),
-                SizedBox(width: 12.w),
-                Text(
-                  point.label,
-                  style: TextStyle(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.textDark,
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  '₹${point.value.toStringAsFixed(0)}',
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }).toList(),
       ),
     );
   }

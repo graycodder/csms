@@ -21,11 +21,9 @@ class ShopSubscriptionHistoryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => di.sl<ShopSubscriptionBloc>()
-        ..add(LoadShopSubscriptionHistory(
-          shopId,
-          ownerId,
-        )),
+      create: (context) =>
+          di.sl<ShopSubscriptionBloc>()
+            ..add(LoadShopSubscriptionHistory(shopId, ownerId)),
       child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: AppBar(
@@ -49,7 +47,11 @@ class ShopSubscriptionHistoryPage extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.error_outline_rounded, size: 48.w, color: AppColors.errorText),
+                      Icon(
+                        Icons.error_outline_rounded,
+                        size: 48.w,
+                        color: AppColors.errorText,
+                      ),
                       SizedBox(height: 16.h),
                       Text(
                         state.message,
@@ -66,7 +68,11 @@ class ShopSubscriptionHistoryPage extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.history_rounded, size: 64.w, color: Colors.grey[300]),
+                      Icon(
+                        Icons.history_rounded,
+                        size: 64.w,
+                        color: Colors.grey[300],
+                      ),
                       SizedBox(height: 16.h),
                       Text(
                         'No history found',
@@ -99,8 +105,8 @@ class ShopSubscriptionHistoryPage extends StatelessWidget {
 
   Widget _buildLogCard(ShopSubscriptionLogEntity log) {
     final bool isAssigned = log.action.toLowerCase() == 'assigned';
-    final Color accentColor = isAssigned ? AppColors.success : AppColors.primary;
-    final IconData icon = isAssigned ? Icons.star_rounded : Icons.refresh_rounded;
+    final Color _ = isAssigned ? AppColors.success : AppColors.primary;
+    final IconData _ = isAssigned ? Icons.star_rounded : Icons.refresh_rounded;
 
     return Container(
       padding: EdgeInsets.all(16.r),
@@ -148,7 +154,11 @@ class ShopSubscriptionHistoryPage extends StatelessWidget {
                   SizedBox(height: 8.h),
                   Row(
                     children: [
-                      Icon(Icons.date_range_outlined, size: 12.w, color: AppColors.textLight),
+                      Icon(
+                        Icons.date_range_outlined,
+                        size: 12.w,
+                        color: AppColors.textLight,
+                      ),
                       SizedBox(width: 4.w),
                       Text(
                         '${DateFormat('dd MMM yyyy').format(log.startDate!)} - ${DateFormat('dd MMM yyyy').format(log.endDate!)}',
@@ -163,9 +173,14 @@ class ShopSubscriptionHistoryPage extends StatelessWidget {
                 if (log.status != null) ...[
                   SizedBox(height: 12.h),
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 8.w,
+                      vertical: 4.h,
+                    ),
                     decoration: BoxDecoration(
-                      color: log.status == 'active' ? AppColors.success.withOpacity(0.1) : AppColors.border.withOpacity(0.2),
+                      color: log.status == 'active'
+                          ? AppColors.success.withOpacity(0.1)
+                          : AppColors.border.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(6.r),
                     ),
                     child: Text(
@@ -173,7 +188,9 @@ class ShopSubscriptionHistoryPage extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 9.sp,
                         fontWeight: FontWeight.bold,
-                        color: log.status == 'active' ? AppColors.success : AppColors.textLight,
+                        color: log.status == 'active'
+                            ? AppColors.success
+                            : AppColors.textLight,
                       ),
                     ),
                   ),

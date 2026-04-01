@@ -1,7 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-import 'package:equatable/equatable.dart';
-
 class ShopSubscriptionEntity extends Equatable {
   final String shopId;
   final String shopName;
@@ -37,7 +35,14 @@ class ActivePlanEntity extends Equatable {
   });
 
   @override
-  List<Object?> get props => [planId, planName, startDate, endDate, status, price];
+  List<Object?> get props => [
+    planId,
+    planName,
+    startDate,
+    endDate,
+    status,
+    price,
+  ];
 }
 
 class QueuedPlanEntity extends Equatable {
