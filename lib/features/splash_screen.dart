@@ -25,6 +25,32 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     // Dispatch the check auth immediately
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authState = context.read<AuthBloc>().state;
+      final shopState = context.read<ShopContextBloc>().state;
+
+      if (shopState is ShopSelected) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => DashboardPage()),
+        );
+        return;
+      } else if (shopState is ShopContextLoaded) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const ShopSelectionPage()),
+        );
+        return;
+      } else if (authState is AuthAuthenticated) {
+        context.read<ShopContextBloc>().add(
+              LoadShops(
+                ownerId: authState.ownerId,
+                shopId: authState.shopId,
+                role: authState.role,
+              ),
+            );
+        return;
+      }
+
       context.read<AuthBloc>().add(CheckAuthStatus());
     });
   }
