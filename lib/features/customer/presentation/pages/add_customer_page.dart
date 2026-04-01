@@ -555,12 +555,26 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                                   TextFormField(
                                     controller: _paidAmountController,
                                     keyboardType: TextInputType.number,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly,
+                                    ],
                                     decoration: const InputDecoration(
                                       hintText: '0',
                                       prefixIcon: Icon(Icons.currency_rupee),
-                                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                      contentPadding: EdgeInsets.symmetric(
+                                          horizontal: 12, vertical: 8),
                                     ),
                                     onChanged: (_) => setState(() {}),
+                                    validator: (v) {
+                                      if (v == null || v.trim().isEmpty)
+                                        return 'Required';
+                                      final paid =
+                                          double.tryParse(v.trim()) ?? 0;
+                                      if (paid > _computedAmount) {
+                                        return 'Cannot exceed ₹${_computedAmount.toStringAsFixed(0)}';
+                                      }
+                                      return null;
+                                    },
                                   ),
                                 ],
                               ),

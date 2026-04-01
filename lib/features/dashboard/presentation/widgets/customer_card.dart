@@ -49,30 +49,39 @@ class CustomerCard extends StatelessWidget {
       }
     }
     final uniqueSubs = latestSubsPerProduct.values.toList();
-    
+
     // Sort by expiry (most urgent first)
     uniqueSubs.sort((a, b) => a.endDate.compareTo(b.endDate));
 
     // Priority 1: Subscription matching the selected product chip
     // Priority 2: Most urgent active subscription
-    final sub = uniqueSubs.where((s) => s.productId == selectedProductId).firstOrNull ?? uniqueSubs.firstOrNull;
-    
-    final daysLeft = sub != null ? AppDateUtils.calculateDaysLeft(sub.endDate) : -1;
+    final sub =
+        uniqueSubs.where((s) => s.productId == selectedProductId).firstOrNull ??
+        uniqueSubs.firstOrNull;
+
+    final daysLeft = sub != null
+        ? AppDateUtils.calculateDaysLeft(sub.endDate)
+        : -1;
     final warningThreshold = state.shop.settings.expiredDaysBefore;
-    
-    final productNames = uniqueSubs.map((s) {
-      final p = state.products.where((prod) => prod.productId == s.productId).firstOrNull;
-      return p?.name ?? s.productId;
-    }).toList().join(', ');
+
+    final productNames = uniqueSubs
+        .map((s) {
+          final p = state.products
+              .where((prod) => prod.productId == s.productId)
+              .firstOrNull;
+          return p?.name ?? s.productId;
+        })
+        .toList()
+        .join(', ');
 
     final isExpired = daysLeft < 0;
     final isWarn = !isExpired && daysLeft <= warningThreshold;
-    
-    final Color statusColor = isExpired 
-        ? Colors.red 
+
+    final Color statusColor = isExpired
+        ? Colors.red
         : (isWarn ? const Color(0xFFE67E22) : const Color(0xFF27AE60));
-    final Color bgColor = isExpired 
-        ? Colors.red.withOpacity(0.1) 
+    final Color bgColor = isExpired
+        ? Colors.red.withOpacity(0.1)
         : (isWarn ? const Color(0xFFFFF3E0) : const Color(0xFFE8F5E9));
 
     final price = sub != null ? sub.price.toStringAsFixed(0) : '—';
@@ -83,7 +92,8 @@ class CustomerCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => CustomerDetailsPage(customerId: customer.customerId),
+            builder: (_) =>
+                CustomerDetailsPage(customerId: customer.customerId),
           ),
         ).then((_) {
           if (onReturn != null) onReturn!();
@@ -91,7 +101,12 @@ class CustomerCard extends StatelessWidget {
       },
       child: Container(
         margin: EdgeInsets.only(bottom: 16.h),
-        padding: EdgeInsets.only(left: 20.r, right: 20.r, top: 15.r, bottom: 15.r),
+        padding: EdgeInsets.only(
+          left: 20.r,
+          right: 20.r,
+          top: 15.r,
+          bottom: 15.r,
+        ),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(22.r),
@@ -100,32 +115,31 @@ class CustomerCard extends StatelessWidget {
               color: Colors.black.withOpacity(0.02),
               blurRadius: 8.r,
               offset: Offset(0, 4.h),
-            )
+            ),
           ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            
-                if (customer.status == 'inactive') ...[
-                        Container(
-                          padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[100],
-                            borderRadius: BorderRadius.circular(6.r),
-                            border: Border.all(color: Colors.grey[300]!, width: 0.5.w),
-                          ),
-                          child: Text(
-                            'INACTIVE',
-                            style: TextStyle(
-                              color: Colors.grey[500],
-                              fontSize: 9.sp,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ),
-                      ],
+            if (customer.status == 'inactive') ...[
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(6.r),
+                  border: Border.all(color: Colors.grey[300]!, width: 0.5.w),
+                ),
+                child: Text(
+                  'INACTIVE',
+                  style: TextStyle(
+                    color: Colors.grey[500],
+                    fontSize: 9.sp,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ],
             // Name + badge
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -136,7 +150,7 @@ class CustomerCard extends StatelessWidget {
                       Flexible(
                         child: Text(
                           customer.name,
-                         // customer.name[0].toUpperCase() + customer.name.substring(1).toLowerCase(),
+                          // customer.name[0].toUpperCase() + customer.name.substring(1).toLowerCase(),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -152,7 +166,10 @@ class CustomerCard extends StatelessWidget {
                 SizedBox(width: 8.w),
                 if (sub != null)
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 10.w,
+                      vertical: 4.h,
+                    ),
                     decoration: BoxDecoration(
                       color: bgColor,
                       borderRadius: BorderRadius.circular(10.r),
@@ -174,22 +191,23 @@ class CustomerCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 InkWell(
-                    onTap: () => AppLauncherUtils.makePhoneCall(customer.mobileNumber),
-                    child: Row(
-                      children: [
-                        Icon(Icons.call, size: 14.sp, color: Colors.grey[400]),
-                        SizedBox(width: 4.w),
-                        Text(
-                          customer.mobileNumber,
-                          style: TextStyle(
-                            color: Colors.grey[400],
-                            fontSize: 13.sp,
-                          ),
+                  onTap: () =>
+                      AppLauncherUtils.makePhoneCall(customer.mobileNumber),
+                  child: Row(
+                    children: [
+                      Icon(Icons.call, size: 14.sp, color: Colors.grey[400]),
+                      SizedBox(width: 4.w),
+                      Text(
+                        customer.mobileNumber,
+                        style: TextStyle(
+                          color: Colors.grey[400],
+                          fontSize: 13.sp,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                
+                ),
+
                 if (uniqueSubs.length > 1)
                   Text(
                     '${uniqueSubs.length} Plans',
@@ -220,16 +238,22 @@ class CustomerCard extends StatelessWidget {
             // Expiry + price
             Row(
               children: [
-                Icon(Icons.calendar_today_outlined, size: 15.sp, color: Colors.grey[400]),
+                Icon(
+                  Icons.calendar_today_outlined,
+                  size: 15.sp,
+                  color: Colors.grey[400],
+                ),
                 SizedBox(width: 8.w),
                 Expanded(
                   child: Text(
-                    sub != null ? 'Expires: ${formatDate(sub.endDate)}' : 'No active subscription',
+                    sub != null
+                        ? 'Expires: ${formatDate(sub.endDate)}'
+                        : 'No active subscription',
                     style: TextStyle(color: Colors.grey[500], fontSize: 13.sp),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-               // const Spacer(),
+                // const Spacer(),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
@@ -244,7 +268,11 @@ class CustomerCard extends StatelessWidget {
                     if (sub != null && sub.balanceAmount > 0) ...[
                       GestureDetector(
                         behavior: HitTestBehavior.opaque,
-                        onTap: () => _showBalanceCollectionDialog(context, sub, customer),
+                        onTap: () => _showBalanceCollectionDialog(
+                          context,
+                          sub,
+                          customer,
+                        ),
                         child: Padding(
                           padding: EdgeInsets.symmetric(vertical: 2.h),
                           child: Text(
@@ -253,7 +281,7 @@ class CustomerCard extends StatelessWidget {
                               fontSize: 11.sp,
                               color: Colors.red,
                               fontWeight: FontWeight.bold,
-                              decoration: TextDecoration.underline,
+                              //decoration: TextDecoration.underline,
                               decorationColor: Colors.red,
                             ),
                           ),
