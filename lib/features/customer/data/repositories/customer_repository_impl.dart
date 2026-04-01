@@ -83,6 +83,9 @@ class CustomerRepositoryImpl implements CustomerRepository {
         updatedAt: DateTime.now(),
         updatedById: customer.updatedById,
         ownerId: customer.ownerId,
+        registrationFeeAmount: customer.registrationFeeAmount,
+        registrationFeePaidAmount: customer.registrationFeePaidAmount,
+        registrationFeeStatus: customer.registrationFeeStatus,
       );
 
       await docRef.set(model.toJson());
@@ -114,6 +117,9 @@ class CustomerRepositoryImpl implements CustomerRepository {
             'mobileNumber': customer.mobileNumber,
             'email': customer.email,
             'status': customer.status,
+            'registrationFeeAmount': customer.registrationFeeAmount,
+            'registrationFeePaidAmount': customer.registrationFeePaidAmount,
+            'registrationFeeStatus': customer.registrationFeeStatus,
             'updatedAt': ServerValue.timestamp,
             'updatedById': customer.updatedById,
           });

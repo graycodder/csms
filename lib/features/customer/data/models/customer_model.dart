@@ -15,6 +15,7 @@ class CustomerModel extends CustomerEntity {
     super.status = 'active',
     super.owner_createdAt = '',
     super.registrationFeeAmount = 0.0,
+    super.registrationFeePaidAmount = 0.0,
     super.registrationFeeStatus = 'unpaid',
   });
 
@@ -42,6 +43,7 @@ class CustomerModel extends CustomerEntity {
       status: json['status'] ?? 'active',
       owner_createdAt: json['owner_createdAt'] ?? '',
       registrationFeeAmount: (json['registrationFeeAmount'] ?? 0.0).toDouble(),
+      registrationFeePaidAmount: (json['registrationFeePaidAmount'] ?? 0.0).toDouble(),
       registrationFeeStatus: json['registrationFeeStatus'] ?? 'unpaid',
     );
   }
@@ -70,6 +72,7 @@ class CustomerModel extends CustomerEntity {
       'status': status,
       'owner_createdAt': owner_createdAt.isNotEmpty ? owner_createdAt : '${ownerId}_${createdAt.millisecondsSinceEpoch}',
       'registrationFeeAmount': registrationFeeAmount,
+      'registrationFeePaidAmount': registrationFeePaidAmount,
       'registrationFeeStatus': registrationFeeStatus,
     };
   }

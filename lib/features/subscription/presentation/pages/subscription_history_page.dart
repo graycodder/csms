@@ -220,7 +220,16 @@ class SubscriptionHistoryPage extends StatelessWidget {
                           ),
                         ],
                       ),
-                      if (log.registrationFeeAmount != null && log.registrationFeeAmount! > 0) ...[
+                      if (log.registrationFeePaid != null && log.registrationFeePaid! > 0) ...[
+                        Text(
+                          '(₹${log.registrationFeePaid!.toStringAsFixed(0)} for Reg Fee)',
+                          style: TextStyle(
+                            fontSize: 11.sp, 
+                            color: Colors.orange[700],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ] else if (log.registrationFeeAmount != null && log.registrationFeeAmount! > 0) ...[
                         Text(
                           '(Incl. ₹${log.registrationFeeAmount!.toStringAsFixed(0)} Reg Fee)',
                           style: TextStyle(

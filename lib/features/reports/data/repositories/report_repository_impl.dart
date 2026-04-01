@@ -155,8 +155,12 @@ class ReportRepositoryImpl implements ReportRepository {
       }
       
       for (var c in filteredCusts) {
-        if (c.registrationFeeStatus.toLowerCase() == 'paid') {
-           regFallbackRevenue += c.registrationFeeAmount;
+        // Fallback for cases where registrationFeePaid wasn't captured in logs/subs
+        // but only if it's not already counted via regFallbackRevenue (logs/subs are more accurate for timeline)
+        // However, for the total revenue metrics, we want to be as inclusive as possible.
+        // We'll trust the customer record as a secondary fallback.
+        if (logRegRevenue <= 0 && regFallbackRevenue <= 0) {
+           regFallbackRevenue += c.registrationFeePaidAmount;
         }
       }
 
@@ -192,7 +196,10 @@ class ReportRepositoryImpl implements ReportRepository {
         }
       }
       final pendingBalanceTotal = latestPerPlan.values.fold<double>(0.0, (sum, s) => sum + (s.balanceAmount > 0 ? s.balanceAmount : 0));
-      final pendingRegTotal = allCustomers.fold<double>(0.0, (sum, c) => sum + (c.registrationFeeStatus.toLowerCase() != 'paid' ? c.registrationFeeAmount : 0));
+      final pendingRegTotal = allCustomers.fold<double>(0.0, (sum, c) {
+        final double due = (c.registrationFeeAmount - c.registrationFeePaidAmount).clamp(0, double.infinity);
+        return sum + due;
+      });
 
       // Chart Data
       final Map<DateTime, double> hourlyRev = {};

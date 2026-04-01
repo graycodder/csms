@@ -41,40 +41,31 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
 
       final logId = _database.ref().push().key ?? 'initial';
       
-        final totalAmount = price + registrationFeeAmount;
-        final actualPaid = paidAmount ?? totalAmount;
-        final balance = totalAmount - actualPaid;
-        final paymentStatus = balance <= 0 ? 'paid' : (actualPaid <= 0 ? 'unpaid' : 'partial');
-
-      final subData = {
-        'subscriptionId': subId,
-        'shopId': shopId,
-        'customerId': customerId,
-        'productId': productId,
-        'startDate': startDate.millisecondsSinceEpoch,
-        'endDate': endDate.millisecondsSinceEpoch,
-        'price': price,
-        'registrationFeeAmount': registrationFeeAmount,
-        'paidAmount': actualPaid,
-        'balanceAmount': balance,
-        'paymentStatus': paymentStatus,
-        'status': 'active',
-        'createdAt': ServerValue.timestamp,
-        'updatedAt': ServerValue.timestamp,
-        'updatedById': updatedById,
-        'ownerId': ownerId,
-      };
-
-      updates['subscriptions/$subId'] = subData;
+      final customerSnapshot = await _database.ref().child('customers/$customerId').get();
+      double totalRegAmount = registrationFeeAmount;
+      double previousRegPaid = 0.0;
       
-      // Mirror to top-level logs only for global auditing natively
-      final double regFee = registrationFeeAmount.toDouble();
+      if (customerSnapshot.exists) {
+        final custData = customerSnapshot.value as Map;
+        totalRegAmount = (custData['registrationFeeAmount'] ?? registrationFeeAmount).toDouble();
+        previousRegPaid = (custData['registrationFeePaidAmount'] ?? 0.0).toDouble();
+      }
+
+      final double remainingReg = (totalRegAmount - previousRegPaid).clamp(0, double.infinity);
       final double totalPaid = (paidAmount ?? 0.0).toDouble();
-      final double regPaid = totalPaid >= regFee ? regFee : totalPaid;
-      final double subPaid = totalPaid - regPaid;
+      
+      // Prioritize registration fee
+      final double regPaidInThisSub = totalPaid >= remainingReg ? remainingReg : totalPaid;
+      final double subPaid = totalPaid - regPaidInThisSub;
+      
       final double subPrice = price.toDouble();
       final double subBalance = subPrice - subPaid;
       final String subPaymentStatus = subBalance <= 0 ? 'paid' : (subPaid <= 0 ? 'unpaid' : 'partial');
+      
+      final double newTotalRegPaid = previousRegPaid + regPaidInThisSub;
+      final String newRegStatus = totalRegAmount <= 0 
+          ? 'paid' 
+          : (newTotalRegPaid >= totalRegAmount ? 'paid' : (newTotalRegPaid > 0 ? 'partial' : 'unpaid'));
 
       updates['subscriptions/$subId'] = {
         'subscriptionId': subId,
@@ -87,8 +78,8 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
         'createdAt': ServerValue.timestamp,
         'updatedAt': ServerValue.timestamp,
         'price': subPrice,
-        'registrationFeeAmount': regFee,
-        'registrationFeePaid': regPaid,
+        'registrationFeeAmount': totalRegAmount,
+        'registrationFeePaid': regPaidInThisSub, // Paid in THIS specific subscription/log
         'paidAmount': subPaid,
         'balanceAmount': subBalance,
         'paymentStatus': subPaymentStatus,
@@ -107,8 +98,8 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
         'validityValue': validityValue,
         'validityUnit': validityUnit,
         'price': subPrice,
-        'registrationFeeAmount': regFee,
-        'registrationFeePaid': regPaid,
+        'registrationFeeAmount': totalRegAmount,
+        'registrationFeePaid': regPaidInThisSub,
         'paidAmount': subPaid,
         'balanceAmount': subBalance,
         'paymentMode': paymentMode ?? 'Cash',
@@ -122,16 +113,15 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
         'ownerId': ownerId,
       };
 
-      // Update customer's assigned products and registration fee
+      // Update customer's assigned products and registration fee state
       updates['customers/$customerId/assignedProductIds/$productId'] = true;
       updates['customers/$customerId/ownerId'] = ownerId; 
       updates['customers/$customerId/updatedById'] = updatedById;
-
-      if (isNewCustomer) {
-        updates['customers/$customerId/registrationFeeAmount'] = regFee;
-        updates['customers/$customerId/registrationFeeStatus'] = 
-            regFee <= 0 ? 'paid' : (regPaid >= regFee ? 'paid' : (regPaid > 0 ? 'partial' : 'unpaid'));
-      }
+      
+      // Always sync registration fee state to customer
+      updates['customers/$customerId/registrationFeeAmount'] = totalRegAmount;
+      updates['customers/$customerId/registrationFeePaidAmount'] = newTotalRegPaid;
+      updates['customers/$customerId/registrationFeeStatus'] = newRegStatus;
 
       await _database.ref().update(updates);
 

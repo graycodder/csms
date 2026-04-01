@@ -891,38 +891,55 @@ class CustomerDetailsPage extends StatelessWidget {
         border: Border.all(color: Colors.white.withOpacity(0.2)),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              Icon(
-                Icons.assignment_ind_outlined,
-                color: Colors.white,
-                size: 20.sp,
-              ),
-              SizedBox(width: 12.w),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Registration Fee',
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
-                      fontSize: 13.sp,
-                    ),
+          Expanded(
+            child: Row(
+              children: [
+                Icon(
+                  Icons.assignment_ind_outlined,
+                  color: Colors.white,
+                  size: 20.sp,
+                ),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Registration Fee',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.8),
+                          fontSize: 13.sp,
+                        ),
+                      ),
+                      Text(
+                        '₹${customer.registrationFeePaidAmount.toStringAsFixed(0)} / ₹${customer.registrationFeeAmount.toStringAsFixed(0)}',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (customer.registrationFeeAmount -
+                              customer.registrationFeePaidAmount >
+                          0)
+                        Text(
+                          'Balance: ₹${(customer.registrationFeeAmount - customer.registrationFeePaidAmount).toStringAsFixed(0)}',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.9),
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                    ],
                   ),
-                  Text(
-                    '₹${customer.registrationFeeAmount.toStringAsFixed(0)}',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
+          SizedBox(width: 8.w),
           Container(
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
             decoration: BoxDecoration(

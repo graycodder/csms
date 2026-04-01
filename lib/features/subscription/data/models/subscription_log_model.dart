@@ -75,6 +75,7 @@ class SubscriptionLogModel extends SubscriptionLogEntity {
       if (endDate != null) 'endDate': endDate!.millisecondsSinceEpoch,
       if (price != null) 'price': price,
       if (registrationFeeAmount != null) 'registrationFeeAmount': registrationFeeAmount,
+      if (registrationFeePaid != null) 'registrationFeePaid': registrationFeePaid,
       if (paidAmount != null) 'paidAmount': paidAmount,
       if (balanceAmount != null) 'balanceAmount': balanceAmount,
       if (paymentMode != null) 'paymentMode': paymentMode,

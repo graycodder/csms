@@ -15,6 +15,7 @@ class CustomerEntity extends Equatable {
   final String status; // 'active' or 'inactive'
   final String owner_createdAt; // composite key
   final double registrationFeeAmount;
+  final double registrationFeePaidAmount;
   final String registrationFeeStatus;
 
   const CustomerEntity({
@@ -31,6 +32,7 @@ class CustomerEntity extends Equatable {
     this.status = 'active',
     this.owner_createdAt = '',
     this.registrationFeeAmount = 0.0,
+    this.registrationFeePaidAmount = 0.0,
     this.registrationFeeStatus = 'unpaid',
   });
 
@@ -48,6 +50,7 @@ class CustomerEntity extends Equatable {
     String? status,
     String? owner_createdAt,
     double? registrationFeeAmount,
+    double? registrationFeePaidAmount,
     String? registrationFeeStatus,
   }) {
     return CustomerEntity(
@@ -64,6 +67,7 @@ class CustomerEntity extends Equatable {
       status: status ?? this.status,
       owner_createdAt: owner_createdAt ?? this.owner_createdAt,
       registrationFeeAmount: registrationFeeAmount ?? this.registrationFeeAmount,
+      registrationFeePaidAmount: registrationFeePaidAmount ?? this.registrationFeePaidAmount,
       registrationFeeStatus: registrationFeeStatus ?? this.registrationFeeStatus,
     );
   }
@@ -83,6 +87,7 @@ class CustomerEntity extends Equatable {
     status,
     owner_createdAt,
     registrationFeeAmount,
+    registrationFeePaidAmount,
     registrationFeeStatus,
   ];
 }

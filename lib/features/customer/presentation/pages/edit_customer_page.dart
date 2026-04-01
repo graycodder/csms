@@ -41,7 +41,7 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
       text: widget.customer.mobileNumber,
     );
     _registrationFeeController = TextEditingController(
-      text: widget.customer.registrationFeeAmount.toStringAsFixed(0),
+      text: widget.customer.registrationFeePaidAmount.toStringAsFixed(0),
     );
     _selectedStatus = widget.customer.status;
     _selectedRegStatus = widget.customer.registrationFeeStatus;
@@ -91,13 +91,23 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
             onPressed: () {
               FocusManager.instance.primaryFocus?.unfocus();
               Navigator.pop(context);
+              final regAmount =
+                  double.tryParse(_registrationFeeController.text.trim()) ??
+                  0.0;
+              double newRegPaid = widget.customer.registrationFeePaidAmount;
+
+              if (_selectedRegStatus == 'paid') {
+                newRegPaid = regAmount;
+              } else if (_selectedRegStatus == 'unpaid') {
+                newRegPaid = 0.0;
+              }
+
               final updated = widget.customer.copyWith(
                 name: _nameController.text.trim(),
                 mobileNumber: _phoneController.text.trim(),
                 status: _selectedStatus,
-                registrationFeeAmount:
-                    double.tryParse(_registrationFeeController.text.trim()) ??
-                    0.0,
+                registrationFeeAmount: regAmount,
+                registrationFeePaidAmount: newRegPaid,
                 registrationFeeStatus: _selectedRegStatus,
                 updatedAt: DateTime.now(),
               );
