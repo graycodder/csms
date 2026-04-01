@@ -160,7 +160,7 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Amount Paid', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp)),
+                                Text('Amount Paid *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp)),
                                 SizedBox(height: 5.h),
                                 TextFormField(
                                   controller: _paidAmountController,
@@ -181,7 +181,7 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Payment Mode', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp)),
+                                Text('Payment Mode *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp)),
                                 SizedBox(height: 5.h),
                                 DropdownButtonFormField<String>(
                                   value: _selectedPaymentMode,
@@ -208,7 +208,7 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
                   ),
                 ),
                 SizedBox(height: 12.h),
-                Text('Expiry Date', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp)),
+                Text('Expiry Date *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp)),
                 SizedBox(height: 5.h),
                 InkWell(
                   onTap: _pickDate,
@@ -234,7 +234,7 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
 
                 SizedBox(height: 12.h),
                 
-                Text('Status', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp)),
+                Text('Status *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp)),
                 SizedBox(height: 5.h),
                 DropdownButtonFormField<String>(
                   value: _selectedStatus,

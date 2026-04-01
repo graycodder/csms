@@ -424,9 +424,8 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
       final data = Map<String, dynamic>.from(snapshot.value as Map);
       
       final double regFee = registrationFeeAmount ?? (data['registrationFeeAmount'] ?? 0.0).toDouble();
-      final double totalPaid = paidAmount ?? ( (data['paidAmount'] ?? 0.0) + (data['registrationFeePaid'] ?? 0.0) ).toDouble();
-      final double regPaid = totalPaid >= regFee ? regFee : totalPaid;
-      final double subPaid = totalPaid - regPaid;
+      final double regPaid = (data['registrationFeePaid'] ?? 0.0).toDouble();
+      final double subPaid = paidAmount ?? (data['paidAmount'] ?? 0.0).toDouble();
       final double subPrice = price;
       final double balance = subPrice - subPaid;
       final String paymentStatus = balance <= 0 ? 'paid' : (subPaid <= 0 ? 'unpaid' : 'partial');
