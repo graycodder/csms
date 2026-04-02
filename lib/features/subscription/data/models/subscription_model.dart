@@ -14,8 +14,6 @@ class SubscriptionModel extends SubscriptionEntity {
     required super.createdAt,
     required super.updatedAt,
     required super.price,
-    super.registrationFeeAmount = 0.0,
-    super.registrationFeePaid = 0.0,
     super.paidAmount = 0.0,
     super.balanceAmount = 0.0,
     super.paymentStatus = 'paid',
@@ -44,8 +42,6 @@ class SubscriptionModel extends SubscriptionEntity {
       createdAt: _parseDate(json['createdAt']),
       updatedAt: _parseDate(json['updatedAt']),
       price: (json['price'] as num? ?? 0.0).toDouble(),
-      registrationFeeAmount: (json['registrationFeeAmount'] ?? 0.0).toDouble(),
-      registrationFeePaid: (json['registrationFeePaid'] ?? 0.0).toDouble(),
       paidAmount: (json['paidAmount'] ?? (json['price'] ?? 0.0))
           .toDouble(), // Default to price for legacy
       balanceAmount: (json['balanceAmount'] ?? 0.0).toDouble(),
@@ -85,8 +81,6 @@ class SubscriptionModel extends SubscriptionEntity {
       'createdAt': createdAt.millisecondsSinceEpoch,
       'updatedAt': updatedAt.millisecondsSinceEpoch,
       'price': price,
-      'registrationFeeAmount': registrationFeeAmount,
-      'registrationFeePaid': registrationFeePaid,
       'paidAmount': paidAmount,
       'balanceAmount': balanceAmount,
       'paymentStatus': paymentStatus,
