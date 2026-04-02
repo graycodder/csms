@@ -155,9 +155,6 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                 if (shopState is ShopSelected && authState is AuthAuthenticated) {
                   final regAmount = double.tryParse(_registrationFeeController.text.trim()) ?? 0.0;
                   final paidAmt = double.tryParse(_paidAmountController.text.trim()) ?? 0.0;
-                  
-                  final initialRegPaid = paidAmt >= regAmount ? regAmount : paidAmt;
-                  final initialRegStatus = regAmount <= 0 ? 'paid' : (initialRegPaid >= regAmount ? 'paid' : (initialRegPaid > 0 ? 'partial' : 'unpaid'));
 
                   pageContext.read<CustomerBloc>().add(AddCustomerWithSubscription(
                     customer: CustomerEntity(
@@ -172,8 +169,8 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                       updatedById: authState.userId,
                       ownerId: authState.ownerId,
                       registrationFeeAmount: regAmount,
-                      registrationFeePaidAmount: initialRegPaid,
-                      registrationFeeStatus: initialRegStatus,
+                      registrationFeePaidAmount: 0.0,
+                      registrationFeeStatus: 'unpaid',
                     ),
                     productId: _selectedProduct!.productId,
                     validityValue: _selectedProduct!.validityType == 'flexible'
