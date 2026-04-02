@@ -518,8 +518,9 @@ class _DailyReportViewState extends State<DailyReportView> {
                 getTitlesWidget: (val, meta) {
                   int idx = val.toInt();
                   if (idx >= 0 && idx < report.revenueChartData.length) {
-                    if (report.revenueChartData.length > 8 && idx % 4 != 0)
+                    if (report.revenueChartData.length > 8 && idx % 4 != 0) {
                       return const SizedBox.shrink();
+                    }
                     return Padding(
                       padding: EdgeInsets.only(top: 8.h),
                       child: Text(

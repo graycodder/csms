@@ -176,6 +176,7 @@ class UpdateSubscription extends CustomerEvent {
   final String updatedByName;
   final String customerName;
   final double? registrationFeeAmount;
+  final double? registrationFeePaid;
   final double? paidAmount;
   final String? paymentMode;
   final String? status;
@@ -190,6 +191,7 @@ class UpdateSubscription extends CustomerEvent {
     required this.updatedByName,
     required this.customerName,
     this.registrationFeeAmount,
+    this.registrationFeePaid,
     this.paidAmount,
     this.paymentMode,
     this.status,
@@ -201,6 +203,7 @@ class UpdateSubscription extends CustomerEvent {
     endDate,
     price,
     registrationFeeAmount,
+    registrationFeePaid,
     paidAmount,
     paymentMode,
     updatedById,
@@ -368,6 +371,7 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
       endDate: event.endDate,
       price: event.price,
       registrationFeeAmount: event.registrationFeeAmount,
+      registrationFeePaid: event.registrationFeePaid,
       paidAmount: event.paidAmount,
       paymentMode: event.paymentMode,
       updatedById: event.updatedById,

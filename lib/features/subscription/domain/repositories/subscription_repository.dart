@@ -36,6 +36,7 @@ abstract class SubscriptionRepository {
     required DateTime endDate,
     required double price,
     double? registrationFeeAmount,
+    double? registrationFeePaid,
     double? paidAmount,
     String? paymentMode,
     required String updatedById,

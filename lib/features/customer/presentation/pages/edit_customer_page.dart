@@ -6,6 +6,8 @@ import '../../../../core/theme/app_colors.dart';
 import 'package:csms/features/customer/domain/entities/customer_entity.dart';
 import 'package:csms/features/product/domain/entities/product_entity.dart';
 import 'package:csms/features/customer/presentation/bloc/customer_bloc.dart';
+import 'package:csms/features/dashboard/presentation/bloc/dashboard_bloc.dart';
+import 'package:csms/features/subscription/domain/entities/subscription_entity.dart';
 import 'package:csms/core/utils/loading_overlay.dart';
 import 'package:csms/core/utils/terminology_helper.dart';
 
@@ -30,6 +32,7 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
   late TextEditingController _nameController;
   late TextEditingController _phoneController;
   late TextEditingController _registrationFeeController;
+  late TextEditingController _registrationFeePaidController;
   late String _selectedStatus;
   late String _selectedRegStatus;
 
@@ -41,6 +44,9 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
       text: widget.customer.mobileNumber,
     );
     _registrationFeeController = TextEditingController(
+      text: widget.customer.registrationFeeAmount.toStringAsFixed(0),
+    );
+    _registrationFeePaidController = TextEditingController(
       text: widget.customer.registrationFeePaidAmount.toStringAsFixed(0),
     );
     _selectedStatus = widget.customer.status;
@@ -52,6 +58,7 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
     _nameController.dispose();
     _phoneController.dispose();
     _registrationFeeController.dispose();
+    _registrationFeePaidController.dispose();
     super.dispose();
   }
 
@@ -94,27 +101,54 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
               final regAmount =
                   double.tryParse(_registrationFeeController.text.trim()) ??
                   0.0;
-              double newRegPaid = widget.customer.registrationFeePaidAmount;
-
-              if (_selectedRegStatus == 'paid') {
-                newRegPaid = regAmount;
-              } else if (_selectedRegStatus == 'unpaid') {
-                newRegPaid = 0.0;
-              }
+              final regPaid =
+                  double.tryParse(_registrationFeePaidController.text.trim()) ??
+                  0.0;
 
               final updated = widget.customer.copyWith(
                 name: _nameController.text.trim(),
                 mobileNumber: _phoneController.text.trim(),
                 status: _selectedStatus,
                 registrationFeeAmount: regAmount,
-                registrationFeePaidAmount: newRegPaid,
+                registrationFeePaidAmount: regPaid,
                 registrationFeeStatus: _selectedRegStatus,
                 updatedAt: DateTime.now(),
               );
 
-              context.read<CustomerBloc>().add(
-                UpdateCustomerInfo(customer: updated),
-              );
+              // Find if there's an active subscription to log against
+              final subs = context.read<DashboardBloc>().state is DashboardLoaded
+                  ? (context.read<DashboardBloc>().state as DashboardLoaded)
+                      .activeSubs
+                      .where((s) => s.customerId == widget.customer.customerId)
+                      .toList()
+                  : <SubscriptionEntity>[];
+
+              if (subs.isNotEmpty) {
+                // If there's an active subscription, use UpdateSubscription to sync everything
+                final sub = subs.first;
+                context.read<CustomerBloc>().add(
+                  UpdateSubscription(
+                    subscriptionId: sub.subscriptionId,
+                    endDate: sub.endDate,
+                    price: sub.price,
+                    registrationFeeAmount: regAmount,
+                    registrationFeePaid: regPaid,
+                    paidAmount: sub.paidAmount,
+                    paymentMode: 'Cash', // Default for edit page
+                    updatedById: widget.customer.updatedById,
+                    ownerId: widget.customer.ownerId,
+                    shopId: widget.customer.shopId,
+                    updatedByName: 'Staff',
+                    customerName: updated.name,
+                    status: sub.status,
+                  ),
+                );
+              } else {
+                // Standard update
+                context.read<CustomerBloc>().add(
+                  UpdateCustomerInfo(customer: updated),
+                );
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
@@ -317,19 +351,58 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                   SizedBox(height: 20.h),
 
                   // Registration Fee
-                  _buildLabel('Registration Fee'),
-                  TextFormField(
-                    controller: _registrationFeeController,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildLabel('Total Reg Fee'),
+                            TextFormField(
+                              controller: _registrationFeeController,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                  RegExp(r'^\d*\.?\d*'),
+                                ),
+                              ],
+                              decoration: const InputDecoration(
+                                hintText: 'Total',
+                                prefixIcon: Icon(Icons.currency_rupee),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildLabel('Amount Paid'),
+                            TextFormField(
+                              controller: _registrationFeePaidController,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                  RegExp(r'^\d*\.?\d*'),
+                                ),
+                              ],
+                              decoration: const InputDecoration(
+                                hintText: 'Paid',
+                                prefixIcon: Icon(Icons.currency_rupee),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
-                    decoration: const InputDecoration(
-                      hintText: 'Enter registration fee',
-                      prefixIcon: Icon(Icons.currency_rupee),
-                    ),
                   ),
                   SizedBox(height: 20.h),
 

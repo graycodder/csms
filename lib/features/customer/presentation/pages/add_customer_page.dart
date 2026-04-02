@@ -383,8 +383,9 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                       counterText: '',
                     ),
                     validator: (v) {
-                      if (v == null || v.trim().isEmpty)
+                      if (v == null || v.trim().isEmpty) {
                         return 'Name is required';
+                      }
                       if (v.length > 20) return 'Maximum 20 characters';
                       if (RegExp(
                         r'[!@#<>?":_`~;[\]\\|=+)(*&^%/-]',
@@ -461,8 +462,9 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                       ),
                       onChanged: (_) => setState(() {}),
                       validator: (v) {
-                        if (v == null || v.trim().isEmpty)
+                        if (v == null || v.trim().isEmpty) {
                           return 'Price is required';
+                        }
                         final p = double.tryParse(v.trim()) ?? 0;
                         if (p <= 0) return 'Price must be greater than 0';
                         return null;
@@ -495,8 +497,9 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                             ),
                             onChanged: (_) => setState(() {}),
                             validator: (v) {
-                              if (v == null || v.trim().isEmpty)
+                              if (v == null || v.trim().isEmpty) {
                                 return 'Required';
+                              }
                               final val = int.tryParse(v.trim()) ?? 0;
                               if (val <= 0) return 'Must be > 0';
                               return null;
@@ -673,9 +676,9 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                             ),
                           ],
                         ),
-                        SizedBox(height: 16.h),
-                        const Divider(),
-                        SizedBox(height: 16.h),
+                        SizedBox(height: 10.h),
+                        const Divider(color: Colors.grey),
+                        SizedBox(height: 10.h),
                         Row(
                           children: [
                             Expanded(
@@ -760,7 +763,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                                 (double.tryParse(_paidAmountController.text) ??
                                     0) >
                             0) ...[
-                          SizedBox(height: 16.h),
+                          SizedBox(height: 10.h),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -783,30 +786,6 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                             ],
                           ),
                         ],
-                        Padding(
-                          padding: EdgeInsets.symmetric(vertical: 8.h),
-                          child: const Divider(),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              'Total Amount:',
-                              style: TextStyle(
-                                color: AppColors.textDark,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              '₹${_computedAmount.toStringAsFixed(0)}',
-                              style: TextStyle(
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16.sp,
-                              ),
-                            ),
-                          ],
-                        ),
                       ],
                     ),
                   ),

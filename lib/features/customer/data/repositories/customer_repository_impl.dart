@@ -108,11 +108,35 @@ class CustomerRepositoryImpl implements CustomerRepository {
         return const Left(DuplicateFailure('This number is already used by another customer. Please try with another number.'));
       }
 
-      await _database
-          .ref()
-          .child('customers')
-          .child(customer.customerId)
-          .update({
+      final ref = _database.ref().child('customers').child(customer.customerId);
+      final snapshot = await ref.get();
+      double oldRegPaid = 0.0;
+      if (snapshot.exists) {
+        final data = snapshot.value as Map<dynamic, dynamic>;
+        oldRegPaid = (data['registrationFeePaidAmount'] ?? 0.0).toDouble();
+      }
+
+      final double newRegPaid = customer.registrationFeePaidAmount;
+      final double diff = newRegPaid - oldRegPaid;
+
+      if (diff != 0) {
+        final logRef = _database.ref().child('subscription_logs').child(customer.shopId).push();
+        await logRef.set({
+          'shopId': customer.shopId,
+          'customerId': customer.customerId,
+          'action': 'payment',
+          'description': diff > 0 
+            ? 'Registration fee balance collected via edit' 
+            : 'Registration fee corrected (Reduced)',
+          'createdAt': ServerValue.timestamp,
+          'createdById': customer.updatedById,
+          'registrationFeePaid': diff,
+          'paidAmount': 0.0,
+          'status': 'active',
+        });
+      }
+
+      await ref.update({
             'name': customer.name,
             'mobileNumber': customer.mobileNumber,
             'email': customer.email,

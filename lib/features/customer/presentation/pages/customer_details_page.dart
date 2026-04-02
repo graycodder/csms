@@ -114,7 +114,11 @@ class CustomerDetailsPage extends StatelessWidget {
                             children: [
                               _buildHeaderInfo(customer),
                               SizedBox(height: 8.h),
-                              _buildRegistrationFeeCard(customer),
+                              _buildRegistrationFeeCard(
+                                context,
+                                customer,
+                                uniqueSubs,
+                              ),
                               SizedBox(height: 24.h),
                               Row(
                                 mainAxisAlignment:
@@ -142,8 +146,9 @@ class CustomerDetailsPage extends StatelessWidget {
                                           })
                                           .toList();
 
-                                      if (availableProducts.isEmpty)
+                                      if (availableProducts.isEmpty) {
                                         return const SizedBox.shrink();
+                                      }
 
                                       return TextButton.icon(
                                         onPressed: () => Navigator.push(
@@ -877,87 +882,315 @@ class CustomerDetailsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildRegistrationFeeCard(CustomerEntity customer) {
+  Widget _buildRegistrationFeeCard(
+    BuildContext context,
+    CustomerEntity customer,
+    List<SubscriptionEntity> subs,
+  ) {
     final status = customer.registrationFeeStatus.toLowerCase();
     final statusColor = status == 'paid'
         ? AppColors.success
         : (status == 'partial' ? Colors.orange : Colors.red);
+    final balance =
+        customer.registrationFeeAmount - customer.registrationFeePaidAmount;
 
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Row(
-              children: [
-                Icon(
-                  Icons.assignment_ind_outlined,
-                  color: Colors.white,
-                  size: 20.sp,
-                ),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Registration Fee',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
-                          fontSize: 13.sp,
-                        ),
-                      ),
-                      Text(
-                        '₹${customer.registrationFeePaidAmount.toStringAsFixed(0)} / ₹${customer.registrationFeeAmount.toStringAsFixed(0)}',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      if (customer.registrationFeeAmount -
-                              customer.registrationFeePaidAmount >
-                          0)
+    return InkWell(
+      onTap: balance > 0
+          ? () => _showRegFeeCollectionDialog(context, customer, subs)
+          : null,
+      borderRadius: BorderRadius.circular(12.r),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(color: Colors.white.withOpacity(0.2)),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.assignment_ind_outlined,
+                    color: Colors.white,
+                    size: 20.sp,
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         Text(
-                          'Balance: ₹${(customer.registrationFeeAmount - customer.registrationFeePaidAmount).toStringAsFixed(0)}',
+                          'Registration Fee',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.9),
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w500,
+                            color: Colors.white.withOpacity(0.8),
+                            fontSize: 13.sp,
+                          ),
+                        ),
+                        Text(
+                          '₹${customer.registrationFeePaidAmount.toStringAsFixed(0)} / ₹${customer.registrationFeeAmount.toStringAsFixed(0)}',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.bold,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
-                    ],
+                        if (balance > 0)
+                          Text(
+                            'Balance: ₹${balance.toStringAsFixed(0)}',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.9),
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(width: 8.w),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+              decoration: BoxDecoration(
+                color: statusColor.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(20.r),
+                border: Border.all(color: statusColor.withOpacity(0.5)),
+              ),
+              child: Text(
+                status.toUpperCase(),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showRegFeeCollectionDialog(
+    BuildContext pageContext,
+    CustomerEntity customer,
+    List<SubscriptionEntity> subs,
+  ) {
+    final balance =
+        customer.registrationFeeAmount - customer.registrationFeePaidAmount;
+    if (balance <= 0) return;
+
+    final TextEditingController amountController = TextEditingController();
+    String selectedPaymentMode = 'Cash';
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: pageContext,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16.r),
+              ),
+              title: Text(
+                'Collect Registration Fee',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp),
+              ),
+              content: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Total Fee:',
+                          style: TextStyle(
+                            color: AppColors.textLight,
+                            fontSize: 13.sp,
+                          ),
+                        ),
+                        Text(
+                          '₹${customer.registrationFeeAmount.toStringAsFixed(0)}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14.sp,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8.h),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Pending Balance:',
+                          style: TextStyle(
+                            color: AppColors.textLight,
+                            fontSize: 13.sp,
+                          ),
+                        ),
+                        Text(
+                          '₹${balance.toStringAsFixed(0)}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
+                            fontSize: 14.sp,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16.h),
+                    Text(
+                      'Received Amount *',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13.sp,
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    TextFormField(
+                      controller: amountController,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d*\.?\d*'),
+                        ),
+                      ],
+                      autofocus: true,
+                      decoration: InputDecoration(
+                        hintText: 'Enter amount',
+                        prefixIcon: const Icon(Icons.currency_rupee, size: 18),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12.w,
+                          vertical: 8.h,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty)
+                          return 'Enter amount';
+                        final amt = double.tryParse(value);
+                        if (amt == null || amt <= 0) return 'Invalid amount';
+                        if (amt > balance)
+                          return 'Cannot exceed pending balance';
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 16.h),
+                    Text(
+                      'Payment Mode *',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13.sp,
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    DropdownButtonFormField<String>(
+                      value: selectedPaymentMode,
+                      decoration: InputDecoration(
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12.w,
+                          vertical: 8.h,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
+                      ),
+                      items: ['Cash', 'UPI', 'Card', 'Bank Transfer'].map((m) {
+                        return DropdownMenuItem(
+                          value: m,
+                          child: Text(m, style: TextStyle(fontSize: 14.sp)),
+                        );
+                      }).toList(),
+                      onChanged: (v) =>
+                          setState(() => selectedPaymentMode = v ?? 'Cash'),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: AppColors.textLight),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    if (formKey.currentState?.validate() ?? false) {
+                      final addedAmt = double.parse(amountController.text);
+                      final newRegPaid =
+                          customer.registrationFeePaidAmount + addedAmt;
+
+                      if (subs.isEmpty) {
+                        // If no subscription, update customer only (Fallback)
+                        pageContext.read<CustomerBloc>().add(
+                          UpdateCustomerInfo(
+                            customer: customer.copyWith(
+                              registrationFeePaidAmount: newRegPaid,
+                              registrationFeeStatus:
+                                  newRegPaid >= customer.registrationFeeAmount
+                                  ? 'paid'
+                                  : 'partial',
+                            ),
+                          ),
+                        );
+                      } else {
+                        // Use latest sub to log payment
+                        final sub = subs.first;
+                        pageContext.read<CustomerBloc>().add(
+                          UpdateSubscription(
+                            subscriptionId: sub.subscriptionId,
+                            endDate: sub.endDate,
+                            price: sub.price,
+                            registrationFeeAmount:
+                                customer.registrationFeeAmount,
+                            registrationFeePaid: newRegPaid,
+                            paidAmount: sub.paidAmount,
+                            paymentMode: selectedPaymentMode,
+                            updatedById: customer.updatedById,
+                            ownerId: customer.ownerId,
+                            shopId: customer.shopId,
+                            updatedByName: 'Staff',
+                            customerName: customer.name,
+                            status: sub.status,
+                          ),
+                        );
+                      }
+
+                      Navigator.pop(dialogContext);
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                  ),
+                  child: const Text(
+                    'Confirm',
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
               ],
-            ),
-          ),
-          SizedBox(width: 8.w),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
-            decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(20.r),
-              border: Border.all(color: statusColor.withOpacity(0.5)),
-            ),
-            child: Text(
-              status.toUpperCase(),
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 11.sp,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
-      ),
+            );
+          },
+        );
+      },
     );
   }
 }

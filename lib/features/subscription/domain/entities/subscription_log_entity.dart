@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 class SubscriptionLogEntity extends Equatable {
   final String logId;
   final String shopId;
+  final String? subscriptionId;
   final String customerId;
   final String action;
   final String description;
@@ -23,6 +24,7 @@ class SubscriptionLogEntity extends Equatable {
   const SubscriptionLogEntity({
     required this.logId,
     required this.shopId,
+    this.subscriptionId,
     required this.customerId,
     required this.action,
     required this.description,
@@ -45,6 +47,7 @@ class SubscriptionLogEntity extends Equatable {
   List<Object?> get props => [
     logId,
     shopId,
+    subscriptionId,
     customerId,
     action,
     description,

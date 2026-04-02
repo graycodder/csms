@@ -4,6 +4,7 @@ class SubscriptionLogModel extends SubscriptionLogEntity {
   const SubscriptionLogModel({
     required super.logId,
     required super.shopId,
+    super.subscriptionId,
     required super.customerId,
     required super.action,
     required super.description,
@@ -36,6 +37,7 @@ class SubscriptionLogModel extends SubscriptionLogEntity {
     return SubscriptionLogModel(
       logId: id,
       shopId: json['shopId'] ?? '',
+      subscriptionId: json['subscriptionId'] as String?,
       customerId: json['customerId'] ?? '',
       action: json['action'] ?? '',
       description: json['description'] ?? '',
@@ -71,12 +73,14 @@ class SubscriptionLogModel extends SubscriptionLogEntity {
   }
 
   static DateTime _parseDate(dynamic date) {
-    if (date is int)
+    if (date is int) {
       return DateTime.fromMillisecondsSinceEpoch(date, isUtc: true);
+    }
     if (date is String) {
       final parsedInt = int.tryParse(date);
-      if (parsedInt != null)
+      if (parsedInt != null) {
         return DateTime.fromMillisecondsSinceEpoch(parsedInt, isUtc: true);
+      }
       return DateTime.tryParse(date)?.toUtc() ??
           DateTime.fromMillisecondsSinceEpoch(0).toUtc();
     }
@@ -86,6 +90,7 @@ class SubscriptionLogModel extends SubscriptionLogEntity {
   Map<String, dynamic> toJson() {
     return {
       'shopId': shopId,
+      if (subscriptionId != null) 'subscriptionId': subscriptionId,
       'customerId': customerId,
       'action': action,
       'description': description,
@@ -100,7 +105,8 @@ class SubscriptionLogModel extends SubscriptionLogEntity {
       if (paymentMode != null) 'paymentMode': paymentMode,
       if (productName != null) 'productName': productName,
       if (status != null) 'status': status,
-      if (registrationFeePaid != null) 'registrationFeePaid': registrationFeePaid,
+      if (registrationFeePaid != null)
+        'registrationFeePaid': registrationFeePaid,
     };
   }
 }

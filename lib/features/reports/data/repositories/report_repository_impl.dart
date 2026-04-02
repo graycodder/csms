@@ -130,106 +130,94 @@ class ReportRepositoryImpl implements ReportRepository {
       final allLogs = parseLogs();
       final allProducts = parseProducts();
 
-      // ── Helper: Date Range Check ──────────────────────────────────────────
-      bool isInFilterRange(DateTime dt) {
-        if (dt.year == 1970)
-          return false; // Never count legacy fallback as "New Activity"
-        final local = dt.toLocal();
-        return !local.isBefore(rangeFrom) && !local.isAfter(rangeTo);
-      }
-
-      bool isBeforeFilterEnd(DateTime dt) {
-        if (dt.year == 1970)
-          return true; // Legacy records are always "Historical"
-        return !dt.toLocal().isAfter(rangeTo);
-      }
-
       // ── Metrics Generation ────────────────────────────────────────────────
+      // Period Activity
 
-      // Activity for the selected period
-      final filteredLogs = allLogs
-          .where((l) => isInFilterRange(l.createdAt))
-          .toList();
+      // Period Activity
+      final List<SubscriptionLogModel> periodLogs = allLogs.where((l) => 
+        l.createdAt.toLocal().isAfter(rangeFrom.subtract(const Duration(milliseconds: 1))) && 
+        l.createdAt.toLocal().isBefore(rangeTo.add(const Duration(milliseconds: 1)))
+      ).toList();
 
-      // For Subscriptions: If createdAt is missing (1970), fallback to startDate for activity matching
-      final filteredSubs = allSubscriptions.where((s) {
-        final dateToUse = (s.createdAt.year == 1970)
-            ? s.startDate
-            : s.createdAt;
-        return isInFilterRange(dateToUse);
+      final List<SubscriptionModel> newSubs = allSubscriptions.where((s) {
+        final dateToUse = s.createdAt.year == 1970 ? s.startDate : s.createdAt;
+        final local = dateToUse.toLocal();
+        return !local.isBefore(rangeFrom) && !local.isAfter(rangeTo);
       }).toList();
 
-      final filteredCusts = allCustomers
-          .where((c) => isInFilterRange(c.createdAt))
-          .toList();
+      final List<CustomerModel> newCustomers = allCustomers.where((c) {
+        final local = c.createdAt.toLocal();
+        return !local.isBefore(rangeFrom) && !local.isAfter(rangeTo);
+      }).toList();
 
-      // New Joinees/Subs (Always trust actual object count over logs)
-      final newJoiners = filteredCusts.length;
-      final newSubsCount = filteredSubs.length;
-
-      // REVENUE CALCULATION (Independent Aggregation)
+      // ── REVENUE CALCULATION: Difference-based Fallback Logic ───────────────
       double totalSubRevenue = 0.0;
       double totalRegRevenue = 0.0;
 
-      // 1. Use Logs as the primary source of truth for transactions
-      if (filteredLogs.isNotEmpty) {
-        for (var l in filteredLogs) {
-          totalSubRevenue += (l.paidAmount ?? 0.0);
-          totalRegRevenue += (l.registrationFeePaid ?? 0.0);
-        }
-      } else {
-        // 2. Fallback to Subscriptions if no logs exist (legacy or edge case)
-        for (var s in filteredSubs) {
-          totalSubRevenue += s.paidAmount;
-          totalRegRevenue += s.registrationFeePaid;
-        }
-      }
+      // 1. Sum all payments from logs in the period
+      final Map<String, double> loggedSubPaidMap = {}; // subscriptionId -> sum
+      final Map<String, double> loggedRegPaidMap = {}; // customerId -> sum
 
-      // 3. For Registration Fees: Ensure new customers who paid but aren't in logs/subs are counted
-      // (e.g., if a customer was added with 0 plan fee but >0 reg fee, and somehow no log was generated)
-      final Set<String> customersWithRegInLogs = filteredLogs
-          .where((l) => (l.registrationFeePaid ?? 0) > 0)
-          .map((l) => l.customerId)
-          .toSet();
-      final Set<String> customersWithRegInSubs = filteredSubs
-          .where((s) => s.registrationFeePaid > 0)
-          .map((s) => s.customerId)
-          .toSet();
-
-      for (var c in filteredCusts) {
-        if (!customersWithRegInLogs.contains(c.customerId) &&
-            !customersWithRegInSubs.contains(c.customerId)) {
-          if (c.registrationFeePaidAmount > 0) {
-            totalRegRevenue += c.registrationFeePaidAmount;
+      for (var l in periodLogs) {
+        if (l.action == 'payment') {
+          final sPaid = l.paidAmount ?? 0.0;
+          final rPaid = l.registrationFeePaid ?? 0.0;
+          totalSubRevenue += sPaid;
+          totalRegRevenue += rPaid;
+          
+          if (l.subscriptionId != null) {
+            loggedSubPaidMap[l.subscriptionId!] = (loggedSubPaidMap[l.subscriptionId!] ?? 0.0) + sPaid;
           }
+          loggedRegPaidMap[l.customerId] = (loggedRegPaidMap[l.customerId] ?? 0.0) + rPaid;
         }
       }
 
-      // Historical Status (Cards)
-      final historicalCusts = allCustomers
-          .where((c) => isBeforeFilterEnd(c.createdAt))
-          .toList();
-      final historicalSubs = allSubscriptions.where((s) {
+      // 2. Fallback for New Subscriptions: Add what's missing from logs
+      for (var s in newSubs) {
+        final double logged = loggedSubPaidMap[s.subscriptionId] ?? 0.0;
+        final double missing = (s.paidAmount - logged).clamp(0, double.infinity);
+        totalSubRevenue += missing;
+        
+        // Also check if reg fee was skipped in logs
+        final double regLogged = loggedRegPaidMap[s.customerId] ?? 0.0;
+        final double regMissing = (s.registrationFeePaid - regLogged).clamp(0, double.infinity);
+        totalRegRevenue += regMissing;
+        
+        // Update map so we don't count it again in newCustomers fallback
+        loggedRegPaidMap[s.customerId] = regLogged + regMissing;
+      }
+
+      // 3. Fallback for New Customers: Add remaining reg fee missing from logs/subs
+      for (var c in newCustomers) {
+        final double logged = loggedRegPaidMap[c.customerId] ?? 0.0;
+        final double missing = (c.registrationFeePaidAmount - logged).clamp(0, double.infinity);
+        totalRegRevenue += missing;
+      }
+
+      // ── HISTORICAL STATUS: Snapshot as of rangeTo ────────────────────────
+      // Someone is active if they have ANY subscription that exists at rangeTo
+      // i.e. startDate <= rangeTo AND endDate >= rangeTo
+      final activeSubsAtEnd = allSubscriptions.where((s) {
         final start = s.startDate.toLocal();
         final end = s.endDate.toLocal();
-        return !start.isAfter(rangeTo) && !end.isBefore(rangeFrom);
+        return !start.isAfter(rangeTo) && !end.isBefore(rangeFrom); 
       }).toList();
 
-      final totalCustCount = historicalCusts.length;
-      final activeCustCount = historicalSubs
-          .map((s) => s.customerId)
-          .toSet()
-          .length;
-      final activeSubCount = historicalSubs.length;
-      final expiredCount = historicalSubs
-          .where((s) => s.endDate.toLocal().isBefore(rangeFrom))
-          .length;
-      final expiringSoonCount = historicalSubs.where((s) {
+      final Set<String> activeCustomerIds = activeSubsAtEnd.map((s) => s.customerId).toSet();
+      
+      // Cumulative Stats (created before or at rangeTo)
+      final customersBeforeEnd = allCustomers.where((c) => !c.createdAt.toLocal().isAfter(rangeTo)).toList();
+
+      // Expiring Soon: Active subs ending in the next 7 days from rangeTo
+      final expiringSoonSubs = activeSubsAtEnd.where((s) {
         final days = s.endDate.toLocal().difference(rangeTo).inDays;
         return days >= 0 && days <= 7;
-      }).length;
+      }).toList();
 
-      // Current Pending (Always from unique latest subs)
+      // Expired: Total ever expired as of rangeTo
+      final expiredCount = allSubscriptions.where((s) => s.endDate.toLocal().isBefore(rangeFrom)).length;
+
+      // ── PENDING CALCULATIONS: Current live state ──────────────────────────
       final Map<String, SubscriptionModel> latestPerPlan = {};
       for (var s in allSubscriptions) {
         final key = '${s.customerId}_${s.productId}';
@@ -238,30 +226,21 @@ class ReportRepositoryImpl implements ReportRepository {
           latestPerPlan[key] = s;
         }
       }
-      final pendingBalanceTotal = latestPerPlan.values.fold<double>(
-        0.0,
-        (sum, s) => sum + (s.balanceAmount > 0 ? s.balanceAmount : 0),
-      );
-      final pendingRegTotal = allCustomers.fold<double>(0.0, (sum, c) {
-        final double due =
-            (c.registrationFeeAmount - c.registrationFeePaidAmount).clamp(
-              0,
-              double.infinity,
-            );
-        return sum + due;
-      });
+      final double totalPendingSubBalance = latestPerPlan.values.fold(0.0, 
+        (sum, s) => sum + (s.balanceAmount > 0 ? s.balanceAmount : 0));
+        
+      final double totalPendingRegBalance = allCustomers.fold(0.0, 
+        (sum, c) => sum + (c.registrationFeeAmount - c.registrationFeePaidAmount).clamp(0, double.infinity));
 
-      // Chart Data
+      // ── CHART DATA ────────────────────────────────────────────────────────
       final Map<DateTime, double> hourlyRev = {};
-
-      // 1. Initialize with 0s for a full timeline (so the chart looks professional)
       if (filter == ReportFilter.daily) {
         for (int h = 0; h < 24; h++) {
           hourlyRev[DateTime(ref.year, ref.month, ref.day, h)] = 0.0;
         }
       } else {
-        final lastDayOfMonth = DateTime(ref.year, ref.month + 1, 0).day;
-        for (int d = 1; d <= lastDayOfMonth; d++) {
+        final lastDay = DateTime(ref.year, ref.month + 1, 0).day;
+        for (int d = 1; d <= lastDay; d++) {
           hourlyRev[DateTime(ref.year, ref.month, d)] = 0.0;
         }
       }
@@ -270,56 +249,54 @@ class ReportRepositoryImpl implements ReportRepository {
           ? DateTime(dt.year, dt.month, dt.day, dt.hour)
           : DateTime(dt.year, dt.month, dt.day);
 
-      // 2. Populate chart (Hybrid approach matching total revenue logic)
-      // Accumulate from logs first
-      for (var l in filteredLogs) {
-        final total = (l.paidAmount ?? 0.0) + (l.registrationFeePaid ?? 0.0);
-        if (total > 0) {
-          final b = getBucket(l.createdAt.toLocal());
-          if (hourlyRev.containsKey(b)) {
-            hourlyRev[b] = (hourlyRev[b] ?? 0.0) + total;
-          }
-        }
+      for (var s in newSubs) {
+         final b = getBucket(s.createdAt.toLocal());
+         if (hourlyRev.containsKey(b)) {
+            final double logged = loggedSubPaidMap[s.subscriptionId] ?? 0.0;
+            final double missing = (s.paidAmount - logged).clamp(0, double.infinity);
+            
+            final double regLogged = loggedRegPaidMap[s.customerId] ?? 0.0;
+            final double regMissing = (s.registrationFeePaid - regLogged).clamp(0, double.infinity);
+            
+            hourlyRev[b] = (hourlyRev[b] ?? 0.0) + missing + regMissing;
+            
+            // Update maps to avoid double-counting in newCustomers
+            loggedRegPaidMap[s.customerId] = regLogged + regMissing;
+         }
+      }
+      
+      for (var c in newCustomers) {
+         final b = getBucket(c.createdAt.toLocal());
+         if (hourlyRev.containsKey(b)) {
+            final double logged = loggedRegPaidMap[c.customerId] ?? 0.0;
+            final double missing = (c.registrationFeePaidAmount - logged).clamp(0, double.infinity);
+            hourlyRev[b] = (hourlyRev[b] ?? 0.0) + missing;
+         }
       }
 
-      // Fallback to subs for any gaps
-      for (var s in filteredSubs) {
-        final total = s.paidAmount + s.registrationFeePaid;
-        if (total > 0) {
-          final b = getBucket(s.createdAt.toLocal());
-          if (hourlyRev.containsKey(b) && hourlyRev[b] == 0) {
-            hourlyRev[b] = total;
-          }
-        }
-      }
-
-      final sortedBuckets = hourlyRev.keys.toList()..sort();
-      final List<ChartDataPoint> revenueChart = sortedBuckets.map((dt) {
-        final label = (filter == ReportFilter.daily)
-            ? '${dt.hour.toString().padLeft(2, '0')}:00'
-            : '${dt.day}/${dt.month}';
-        return ChartDataPoint(label, hourlyRev[dt]!);
+      final List<DateTime> sortedKeys = hourlyRev.keys.toList()
+        ..sort((a, b) => a.compareTo(b));
+        
+      final List<ChartDataPoint> revenueChart = sortedKeys.map((dt) {
+          final label = (filter == ReportFilter.daily)
+              ? '${dt.hour.toString().padLeft(2, '0')}:00'
+              : '${dt.day}/${dt.month}';
+          return ChartDataPoint(label, hourlyRev[dt]!);
       }).toList();
 
-      // Product Breakdown
+      // ── PRODUCT BREAKDOWN ──────────────────────────────────────────────────
       final productBreakdownList = allProducts
           .where((p) => p.status == 'active')
           .map((prod) {
             final pid = prod.productId;
-            final pSubs = historicalSubs
-                .where((s) => s.productId == pid)
-                .toList();
-            final pExpired = pSubs
-                .where((s) => s.endDate.toLocal().isBefore(rangeFrom))
-                .length;
-            final pExpiring = pSubs.where((s) {
-              final days = s.endDate.toLocal().difference(rangeTo).inDays;
-              return days >= 0 && days <= 7;
-            }).length;
+            final pSubs = activeSubsAtEnd.where((s) => s.productId == pid).toList();
+            final pExpiring = expiringSoonSubs.where((s) => s.productId == pid).length;
+            final pExpired = allSubscriptions.where((s) => s.productId == pid && s.endDate.toLocal().isBefore(rangeFrom)).length;
+
             return ProductReportEntry(
               productId: pid,
               productName: prod.name,
-              activeCount: pSubs.length - pExpired,
+              activeCount: pSubs.length,
               expiringCount: pExpiring,
               expiredCount: pExpired,
             );
@@ -328,17 +305,17 @@ class ReportRepositoryImpl implements ReportRepository {
 
       return Right(
         ReportEntity(
-          totalCustomers: totalCustCount,
-          activeCustomers: activeCustCount,
-          inactiveCustomers: totalCustCount - activeCustCount,
-          activeSubscriptions: activeSubCount,
-          expiringSoonSubscriptions: expiringSoonCount,
+          totalCustomers: customersBeforeEnd.length,
+          activeCustomers: activeCustomerIds.length,
+          inactiveCustomers: (customersBeforeEnd.length - activeCustomerIds.length).clamp(0, 999999),
+          activeSubscriptions: activeSubsAtEnd.length,
+          expiringSoonSubscriptions: expiringSoonSubs.length,
           expiredSubscriptions: expiredCount,
-          newJoiners: newJoiners,
-          newSubscriptions: newSubsCount,
+          newJoiners: newCustomers.length,
+          newSubscriptions: newSubs.length,
           registrationFeeCollected: totalRegRevenue,
-          registrationFeePending: pendingRegTotal,
-          totalPendingBalance: pendingBalanceTotal,
+          registrationFeePending: totalPendingRegBalance,
+          totalPendingBalance: totalPendingSubBalance,
           subscriptionRevenueCollected: totalSubRevenue,
           totalRevenueCollected: totalSubRevenue + totalRegRevenue,
           revenueChartData: revenueChart,
