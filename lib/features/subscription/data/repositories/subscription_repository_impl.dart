@@ -95,6 +95,8 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
         'paidAmount': subPaid,
         'balanceAmount': subBalance,
         'paymentStatus': subPaymentStatus,
+        'registrationFeeAmount': totalRegAmount,
+        'registrationFeePaid': regPaidInThisSub,
         'updatedById': updatedById,
         'ownerId': ownerId,
       };
@@ -111,6 +113,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
         'validityUnit': validityUnit,
         'price': subPrice,
         'paidAmount': subPaid,
+        'registrationFeePaid': regPaidInThisSub,
         'balanceAmount': subBalance,
         'paymentMode': paymentMode ?? 'Cash',
         'createdAt': ServerValue.timestamp,
@@ -454,79 +457,84 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
           registrationFeeAmount ??
           (data['registrationFeeAmount'] ?? 0.0).toDouble();
       final double regPaid = (data['registrationFeePaid'] ?? 0.0).toDouble();
+      final double oldPaid = (data['paidAmount'] ?? 0.0).toDouble();
       final double subPaid =
-          paidAmount ?? (data['paidAmount'] ?? 0.0).toDouble();
+          paidAmount ?? oldPaid;
+      final double paymentDifference = subPaid - oldPaid;
+      final bool isBalanceCollection = paymentDifference > 0 && 
+          price == (data['price'] as num? ?? 0.0).toDouble();
+      
       final double subPrice = price;
       final double balance = subPrice - subPaid;
       final String paymentStatus = balance <= 0
           ? 'paid'
           : (subPaid <= 0 ? 'unpaid' : 'partial');
-
-      final Map<String, dynamic> updates = {};
-
-      updates['subscriptions/$subscriptionId'] = {
-        ...data,
-        'endDate': endDate.millisecondsSinceEpoch,
-        'price': subPrice,
-        'paidAmount': subPaid,
-        'balanceAmount': balance,
-        'paymentStatus': paymentStatus,
-        'status': status ?? data['status'],
-        'updatedAt': ServerValue.timestamp,
-        'updatedById': updatedById,
-      };
-
-      final shopId = data['shopId'] ?? '';
-      final customerId = data['customerId'] ?? '';
-      final productId = data['productId'] ?? '';
-      final logId =
-          _database.ref().push().key ??
-          DateTime.now().millisecondsSinceEpoch.toString();
-
-      final Map<String, dynamic> extraUpdates = {};
-
-      // Update customer record if status or registration fee was provided
-      if (customerId.isNotEmpty) {
-        if (status != null && productId.isNotEmpty) {
-          extraUpdates['customers/$customerId/assignedProductIds/$productId'] =
-              status;
-        }
-        if (registrationFeeAmount != null) {
-          extraUpdates['customers/$customerId/registrationFeeAmount'] =
-              registrationFeeAmount;
-          extraUpdates['customers/$customerId/registrationFeeStatus'] =
-              regFee <= 0
-              ? 'paid'
-              : (regPaid >= regFee
-                    ? 'paid'
-                    : (regPaid > 0 ? 'partial' : 'unpaid'));
-        }
-        if (extraUpdates.isNotEmpty) {
-          extraUpdates['customers/$customerId/updatedAt'] =
-              ServerValue.timestamp;
-          extraUpdates['customers/$customerId/updatedById'] = updatedById;
-        }
-      }
-
-      extraUpdates['subscription_logs/$shopId/$logId'] = {
-        'logId': logId,
-        'subscriptionId': subscriptionId,
-        'customerId': customerId,
-        'shopId': shopId,
-        'action': 'edit',
-        'status': status ?? data['status'],
-        'endDate': endDate.millisecondsSinceEpoch,
-        'price': price,
-        'paidAmount': paidAmount, // Only if explicitly passed in edit
-        'balanceAmount': balance,
-        'paymentMode': paymentMode,
-        'createdAt': ServerValue.timestamp,
-        'createdById': updatedById,
-        'updatedById': updatedById,
-        'description': 'Subscription details corrected.',
-        'ownerId': data['ownerId'] ?? '',
-        'productId': productId,
-      };
+ 
+       final Map<String, dynamic> updates = {};
+ 
+       updates['subscriptions/$subscriptionId'] = {
+         ...data,
+         'endDate': endDate.millisecondsSinceEpoch,
+         'price': subPrice,
+         'paidAmount': subPaid,
+         'balanceAmount': balance,
+         'paymentStatus': paymentStatus,
+         'status': status ?? data['status'],
+         'updatedAt': ServerValue.timestamp,
+         'updatedById': updatedById,
+       };
+ 
+       final shopId = data['shopId'] ?? '';
+       final customerId = data['customerId'] ?? '';
+       final productId = data['productId'] ?? '';
+       final logId =
+           _database.ref().push().key ??
+           DateTime.now().millisecondsSinceEpoch.toString();
+ 
+       final Map<String, dynamic> extraUpdates = {};
+ 
+       // Update customer record if status or registration fee was provided
+       if (customerId.isNotEmpty) {
+         if (status != null && productId.isNotEmpty) {
+           extraUpdates['customers/$customerId/assignedProductIds/$productId'] =
+               status;
+         }
+         if (registrationFeeAmount != null) {
+           extraUpdates['customers/$customerId/registrationFeeAmount'] =
+               registrationFeeAmount;
+           extraUpdates['customers/$customerId/registrationFeeStatus'] =
+               regFee <= 0
+               ? 'paid'
+               : (regPaid >= regFee
+                     ? 'paid'
+                     : (regPaid > 0 ? 'partial' : 'unpaid'));
+         }
+         if (extraUpdates.isNotEmpty) {
+           extraUpdates['customers/$customerId/updatedAt'] =
+               ServerValue.timestamp;
+           extraUpdates['customers/$customerId/updatedById'] = updatedById;
+         }
+       }
+ 
+       extraUpdates['subscription_logs/$shopId/$logId'] = {
+         'logId': logId,
+         'subscriptionId': subscriptionId,
+         'customerId': customerId,
+         'shopId': shopId,
+         'action': isBalanceCollection ? 'payment' : 'edit',
+         'status': status ?? data['status'],
+         'endDate': endDate.millisecondsSinceEpoch,
+         'price': price,
+         'paidAmount': paymentDifference > 0 ? paymentDifference : (paidAmount != null ? paidAmount : null),
+         'balanceAmount': balance,
+         'paymentMode': paymentMode,
+         'createdAt': ServerValue.timestamp,
+         'createdById': updatedById,
+         'updatedById': updatedById,
+         'description': isBalanceCollection ? 'Balance collected.' : 'Subscription details corrected.',
+         'ownerId': data['ownerId'] ?? '',
+         'productId': productId,
+       };
 
       if (extraUpdates.isNotEmpty) {
         updates.addAll(

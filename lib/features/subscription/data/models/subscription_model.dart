@@ -17,6 +17,8 @@ class SubscriptionModel extends SubscriptionEntity {
     super.paidAmount = 0.0,
     super.balanceAmount = 0.0,
     super.paymentStatus = 'paid',
+    super.registrationFeeAmount = 0.0,
+    super.registrationFeePaid = 0.0,
     required super.updatedById,
     required super.ownerId,
   });
@@ -46,6 +48,10 @@ class SubscriptionModel extends SubscriptionEntity {
           .toDouble(), // Default to price for legacy
       balanceAmount: (json['balanceAmount'] ?? 0.0).toDouble(),
       paymentStatus: json['paymentStatus'] ?? 'paid',
+      registrationFeeAmount:
+          (json['registrationFeeAmount'] as num? ?? 0.0).toDouble(),
+      registrationFeePaid:
+          (json['registrationFeePaid'] as num? ?? 0.0).toDouble(),
       updatedById: json['updatedById'] ?? '',
       ownerId: json['ownerId'] ?? '',
     );
@@ -84,6 +90,8 @@ class SubscriptionModel extends SubscriptionEntity {
       'paidAmount': paidAmount,
       'balanceAmount': balanceAmount,
       'paymentStatus': paymentStatus,
+      'registrationFeeAmount': registrationFeeAmount,
+      'registrationFeePaid': registrationFeePaid,
       'updatedById': updatedById,
       'ownerId': ownerId,
     };

@@ -18,6 +18,7 @@ class SubscriptionLogModel extends SubscriptionLogEntity {
     super.productName,
     super.productId,
     super.status,
+    super.registrationFeePaid,
   });
 
   factory SubscriptionLogModel.fromJson(Map<dynamic, dynamic> json, String id) {
@@ -61,6 +62,11 @@ class SubscriptionLogModel extends SubscriptionLogEntity {
       productName: json['productName'] as String?,
       productId: json['productId'] as String?,
       status: json['status'] as String?,
+      registrationFeePaid: json['registrationFeePaid'] != null
+          ? (json['registrationFeePaid'] is int
+                ? (json['registrationFeePaid'] as int).toDouble()
+                : json['registrationFeePaid'])
+          : null,
     );
   }
 
@@ -94,6 +100,7 @@ class SubscriptionLogModel extends SubscriptionLogEntity {
       if (paymentMode != null) 'paymentMode': paymentMode,
       if (productName != null) 'productName': productName,
       if (status != null) 'status': status,
+      if (registrationFeePaid != null) 'registrationFeePaid': registrationFeePaid,
     };
   }
 }

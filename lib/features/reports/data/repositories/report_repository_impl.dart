@@ -12,7 +12,7 @@ class ReportRepositoryImpl implements ReportRepository {
   final FirebaseDatabase _database;
 
   ReportRepositoryImpl({required FirebaseDatabase database})
-      : _database = database;
+    : _database = database;
 
   @override
   Future<Either<Failure, ReportEntity>> getReport({
@@ -40,19 +40,34 @@ class ReportRepositoryImpl implements ReportRepository {
 
       // ── Fetch Data ────────────────────────────────────────────────────────
       final results = await Future.wait([
-        _database.ref().child('customers').orderByChild('ownerId').equalTo(ownerId).get(),
-        _database.ref().child('subscriptions').orderByChild('ownerId').equalTo(ownerId).get(),
+        _database
+            .ref()
+            .child('customers')
+            .orderByChild('ownerId')
+            .equalTo(ownerId)
+            .get(),
+        _database
+            .ref()
+            .child('subscriptions')
+            .orderByChild('ownerId')
+            .equalTo(ownerId)
+            .get(),
         _database.ref().child('subscription_logs').child(shopId).get(),
-        _database.ref().child('products').orderByChild('ownerId').equalTo(ownerId).get(),
+        _database
+            .ref()
+            .child('products')
+            .orderByChild('ownerId')
+            .equalTo(ownerId)
+            .get(),
       ]);
-      
+
       final DataSnapshot customerSnap = results[0];
       final DataSnapshot subSnap = results[1];
       final DataSnapshot logSnap = results[2];
       final DataSnapshot productSnap = results[3];
 
       // ── Robust Parsing ───────────────────────────────────────────────────
-      List<CustomerModel> _parseCustomers() {
+      List<CustomerModel> parseCustomers() {
         final list = <CustomerModel>[];
         if (customerSnap.value != null) {
           final data = customerSnap.value as Map<dynamic, dynamic>;
@@ -66,7 +81,7 @@ class ReportRepositoryImpl implements ReportRepository {
         return list;
       }
 
-      List<SubscriptionModel> _parseSubs() {
+      List<SubscriptionModel> parseSubs() {
         final list = <SubscriptionModel>[];
         if (subSnap.value != null) {
           final data = subSnap.value as Map<dynamic, dynamic>;
@@ -80,18 +95,23 @@ class ReportRepositoryImpl implements ReportRepository {
         return list;
       }
 
-      List<SubscriptionLogModel> _parseLogs() {
+      List<SubscriptionLogModel> parseLogs() {
         final list = <SubscriptionLogModel>[];
         if (logSnap.value != null) {
           final data = logSnap.value as Map<dynamic, dynamic>;
           data.forEach((key, val) {
-            list.add(SubscriptionLogModel.fromJson(Map<String, dynamic>.from(val as Map), key.toString()));
+            list.add(
+              SubscriptionLogModel.fromJson(
+                Map<String, dynamic>.from(val as Map),
+                key.toString(),
+              ),
+            );
           });
         }
         return list;
       }
 
-      List<ProductModel> _parseProducts() {
+      List<ProductModel> parseProducts() {
         final list = <ProductModel>[];
         if (productSnap.value != null) {
           final data = productSnap.value as Map<dynamic, dynamic>;
@@ -105,72 +125,90 @@ class ReportRepositoryImpl implements ReportRepository {
         return list;
       }
 
-      final allCustomers = _parseCustomers();
-      final allSubscriptions = _parseSubs();
-      final allLogs = _parseLogs();
-      final allProducts = _parseProducts();
+      final allCustomers = parseCustomers();
+      final allSubscriptions = parseSubs();
+      final allLogs = parseLogs();
+      final allProducts = parseProducts();
 
       // ── Helper: Date Range Check ──────────────────────────────────────────
       bool isInFilterRange(DateTime dt) {
-        if (dt.year == 1970) return false; // Never count legacy fallback as "New Activity"
+        if (dt.year == 1970)
+          return false; // Never count legacy fallback as "New Activity"
         final local = dt.toLocal();
         return !local.isBefore(rangeFrom) && !local.isAfter(rangeTo);
       }
 
       bool isBeforeFilterEnd(DateTime dt) {
-        if (dt.year == 1970) return true; // Legacy records are always "Historical"
+        if (dt.year == 1970)
+          return true; // Legacy records are always "Historical"
         return !dt.toLocal().isAfter(rangeTo);
       }
 
       // ── Metrics Generation ────────────────────────────────────────────────
-      
+
       // Activity for the selected period
-      final filteredLogs = allLogs.where((l) => isInFilterRange(l.createdAt)).toList();
-      
+      final filteredLogs = allLogs
+          .where((l) => isInFilterRange(l.createdAt))
+          .toList();
+
       // For Subscriptions: If createdAt is missing (1970), fallback to startDate for activity matching
       final filteredSubs = allSubscriptions.where((s) {
-        final dateToUse = (s.createdAt.year == 1970) ? s.startDate : s.createdAt;
+        final dateToUse = (s.createdAt.year == 1970)
+            ? s.startDate
+            : s.createdAt;
         return isInFilterRange(dateToUse);
       }).toList();
 
-      final filteredCusts = allCustomers.where((c) => isInFilterRange(c.createdAt)).toList();
+      final filteredCusts = allCustomers
+          .where((c) => isInFilterRange(c.createdAt))
+          .toList();
 
       // New Joinees/Subs (Always trust actual object count over logs)
       final newJoiners = filteredCusts.length;
       final newSubsCount = filteredSubs.length;
 
-      // REVENUE CALCULATION (Hybrid Approach)
-      double logSubRevenue = 0.0;
-      double logRegRevenue = 0.0;
-      for (var l in filteredLogs) {
-        logSubRevenue += (l.paidAmount ?? 0.0);
-        logRegRevenue += (l.registrationFeePaid ?? 0.0);
-      }
+      // REVENUE CALCULATION (Independent Aggregation)
+      double totalSubRevenue = 0.0;
+      double totalRegRevenue = 0.0;
 
-      double subFallbackRevenue = 0.0;
-      double regFallbackRevenue = 0.0;
-      for (var s in filteredSubs) {
-        subFallbackRevenue += s.paidAmount;
-        regFallbackRevenue += s.registrationFeePaid;
-      }
-      
-      for (var c in filteredCusts) {
-        // Fallback for cases where registrationFeePaid wasn't captured in logs/subs
-        // but only if it's not already counted via regFallbackRevenue (logs/subs are more accurate for timeline)
-        // However, for the total revenue metrics, we want to be as inclusive as possible.
-        // We'll trust the customer record as a secondary fallback.
-        if (logRegRevenue <= 0 && regFallbackRevenue <= 0) {
-           regFallbackRevenue += c.registrationFeePaidAmount;
+      // 1. Use Logs as the primary source of truth for transactions
+      if (filteredLogs.isNotEmpty) {
+        for (var l in filteredLogs) {
+          totalSubRevenue += (l.paidAmount ?? 0.0);
+          totalRegRevenue += (l.registrationFeePaid ?? 0.0);
+        }
+      } else {
+        // 2. Fallback to Subscriptions if no logs exist (legacy or edge case)
+        for (var s in filteredSubs) {
+          totalSubRevenue += s.paidAmount;
+          totalRegRevenue += s.registrationFeePaid;
         }
       }
 
-      // Final Revenue Logic: Take the maximum of logs or explicit source models 
-      // to ensure no transaction drops.
-      final totalSubRevenue = logSubRevenue > subFallbackRevenue ? logSubRevenue : subFallbackRevenue;
-      final totalRegRevenue = logRegRevenue > regFallbackRevenue ? logRegRevenue : regFallbackRevenue;
+      // 3. For Registration Fees: Ensure new customers who paid but aren't in logs/subs are counted
+      // (e.g., if a customer was added with 0 plan fee but >0 reg fee, and somehow no log was generated)
+      final Set<String> customersWithRegInLogs = filteredLogs
+          .where((l) => (l.registrationFeePaid ?? 0) > 0)
+          .map((l) => l.customerId)
+          .toSet();
+      final Set<String> customersWithRegInSubs = filteredSubs
+          .where((s) => s.registrationFeePaid > 0)
+          .map((s) => s.customerId)
+          .toSet();
+
+      for (var c in filteredCusts) {
+        if (!customersWithRegInLogs.contains(c.customerId) &&
+            !customersWithRegInSubs.contains(c.customerId)) {
+          if (c.registrationFeePaidAmount > 0) {
+            totalRegRevenue += c.registrationFeePaidAmount;
+          }
+        }
+      }
 
       // Historical Status (Cards)
-      final historicalCusts = allCustomers.where((c) => isBeforeFilterEnd(c.createdAt)).toList();
+      final historicalCusts = allCustomers
+          .where((c) => isBeforeFilterEnd(c.createdAt))
+          .toList();
       final historicalSubs = allSubscriptions.where((s) {
         final start = s.startDate.toLocal();
         final end = s.endDate.toLocal();
@@ -178,9 +216,14 @@ class ReportRepositoryImpl implements ReportRepository {
       }).toList();
 
       final totalCustCount = historicalCusts.length;
-      final activeCustCount = historicalSubs.map((s) => s.customerId).toSet().length;
+      final activeCustCount = historicalSubs
+          .map((s) => s.customerId)
+          .toSet()
+          .length;
       final activeSubCount = historicalSubs.length;
-      final expiredCount = historicalSubs.where((s) => s.endDate.toLocal().isBefore(rangeFrom)).length;
+      final expiredCount = historicalSubs
+          .where((s) => s.endDate.toLocal().isBefore(rangeFrom))
+          .length;
       final expiringSoonCount = historicalSubs.where((s) {
         final days = s.endDate.toLocal().difference(rangeTo).inDays;
         return days >= 0 && days <= 7;
@@ -195,9 +238,16 @@ class ReportRepositoryImpl implements ReportRepository {
           latestPerPlan[key] = s;
         }
       }
-      final pendingBalanceTotal = latestPerPlan.values.fold<double>(0.0, (sum, s) => sum + (s.balanceAmount > 0 ? s.balanceAmount : 0));
+      final pendingBalanceTotal = latestPerPlan.values.fold<double>(
+        0.0,
+        (sum, s) => sum + (s.balanceAmount > 0 ? s.balanceAmount : 0),
+      );
       final pendingRegTotal = allCustomers.fold<double>(0.0, (sum, c) {
-        final double due = (c.registrationFeeAmount - c.registrationFeePaidAmount).clamp(0, double.infinity);
+        final double due =
+            (c.registrationFeeAmount - c.registrationFeePaidAmount).clamp(
+              0,
+              double.infinity,
+            );
         return sum + due;
       });
 
@@ -252,41 +302,50 @@ class ReportRepositoryImpl implements ReportRepository {
       }).toList();
 
       // Product Breakdown
-      final productBreakdownList = allProducts.where((p) => p.status == 'active').map((prod) {
-        final pid = prod.productId;
-        final pSubs = historicalSubs.where((s) => s.productId == pid).toList();
-        final pExpired = pSubs.where((s) => s.endDate.toLocal().isBefore(rangeFrom)).length;
-        final pExpiring = pSubs.where((s) {
-          final days = s.endDate.toLocal().difference(rangeTo).inDays;
-          return days >= 0 && days <= 7;
-        }).length;
-        return ProductReportEntry(
-          productId: pid,
-          productName: prod.name,
-          activeCount: pSubs.length - pExpired,
-          expiringCount: pExpiring,
-          expiredCount: pExpired,
-        );
-      }).toList();
+      final productBreakdownList = allProducts
+          .where((p) => p.status == 'active')
+          .map((prod) {
+            final pid = prod.productId;
+            final pSubs = historicalSubs
+                .where((s) => s.productId == pid)
+                .toList();
+            final pExpired = pSubs
+                .where((s) => s.endDate.toLocal().isBefore(rangeFrom))
+                .length;
+            final pExpiring = pSubs.where((s) {
+              final days = s.endDate.toLocal().difference(rangeTo).inDays;
+              return days >= 0 && days <= 7;
+            }).length;
+            return ProductReportEntry(
+              productId: pid,
+              productName: prod.name,
+              activeCount: pSubs.length - pExpired,
+              expiringCount: pExpiring,
+              expiredCount: pExpired,
+            );
+          })
+          .toList();
 
-      return Right(ReportEntity(
-        totalCustomers: totalCustCount,
-        activeCustomers: activeCustCount,
-        inactiveCustomers: totalCustCount - activeCustCount,
-        activeSubscriptions: activeSubCount,
-        expiringSoonSubscriptions: expiringSoonCount,
-        expiredSubscriptions: expiredCount,
-        newJoiners: newJoiners,
-        newSubscriptions: newSubsCount,
-        registrationFeeCollected: totalRegRevenue,
-        registrationFeePending: pendingRegTotal,
-        totalPendingBalance: pendingBalanceTotal,
-        subscriptionRevenueCollected: totalSubRevenue,
-        totalRevenueCollected: totalSubRevenue + totalRegRevenue,
-        revenueChartData: revenueChart,
-        filter: filter,
-        productBreakdown: productBreakdownList,
-      ));
+      return Right(
+        ReportEntity(
+          totalCustomers: totalCustCount,
+          activeCustomers: activeCustCount,
+          inactiveCustomers: totalCustCount - activeCustCount,
+          activeSubscriptions: activeSubCount,
+          expiringSoonSubscriptions: expiringSoonCount,
+          expiredSubscriptions: expiredCount,
+          newJoiners: newJoiners,
+          newSubscriptions: newSubsCount,
+          registrationFeeCollected: totalRegRevenue,
+          registrationFeePending: pendingRegTotal,
+          totalPendingBalance: pendingBalanceTotal,
+          subscriptionRevenueCollected: totalSubRevenue,
+          totalRevenueCollected: totalSubRevenue + totalRegRevenue,
+          revenueChartData: revenueChart,
+          filter: filter,
+          productBreakdown: productBreakdownList,
+        ),
+      );
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }
