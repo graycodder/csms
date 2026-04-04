@@ -146,10 +146,17 @@ class ReportRepositoryImpl implements ReportRepository {
       // Period Activity
 
       // Period Activity
-      final List<SubscriptionLogModel> periodLogs = allLogs.where((l) => 
-        l.createdAt.toLocal().isAfter(rangeFrom.subtract(const Duration(milliseconds: 1))) && 
-        l.createdAt.toLocal().isBefore(rangeTo.add(const Duration(milliseconds: 1)))
-      ).toList();
+      final List<SubscriptionLogModel> periodLogs = allLogs
+          .where(
+            (l) =>
+                l.createdAt.toLocal().isAfter(
+                  rangeFrom.subtract(const Duration(milliseconds: 1)),
+                ) &&
+                l.createdAt.toLocal().isBefore(
+                  rangeTo.add(const Duration(milliseconds: 1)),
+                ),
+          )
+          .toList();
 
       final List<SubscriptionModel> newSubs = allSubscriptions.where((s) {
         final dateToUse = s.createdAt.year == 1970 ? s.startDate : s.createdAt;
@@ -168,62 +175,54 @@ class ReportRepositoryImpl implements ReportRepository {
 
       // 1. Sum all payments from logs in the period
       final Map<String, double> loggedSubPaidMap = {}; // subscriptionId -> sum
-      final Map<String, double> loggedRegPaidMap = {}; // customerId -> sum
 
       for (var l in periodLogs) {
         if (l.action == 'payment') {
           final sPaid = l.paidAmount ?? 0.0;
-          final rPaid = l.registrationFeePaid ?? 0.0;
           totalSubRevenue += sPaid;
-          totalRegRevenue += rPaid;
-          
+
           if (l.subscriptionId != null) {
-            loggedSubPaidMap[l.subscriptionId!] = (loggedSubPaidMap[l.subscriptionId!] ?? 0.0) + sPaid;
+            loggedSubPaidMap[l.subscriptionId!] =
+                (loggedSubPaidMap[l.subscriptionId!] ?? 0.0) + sPaid;
           }
-          loggedRegPaidMap[l.customerId] = (loggedRegPaidMap[l.customerId] ?? 0.0) + rPaid;
         }
       }
 
       // 2. Fallback for New Subscriptions: Add what's missing from logs
       for (var s in newSubs) {
         final double logged = loggedSubPaidMap[s.subscriptionId] ?? 0.0;
-        final double missing = (s.paidAmount - logged).clamp(0, double.infinity);
+        final double missing = (s.paidAmount - logged).clamp(
+          0,
+          double.infinity,
+        );
         totalSubRevenue += missing;
-        
-        // Also check if reg fee was skipped in logs
-        final double regLogged = loggedRegPaidMap[s.customerId] ?? 0.0;
-        final double regMissing = (s.registrationFeePaid - regLogged).clamp(0, double.infinity);
-        totalRegRevenue += regMissing;
-        
-        // Update map so we don't count it again in newCustomers fallback
-        loggedRegPaidMap[s.customerId] = regLogged + regMissing;
       }
 
       // 3. Fallback for New Customers: Add remaining reg fee missing from logs/subs
       for (var c in newCustomers) {
-        final double logged = loggedRegPaidMap[c.customerId] ?? 0.0;
-        final double missing = (c.registrationFeePaidAmount - logged).clamp(0, double.infinity);
-        totalRegRevenue += missing;
+        totalRegRevenue += c.registrationFeePaidAmount;
       }
 
       // ── HISTORICAL STATUS: Snapshot as of rangeTo ────────────────────────
       // 1. All customers created before or at rangeTo
-      final customersInScope = allCustomers.where((c) => 
-        !c.createdAt.toLocal().isAfter(rangeTo)
-      ).toList();
+      final customersInScope = allCustomers
+          .where((c) => !c.createdAt.toLocal().isAfter(rangeTo))
+          .toList();
 
       // 2. Customers currently marked as 'active' (case-insensitive)
-      final activeStatusCustomers = customersInScope.where((c) => 
-        c.status.toLowerCase() == 'active'
-      ).toList();
-      final activeStatusCustomerIds = activeStatusCustomers.map((c) => c.customerId).toSet();
+      final activeStatusCustomers = customersInScope
+          .where((c) => c.status.toLowerCase() == 'active')
+          .toList();
+      final activeStatusCustomerIds = activeStatusCustomers
+          .map((c) => c.customerId)
+          .toSet();
 
       // 3. Subscription pools (Snapshot as of rangeTo)
       // Any subscription with status == 'active' is considered a member's current plan pool
       final activeStatusSubs = allSubscriptions.where((s) {
         final isStatusActive = s.status.toLowerCase() == 'active';
         // Member must also be an 'active' status customer
-        return isStatusActive && activeStatusCustomerIds.contains(s.customerId); 
+        return isStatusActive && activeStatusCustomerIds.contains(s.customerId);
       }).toList();
 
       // CATEGORIZE THE POOL:
@@ -244,8 +243,10 @@ class ReportRepositoryImpl implements ReportRepository {
         return days >= 0 && days <= expiringThreshold;
       }).toList();
 
-      final Set<String> activeMemberIds = activeSubsAtEnd.map((s) => s.customerId).toSet();
-      
+      final Set<String> activeMemberIds = activeSubsAtEnd
+          .map((s) => s.customerId)
+          .toSet();
+
       // 4. Counts
       final activeCount = activeMemberIds.length;
       final inactiveCount = customersInScope.length - activeCount;
@@ -260,11 +261,20 @@ class ReportRepositoryImpl implements ReportRepository {
           latestPerPlan[key] = s;
         }
       }
-      final double totalPendingSubBalance = latestPerPlan.values.fold(0.0, 
-        (sum, s) => sum + (s.balanceAmount > 0 ? s.balanceAmount : 0));
-        
-      final double totalPendingRegBalance = allCustomers.fold(0.0, 
-        (sum, c) => sum + (c.registrationFeeAmount - c.registrationFeePaidAmount).clamp(0, double.infinity));
+      final double totalPendingSubBalance = latestPerPlan.values.fold(
+        0.0,
+        (sum, s) => sum + (s.balanceAmount > 0 ? s.balanceAmount : 0),
+      );
+
+      final double totalPendingRegBalance = activeStatusCustomers.fold(
+        0.0,
+        (sum, c) =>
+            sum +
+            (c.registrationFeeAmount - c.registrationFeePaidAmount).clamp(
+              0,
+              double.infinity,
+            ),
+      );
 
       // ── CHART DATA ────────────────────────────────────────────────────────
       final Map<DateTime, double> hourlyRev = {};
@@ -284,38 +294,33 @@ class ReportRepositoryImpl implements ReportRepository {
           : DateTime(dt.year, dt.month, dt.day);
 
       for (var s in newSubs) {
-         final b = getBucket(s.createdAt.toLocal());
-         if (hourlyRev.containsKey(b)) {
-            final double logged = loggedSubPaidMap[s.subscriptionId] ?? 0.0;
-            final double missing = (s.paidAmount - logged).clamp(0, double.infinity);
-            
-            final double regLogged = loggedRegPaidMap[s.customerId] ?? 0.0;
-            final double regMissing = (s.registrationFeePaid - regLogged).clamp(0, double.infinity);
-            
-            hourlyRev[b] = (hourlyRev[b] ?? 0.0) + missing + regMissing;
-            
-            // Update maps to avoid double-counting in newCustomers
-            loggedRegPaidMap[s.customerId] = regLogged + regMissing;
-         }
+        final b = getBucket(s.createdAt.toLocal());
+        if (hourlyRev.containsKey(b)) {
+          final double logged = loggedSubPaidMap[s.subscriptionId] ?? 0.0;
+          final double missing = (s.paidAmount - logged).clamp(
+            0,
+            double.infinity,
+          );
+
+          hourlyRev[b] = (hourlyRev[b] ?? 0.0) + missing;
+        }
       }
-      
+
       for (var c in newCustomers) {
-         final b = getBucket(c.createdAt.toLocal());
-         if (hourlyRev.containsKey(b)) {
-            final double logged = loggedRegPaidMap[c.customerId] ?? 0.0;
-            final double missing = (c.registrationFeePaidAmount - logged).clamp(0, double.infinity);
-            hourlyRev[b] = (hourlyRev[b] ?? 0.0) + missing;
-         }
+        final b = getBucket(c.createdAt.toLocal());
+        if (hourlyRev.containsKey(b)) {
+          hourlyRev[b] = (hourlyRev[b] ?? 0.0) + c.registrationFeePaidAmount;
+        }
       }
 
       final List<DateTime> sortedKeys = hourlyRev.keys.toList()
         ..sort((a, b) => a.compareTo(b));
-        
+
       final List<ChartDataPoint> revenueChart = sortedKeys.map((dt) {
-          final label = (filter == ReportFilter.daily)
-              ? '${dt.hour.toString().padLeft(2, '0')}:00'
-              : '${dt.day}/${dt.month}';
-          return ChartDataPoint(label, hourlyRev[dt]!);
+        final label = (filter == ReportFilter.daily)
+            ? '${dt.hour.toString().padLeft(2, '0')}:00'
+            : '${dt.day}/${dt.month}';
+        return ChartDataPoint(label, hourlyRev[dt]!);
       }).toList();
 
       // ── PRODUCT BREAKDOWN ──────────────────────────────────────────────────
@@ -323,9 +328,15 @@ class ReportRepositoryImpl implements ReportRepository {
           .where((p) => p.status.toLowerCase() == 'active')
           .map((prod) {
             final pid = prod.productId;
-            final pActive = activeSubsAtEnd.where((s) => s.productId == pid).length;
-            final pExpiring = expiringSoonSubs.where((s) => s.productId == pid).length;
-            final pExpired = expiredSubsAtEnd.where((s) => s.productId == pid).length;
+            final pActive = activeSubsAtEnd
+                .where((s) => s.productId == pid)
+                .length;
+            final pExpiring = expiringSoonSubs
+                .where((s) => s.productId == pid)
+                .length;
+            final pExpired = expiredSubsAtEnd
+                .where((s) => s.productId == pid)
+                .length;
 
             return ProductReportEntry(
               productId: pid,
