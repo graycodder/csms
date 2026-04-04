@@ -371,7 +371,7 @@ class _DailyReportViewState extends State<DailyReportView> {
         ),
         _buildActivityCard(
           'Active Members',
-          report.activeSubscriptions.toString(),
+          report.activeCustomers.toString(),
           Icons.group,
           const Color(0xFFE0F7FA),
           const Color(0xFF00838F),

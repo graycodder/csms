@@ -195,18 +195,32 @@ class ReportRepositoryImpl implements ReportRepository {
       }
 
       // ── HISTORICAL STATUS: Snapshot as of rangeTo ────────────────────────
-      // Someone is active if they have ANY subscription that exists at rangeTo
-      // i.e. startDate <= rangeTo AND endDate >= rangeTo
+      // 1. All customers created before or at rangeTo
+      final customersInScope = allCustomers.where((c) => 
+        !c.createdAt.toLocal().isAfter(rangeTo)
+      ).toList();
+
+      // 2. Customers currently marked as 'active' (case-insensitive)
+      final activeStatusCustomers = customersInScope.where((c) => 
+        c.status.toLowerCase() == 'active'
+      ).toList();
+      final activeStatusCustomerIds = activeStatusCustomers.map((c) => c.customerId).toSet();
+
+      // 3. Subscriptions active snapshot (status check + date check)
       final activeSubsAtEnd = allSubscriptions.where((s) {
         final start = s.startDate.toLocal();
         final end = s.endDate.toLocal();
-        return !start.isAfter(rangeTo) && !end.isBefore(rangeFrom); 
+        final isDateActive = !start.isAfter(rangeTo) && !end.isBefore(rangeTo);
+        final isStatusActive = s.status.toLowerCase() == 'active';
+        // Member must also be an 'active' status customer
+        return isStatusActive && isDateActive && activeStatusCustomerIds.contains(s.customerId); 
       }).toList();
 
-      final Set<String> activeCustomerIds = activeSubsAtEnd.map((s) => s.customerId).toSet();
+      final Set<String> activeMemberIds = activeSubsAtEnd.map((s) => s.customerId).toSet();
       
-      // Cumulative Stats (created before or at rangeTo)
-      final customersBeforeEnd = allCustomers.where((c) => !c.createdAt.toLocal().isAfter(rangeTo)).toList();
+      // 4. Counts
+      final activeCount = activeMemberIds.length;
+      final inactiveCount = customersInScope.length - activeCount;
 
       // Expiring Soon: Active subs ending in the next 7 days from rangeTo
       final expiringSoonSubs = activeSubsAtEnd.where((s) {
@@ -214,8 +228,8 @@ class ReportRepositoryImpl implements ReportRepository {
         return days >= 0 && days <= 7;
       }).toList();
 
-      // Expired: Total ever expired as of rangeTo
-      final expiredCount = allSubscriptions.where((s) => s.endDate.toLocal().isBefore(rangeFrom)).length;
+      // Expired: Total subscriptions that ended before rangeTo
+      final expiredCount = allSubscriptions.where((s) => s.endDate.toLocal().isBefore(rangeTo)).length;
 
       // ── PENDING CALCULATIONS: Current live state ──────────────────────────
       final Map<String, SubscriptionModel> latestPerPlan = {};
@@ -305,9 +319,9 @@ class ReportRepositoryImpl implements ReportRepository {
 
       return Right(
         ReportEntity(
-          totalCustomers: customersBeforeEnd.length,
-          activeCustomers: activeCustomerIds.length,
-          inactiveCustomers: (customersBeforeEnd.length - activeCustomerIds.length).clamp(0, 999999),
+          totalCustomers: customersInScope.length,
+          activeCustomers: activeCount,
+          inactiveCustomers: inactiveCount.clamp(0, 999999),
           activeSubscriptions: activeSubsAtEnd.length,
           expiringSoonSubscriptions: expiringSoonSubs.length,
           expiredSubscriptions: expiredCount,
