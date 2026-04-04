@@ -3,20 +3,22 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
 class LoadingOverlayHelper {
-  static OverlayEntry? _overlayEntry;
+  static Route? _loadingRoute;
   static Timer? _timeoutTimer;
 
   static void show(BuildContext context) {
-    if (_overlayEntry != null) return;
+    if (_loadingRoute != null) return;
 
-    _overlayEntry = OverlayEntry(
-      builder: (context) => Container(
-        color: Colors.black.withValues(alpha: 0.3),
-        child: const LoadingOverlay(),
-      ),
+    _loadingRoute = PageRouteBuilder(
+      opaque: false,
+      barrierColor: Colors.black.withValues(alpha: 0.3),
+      transitionDuration: Duration.zero,
+      reverseTransitionDuration: Duration.zero,
+      pageBuilder: (context, _, __) =>
+          const PopScope(canPop: false, child: LoadingOverlay()),
     );
 
-    Overlay.of(context).insert(_overlayEntry!);
+    Navigator.of(context, rootNavigator: true).push(_loadingRoute!);
 
     // Start a safety timeout to prevent permanent loading screens
     _timeoutTimer?.cancel();
@@ -28,13 +30,17 @@ class LoadingOverlayHelper {
   static void hide() {
     _timeoutTimer?.cancel();
     _timeoutTimer = null;
-    if (_overlayEntry == null) return;
-    try {
-      _overlayEntry?.remove();
-    } catch (_) {
-      // Ignore if already removed or detached
-    } finally {
-      _overlayEntry = null;
+
+    if (_loadingRoute != null) {
+      try {
+        if (_loadingRoute!.isActive) {
+          _loadingRoute!.navigator?.removeRoute(_loadingRoute!);
+        }
+      } catch (_) {
+        // Safe to ignore, route already detached.
+      } finally {
+        _loadingRoute = null;
+      }
     }
   }
 }
