@@ -59,12 +59,24 @@ class ReportRepositoryImpl implements ReportRepository {
             .orderByChild('ownerId')
             .equalTo(ownerId)
             .get(),
+        _database.ref().child('shops').child(shopId).get(),
       ]);
 
       final DataSnapshot customerSnap = results[0];
       final DataSnapshot subSnap = results[1];
       final DataSnapshot logSnap = results[2];
       final DataSnapshot productSnap = results[3];
+      final DataSnapshot shopSnap = results[4];
+
+      // ── Shop Settings (for threshold alignment) ──────────────────────────
+      int expiringThreshold = 30; // Dashboard default
+      if (shopSnap.exists) {
+        final shopData = Map<String, dynamic>.from(shopSnap.value as Map);
+        final settings = shopData['settings'] as Map?;
+        if (settings != null) {
+          expiringThreshold = settings['expiredDaysBefore'] ?? 30;
+        }
+      }
 
       // ── Robust Parsing ───────────────────────────────────────────────────
       List<CustomerModel> parseCustomers() {
@@ -206,14 +218,30 @@ class ReportRepositoryImpl implements ReportRepository {
       ).toList();
       final activeStatusCustomerIds = activeStatusCustomers.map((c) => c.customerId).toSet();
 
-      // 3. Subscriptions active snapshot (status check + date check)
-      final activeSubsAtEnd = allSubscriptions.where((s) {
-        final start = s.startDate.toLocal();
-        final end = s.endDate.toLocal();
-        final isDateActive = !start.isAfter(rangeTo) && !end.isBefore(rangeTo);
+      // 3. Subscription pools (Snapshot as of rangeTo)
+      // Any subscription with status == 'active' is considered a member's current plan pool
+      final activeStatusSubs = allSubscriptions.where((s) {
         final isStatusActive = s.status.toLowerCase() == 'active';
         // Member must also be an 'active' status customer
-        return isStatusActive && isDateActive && activeStatusCustomerIds.contains(s.customerId); 
+        return isStatusActive && activeStatusCustomerIds.contains(s.customerId); 
+      }).toList();
+
+      // CATEGORIZE THE POOL:
+      // Active: Plan is current (or starts in future)
+      final activeSubsAtEnd = activeStatusSubs.where((s) {
+        return !s.endDate.toLocal().isBefore(rangeTo);
+      }).toList();
+
+      // Expired: Plan status is 'active' but date is in the past
+      final expiredSubsAtEnd = activeStatusSubs.where((s) {
+        return s.endDate.toLocal().isBefore(rangeTo);
+      }).toList();
+
+      // Expiring Soon: Active plans ending in the next X days from rangeTo
+      // Matches Dashboard logic (threshold from shop settings)
+      final expiringSoonSubs = activeSubsAtEnd.where((s) {
+        final days = s.endDate.toLocal().difference(rangeTo).inDays;
+        return days >= 0 && days <= expiringThreshold;
       }).toList();
 
       final Set<String> activeMemberIds = activeSubsAtEnd.map((s) => s.customerId).toSet();
@@ -221,15 +249,7 @@ class ReportRepositoryImpl implements ReportRepository {
       // 4. Counts
       final activeCount = activeMemberIds.length;
       final inactiveCount = customersInScope.length - activeCount;
-
-      // Expiring Soon: Active subs ending in the next 7 days from rangeTo
-      final expiringSoonSubs = activeSubsAtEnd.where((s) {
-        final days = s.endDate.toLocal().difference(rangeTo).inDays;
-        return days >= 0 && days <= 7;
-      }).toList();
-
-      // Expired: Total subscriptions that ended before rangeTo
-      final expiredCount = allSubscriptions.where((s) => s.endDate.toLocal().isBefore(rangeTo)).length;
+      final expiredCount = expiredSubsAtEnd.length;
 
       // ── PENDING CALCULATIONS: Current live state ──────────────────────────
       final Map<String, SubscriptionModel> latestPerPlan = {};
@@ -300,17 +320,17 @@ class ReportRepositoryImpl implements ReportRepository {
 
       // ── PRODUCT BREAKDOWN ──────────────────────────────────────────────────
       final productBreakdownList = allProducts
-          .where((p) => p.status == 'active')
+          .where((p) => p.status.toLowerCase() == 'active')
           .map((prod) {
             final pid = prod.productId;
-            final pSubs = activeSubsAtEnd.where((s) => s.productId == pid).toList();
+            final pActive = activeSubsAtEnd.where((s) => s.productId == pid).length;
             final pExpiring = expiringSoonSubs.where((s) => s.productId == pid).length;
-            final pExpired = allSubscriptions.where((s) => s.productId == pid && s.endDate.toLocal().isBefore(rangeFrom)).length;
+            final pExpired = expiredSubsAtEnd.where((s) => s.productId == pid).length;
 
             return ProductReportEntry(
               productId: pid,
               productName: prod.name,
-              activeCount: pSubs.length,
+              activeCount: pActive,
               expiringCount: pExpiring,
               expiredCount: pExpired,
             );
