@@ -180,6 +180,7 @@ class UpdateSubscription extends CustomerEvent {
   final double? paidAmount;
   final String? paymentMode;
   final String? status;
+  final CustomerEntity? customer; // Add optional customer entity
 
   const UpdateSubscription({
     required this.subscriptionId,
@@ -195,6 +196,7 @@ class UpdateSubscription extends CustomerEvent {
     this.paidAmount,
     this.paymentMode,
     this.status,
+    this.customer,
   });
 
   @override
@@ -212,6 +214,7 @@ class UpdateSubscription extends CustomerEvent {
     updatedByName,
     customerName,
     status,
+    customer,
   ];
 }
 
@@ -366,6 +369,16 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
     Emitter<CustomerState> emit,
   ) async {
     emit(CustomerLoading());
+    
+    // Check and update customer entity first if provided
+    if (event.customer != null) {
+      final custResult = await customerRepository.updateCustomer(event.customer!);
+      if (custResult.isLeft()) {
+         emit(CustomerError(custResult.fold((l) => l.message, (r) => "Error updating customer details")));
+         return;
+      }
+    }
+
     final result = await subscriptionRepository.updateSubscription(
       subscriptionId: event.subscriptionId,
       endDate: event.endDate,

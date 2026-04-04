@@ -141,6 +141,7 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                     updatedByName: 'Staff',
                     customerName: updated.name,
                     status: sub.status,
+                    customer: updated, // Pass the fully updated entity
                   ),
                 );
               } else {
