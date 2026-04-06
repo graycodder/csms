@@ -43,6 +43,10 @@ class ReportEntity extends Equatable {
   // ── Per-product breakdown ──────────────────────────────────────────────────
   final List<ProductReportEntry> productBreakdown;
 
+  // ── Payment mode collection breakdown ─────────────────────────────────────
+  /// Keys are the normalised payment mode string (e.g. 'Cash', 'UPI', 'Card').
+  final Map<String, double> paymentModeBreakdown;
+
   const ReportEntity({
     required this.totalCustomers,
     required this.activeCustomers,
@@ -62,6 +66,7 @@ class ReportEntity extends Equatable {
     this.customStartDate,
     this.customEndDate,
     required this.productBreakdown,
+    this.paymentModeBreakdown = const {},
   });
 
   @override
@@ -84,6 +89,7 @@ class ReportEntity extends Equatable {
     customStartDate,
     customEndDate,
     productBreakdown,
+    paymentModeBreakdown,
   ];
 }
 

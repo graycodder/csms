@@ -124,7 +124,7 @@ class _DailyReportViewState extends State<DailyReportView> {
     DashboardLoaded dashState,
   ) {
     return Container(
-      color: Colors.grey[100], // Light cyan background to match the design
+      color: Colors.grey[100],
       child: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
         child: Column(
@@ -133,6 +133,8 @@ class _DailyReportViewState extends State<DailyReportView> {
             _buildReportTitleSection(dashState),
             SizedBox(height: 16.h),
             _buildRevenueHeroCard(report, term),
+            SizedBox(height: 10.h),
+            _buildPaymentModeCard(report),
             SizedBox(height: 10.h),
             _buildRevenueChart(report),
             SizedBox(height: 24.h),
@@ -473,13 +475,145 @@ class _DailyReportViewState extends State<DailyReportView> {
     );
   }
 
+  // ── Payment Mode Breakdown Card ─────────────────────────────────────────
+  Widget _buildPaymentModeCard(ReportEntity report) {
+    final modes = [
+      ('Cash', const Color(0xFF43A047), const Color(0xFFE8F5E9)),
+      ('UPI', const Color(0xFF1E88E5), const Color(0xFFE3F2FD)),
+      ('Card', const Color(0xFF8E24AA), const Color(0xFFF3E5F5)),
+      ('Bank Transfer', const Color(0xFF00897B), const Color(0xFFE0F2F1)),
+      ('Other', const Color(0xFF757575), const Color(0xFFF5F5F5)),
+    ];
+
+    final total = report.paymentModeBreakdown.values.fold(
+      0.0,
+      (s, v) => s + v,
+    );
+
+    final hasData = total > 0;
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(20.r),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Collection by Payment Mode',
+            style: TextStyle(
+              fontSize: 15.sp,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textDark,
+            ),
+          ),
+          SizedBox(height: 14.h),
+          if (hasData) ...
+            [
+              // Stacked progress bar
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8.r),
+                child: Row(
+                  children: modes.map((m) {
+                    final val = report.paymentModeBreakdown[m.$1] ?? 0.0;
+                    final frac = val / total;
+                    if (frac <= 0) return const SizedBox.shrink();
+                    return Flexible(
+                      flex: (frac * 1000).round(),
+                      child: Container(
+                        height: 10.h,
+                        color: m.$2,
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+              SizedBox(height: 16.h),
+            ]
+          else
+            Container(
+              height: 10.h,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+            ),
+          SizedBox(height: 16.h),
+          ...modes.map((m) {
+            final val = report.paymentModeBreakdown[m.$1] ?? 0.0;
+            final pct = hasData ? (val / total * 100) : 0.0;
+            return Padding(
+              padding: EdgeInsets.only(bottom: 10.h),
+              child: Row(
+                children: [
+                  Container(
+                    width: 10.w,
+                    height: 10.h,
+                    decoration: BoxDecoration(
+                      color: m.$2,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  SizedBox(width: 8.w),
+                  Expanded(
+                    child: Text(
+                      m.$1,
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textDark,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    '₹${val.toStringAsFixed(0)}',
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textDark,
+                    ),
+                  ),
+                  SizedBox(width: 8.w),
+                  SizedBox(
+                    width: 42.w,
+                    child: Text(
+                      '${pct.toStringAsFixed(1)}%',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        color: AppColors.textLight,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  // ── Revenue Bar Chart ───────────────────────────────────────────────────
   Widget _buildRevenueChart(ReportEntity report) {
     if (report.revenueChartData.isEmpty) return const SizedBox.shrink();
-    final double maxVal = report.revenueChartData.fold(
-      0,
-      (max, p) => p.value > max ? p.value : max,
-    );
-    final double yLimit = (maxVal * 1.2).ceilToDouble();
+
+    final nonZeroData = report.revenueChartData.where((p) => p.value > 0);
+    final double maxVal = nonZeroData.isEmpty
+        ? 100
+        : nonZeroData.fold(0.0, (m, p) => p.value > m ? p.value : m);
+    final double yLimit = (maxVal * 1.25).ceilToDouble();
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(20.r),
@@ -505,31 +639,32 @@ class _DailyReportViewState extends State<DailyReportView> {
               color: AppColors.textDark,
             ),
           ),
+          SizedBox(height: 4.h),
+          Text(
+            'Tap a bar to see the amount',
+            style: TextStyle(fontSize: 11.sp, color: AppColors.textLight),
+          ),
           SizedBox(height: 16.h),
-          Container(
+          SizedBox(
             height: 200.h,
-            padding: EdgeInsets.only(right: 16.w, top: 24.h),
-            child: LineChart(
-              LineChartData(
-                gridData: FlGridData(
-                  show: true,
-                  drawVerticalLine: false,
-                  getDrawingHorizontalLine: (value) =>
-                      const FlLine(color: Color(0xFFF3F4F6), strokeWidth: 1),
-                ),
-                lineTouchData: LineTouchData(
-                  touchTooltipData: LineTouchTooltipData(
-                    getTooltipItems: (touchedSpots) {
-                      return touchedSpots.map((touchedSpot) {
-                        return LineTooltipItem(
-                          '\$${touchedSpot.y.toInt()} at ${report.revenueChartData[touchedSpot.x.toInt()].label}',
-                          TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12.sp,
-                          ),
-                        );
-                      }).toList();
+            child: BarChart(
+              BarChartData(
+                alignment: BarChartAlignment.spaceAround,
+                maxY: yLimit,
+                minY: 0,
+                barTouchData: BarTouchData(
+                  touchTooltipData: BarTouchTooltipData(
+                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                      final label =
+                          report.revenueChartData[group.x.toInt()].label;
+                      return BarTooltipItem(
+                        '₹${rod.toY.toInt()}\n$label',
+                        TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11.sp,
+                        ),
+                      );
                     },
                   ),
                 ),
@@ -545,26 +680,28 @@ class _DailyReportViewState extends State<DailyReportView> {
                     sideTitles: SideTitles(
                       showTitles: true,
                       getTitlesWidget: (val, meta) {
-                        int idx = val.toInt();
-                        if (idx >= 0 && idx < report.revenueChartData.length) {
-                          if (report.revenueChartData.length > 8 &&
-                              idx % 4 != 0) {
-                            return const SizedBox.shrink();
-                          }
-                          return Padding(
-                            padding: EdgeInsets.only(top: 8.h),
-                            child: Text(
-                              report.revenueChartData[idx].label,
-                              style: TextStyle(
-                                color: AppColors.textLight,
-                                fontSize: 10.sp,
-                              ),
-                            ),
-                          );
+                        final idx = val.toInt();
+                        if (idx < 0 ||
+                            idx >= report.revenueChartData.length) {
+                          return const SizedBox.shrink();
                         }
-                        return const SizedBox.shrink();
+                        // Only show every 4th label to avoid crowding
+                        if (report.revenueChartData.length > 8 &&
+                            idx % 4 != 0) {
+                          return const SizedBox.shrink();
+                        }
+                        return Padding(
+                          padding: EdgeInsets.only(top: 6.h),
+                          child: Text(
+                            report.revenueChartData[idx].label,
+                            style: TextStyle(
+                              color: AppColors.textLight,
+                              fontSize: 9.sp,
+                            ),
+                          ),
+                        );
                       },
-                      reservedSize: 30.h,
+                      reservedSize: 28.h,
                     ),
                   ),
                   leftTitles: AxisTitles(
@@ -576,7 +713,7 @@ class _DailyReportViewState extends State<DailyReportView> {
                           '₹${val.toInt()}',
                           style: TextStyle(
                             color: AppColors.textLight,
-                            fontSize: 10.sp,
+                            fontSize: 9.sp,
                           ),
                         );
                       },
@@ -584,43 +721,44 @@ class _DailyReportViewState extends State<DailyReportView> {
                     ),
                   ),
                 ),
+                gridData: FlGridData(
+                  show: true,
+                  drawVerticalLine: false,
+                  getDrawingHorizontalLine: (_) => const FlLine(
+                    color: Color(0xFFF3F4F6),
+                    strokeWidth: 1,
+                  ),
+                ),
                 borderData: FlBorderData(show: false),
-                lineBarsData: [
-                  LineChartBarData(
-                    spots: report.revenueChartData
-                        .asMap()
-                        .entries
-                        .map((e) => FlSpot(e.key.toDouble(), e.value.value))
-                        .toList(),
-                    isCurved: true,
-                    color: const Color(0xFF29B6F6), // Light blue curve
-                    barWidth: 3,
-                    isStrokeCapRound: true,
-                    dotData: FlDotData(
-                      show: true,
-                      getDotPainter: (spot, percent, barData, index) =>
-                          FlDotCirclePainter(
-                            radius: 4,
-                            color: Colors.white,
-                            strokeWidth: 2,
-                            strokeColor: const Color(0xFF29B6F6),
+                barGroups: report.revenueChartData
+                    .asMap()
+                    .entries
+                    .map(
+                      (e) => BarChartGroupData(
+                        x: e.key,
+                        barRods: [
+                          BarChartRodData(
+                            toY: e.value.value,
+                            width: report.revenueChartData.length > 16
+                                ? 6.w
+                                : 10.w,
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(4.r),
+                              topRight: Radius.circular(4.r),
+                            ),
+                            gradient: LinearGradient(
+                              begin: Alignment.bottomCenter,
+                              end: Alignment.topCenter,
+                              colors: [
+                                const Color(0xFF29B6F6),
+                                const Color(0xFF0288D1),
+                              ],
+                            ),
                           ),
-                    ),
-                    belowBarData: BarAreaData(
-                      show: true,
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          const Color(0xFF29B6F6).withOpacity(0.3),
-                          const Color(0xFF29B6F6).withOpacity(0.0),
                         ],
                       ),
-                    ),
-                  ),
-                ],
-                minY: 0,
-                maxY: yLimit,
+                    )
+                    .toList(),
               ),
             ),
           ),
