@@ -463,22 +463,6 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                       }
                     },
                   ),
-                  // SizedBox(height: 20.h),
-
-                  // _buildLabel('Reg Fee Payment Mode'),
-                  // DropdownButtonFormField<String>(
-                  //   value: _selectedRegPaymentMode,
-                  //   decoration: const InputDecoration(
-                  //     prefixIcon: Icon(Icons.payment_outlined),
-                  //   ),
-                  //   items: ['Cash', 'UPI', 'Card', 'Bank Transfer'].map((m) {
-                  //     return DropdownMenuItem(value: m, child: Text(m));
-                  //   }).toList(),
-                  //   onChanged: (v) {
-                  //     if (v != null)
-                  //       setState(() => _selectedRegPaymentMode = v);
-                  //   },
-                  // ),
                   SizedBox(height: 32.h),
                   SizedBox(
                     width: double.infinity,
