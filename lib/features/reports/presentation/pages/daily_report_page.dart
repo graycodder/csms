@@ -233,7 +233,7 @@ class _DailyReportViewState extends State<DailyReportView> {
                   ),
                   SizedBox(height: 4.h),
                   Text(
-                    report.totalRevenueCollected.toStringAsFixed(2),
+                    '₹${report.totalRevenueCollected.toStringAsFixed(2)}',
                     style: TextStyle(
                       color: Colors.black,
                       fontSize: 24.sp,
@@ -251,7 +251,7 @@ class _DailyReportViewState extends State<DailyReportView> {
               Expanded(
                 child: _buildRevenueGridItem(
                   'Subscription:',
-                  report.subscriptionRevenueCollected.toStringAsFixed(0),
+                  '₹${report.subscriptionRevenueCollected.toStringAsFixed(0)}',
                   Icons.autorenew,
                   const Color(0xFFE0F7FA),
                   const Color(0xFF006064),
@@ -261,7 +261,7 @@ class _DailyReportViewState extends State<DailyReportView> {
               Expanded(
                 child: _buildRevenueGridItem(
                   'Reg. Fees',
-                  report.registrationFeeCollected.toStringAsFixed(0),
+                  '₹${report.registrationFeeCollected.toStringAsFixed(0)}',
                   Icons.badge_outlined,
                   const Color(0xFFE0F2F1),
                   const Color(0xFF004D40),
@@ -275,7 +275,7 @@ class _DailyReportViewState extends State<DailyReportView> {
               Expanded(
                 child: _buildRevenueGridItem(
                   'Pending Balance',
-                  report.totalPendingBalance.toStringAsFixed(0),
+                  '₹${report.totalPendingBalance.toStringAsFixed(0)}',
                   Icons.access_time,
                   const Color(0xFFFFF3E0),
                   const Color(0xFFE65100),
@@ -285,7 +285,7 @@ class _DailyReportViewState extends State<DailyReportView> {
               Expanded(
                 child: _buildRevenueGridItem(
                   'Pending Reg. Fees',
-                  report.registrationFeePending.toStringAsFixed(0),
+                  '₹${report.registrationFeePending.toStringAsFixed(0)}',
                   Icons.access_time,
                   const Color(0xFFFFF3E0),
                   const Color(0xFFE65100),
@@ -573,7 +573,7 @@ class _DailyReportViewState extends State<DailyReportView> {
                       getTitlesWidget: (val, meta) {
                         if (val == 0) return const SizedBox.shrink();
                         return Text(
-                          '\$${val.toInt()}',
+                          '₹${val.toInt()}',
                           style: TextStyle(
                             color: AppColors.textLight,
                             fontSize: 10.sp,
