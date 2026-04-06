@@ -36,6 +36,7 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
   late String _selectedStatus;
   late String _selectedRegStatus;
   String _selectedPaymentMode = 'Cash';
+  late String _selectedRegPaymentMode;
 
   @override
   void initState() {
@@ -52,6 +53,7 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
     );
     _selectedStatus = widget.customer.status;
     _selectedRegStatus = widget.customer.registrationFeeStatus;
+    _selectedRegPaymentMode = widget.customer.registrationFeePaymentMode;
 
     // Auto-calculate status when numbers change
     _registrationFeeController.addListener(_updateRegStatus);
@@ -141,6 +143,7 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                 registrationFeeAmount: regAmount,
                 registrationFeePaidAmount: regPaid,
                 registrationFeeStatus: _selectedRegStatus,
+                registrationFeePaymentMode: _selectedRegPaymentMode,
                 updatedAt: DateTime.now(),
               );
 
@@ -166,14 +169,15 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                     registrationFeeAmount: regAmount,
                     registrationFeePaid: regPaid,
                     paidAmount: sub.paidAmount,
-                    paymentMode: _selectedPaymentMode,
+                    paymentMode: _selectedRegPaymentMode,
                     updatedById: widget.customer.updatedById,
                     ownerId: widget.customer.ownerId,
                     shopId: widget.customer.shopId,
                     updatedByName: 'Staff',
                     customerName: updated.name,
                     status: sub.status,
-                    customer: updated, // Pass the fully updated entity
+                    customer: updated,
+                    // Pass the fully updated entity
                   ),
                 );
               } else {
@@ -446,7 +450,7 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
 
                   _buildLabel('Payment Mode'),
                   DropdownButtonFormField<String>(
-                    value: _selectedPaymentMode,
+                    value: _selectedRegPaymentMode,
                     decoration: const InputDecoration(
                       prefixIcon: Icon(Icons.payment_outlined),
                     ),
@@ -454,9 +458,27 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                       return DropdownMenuItem(value: m, child: Text(m));
                     }).toList(),
                     onChanged: (v) {
-                      if (v != null) setState(() => _selectedPaymentMode = v);
+                      if (v != null) {
+                        setState(() => _selectedRegPaymentMode = v);
+                      }
                     },
                   ),
+                  // SizedBox(height: 20.h),
+
+                  // _buildLabel('Reg Fee Payment Mode'),
+                  // DropdownButtonFormField<String>(
+                  //   value: _selectedRegPaymentMode,
+                  //   decoration: const InputDecoration(
+                  //     prefixIcon: Icon(Icons.payment_outlined),
+                  //   ),
+                  //   items: ['Cash', 'UPI', 'Card', 'Bank Transfer'].map((m) {
+                  //     return DropdownMenuItem(value: m, child: Text(m));
+                  //   }).toList(),
+                  //   onChanged: (v) {
+                  //     if (v != null)
+                  //       setState(() => _selectedRegPaymentMode = v);
+                  //   },
+                  // ),
                   SizedBox(height: 32.h),
                   SizedBox(
                     width: double.infinity,

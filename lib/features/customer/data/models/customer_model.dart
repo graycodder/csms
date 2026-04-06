@@ -17,6 +17,7 @@ class CustomerModel extends CustomerEntity {
     super.registrationFeeAmount = 0.0,
     super.registrationFeePaidAmount = 0.0,
     super.registrationFeeStatus = 'unpaid',
+    super.registrationFeePaymentMode = 'Cash',
   });
 
   factory CustomerModel.fromJson(Map<dynamic, dynamic> json, String id) {
@@ -45,6 +46,7 @@ class CustomerModel extends CustomerEntity {
       registrationFeeAmount: (json['registrationFeeAmount'] ?? 0.0).toDouble(),
       registrationFeePaidAmount: (json['registrationFeePaidAmount'] ?? 0.0).toDouble(),
       registrationFeeStatus: json['registrationFeeStatus'] ?? 'unpaid',
+      registrationFeePaymentMode: json['registrationFeePaymentMode'] ?? 'Cash',
     );
   }
 
@@ -74,6 +76,7 @@ class CustomerModel extends CustomerEntity {
       'registrationFeeAmount': registrationFeeAmount,
       'registrationFeePaidAmount': registrationFeePaidAmount,
       'registrationFeeStatus': registrationFeeStatus,
+      'registrationFeePaymentMode': registrationFeePaymentMode,
     };
   }
 }

@@ -86,6 +86,7 @@ class CustomerRepositoryImpl implements CustomerRepository {
         registrationFeeAmount: customer.registrationFeeAmount,
         registrationFeePaidAmount: customer.registrationFeePaidAmount,
         registrationFeeStatus: customer.registrationFeeStatus,
+        registrationFeePaymentMode: customer.registrationFeePaymentMode,
       );
 
       await docRef.set(model.toJson());
@@ -136,7 +137,7 @@ class CustomerRepositoryImpl implements CustomerRepository {
           'registrationFeePaid': diff,
           'paidAmount': 0.0,
           'status': 'active',
-          'paymentMode': paymentMode ?? 'Cash',
+          'paymentMode': customer.registrationFeePaymentMode,
         });
       }
 
@@ -148,6 +149,7 @@ class CustomerRepositoryImpl implements CustomerRepository {
             'registrationFeeAmount': customer.registrationFeeAmount,
             'registrationFeePaidAmount': customer.registrationFeePaidAmount,
             'registrationFeeStatus': customer.registrationFeeStatus,
+            'registrationFeePaymentMode': customer.registrationFeePaymentMode,
             'updatedAt': ServerValue.timestamp,
             'updatedById': customer.updatedById,
           });

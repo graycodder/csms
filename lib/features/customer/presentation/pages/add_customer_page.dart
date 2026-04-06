@@ -35,6 +35,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
   final _paidAmountController = TextEditingController();
   late String _customValidityUnit;
   String _selectedPaymentMode = 'Cash';
+  String _selectedRegPaymentMode = 'Cash';
 
   ProductEntity? _selectedProduct;
 
@@ -213,6 +214,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                         registrationFeeAmount: regAmount,
                         registrationFeePaidAmount: 0.0,
                         registrationFeeStatus: 'unpaid',
+                        registrationFeePaymentMode: _selectedRegPaymentMode,
                       ),
                       productId: _selectedProduct!.productId,
                       validityValue:
@@ -228,7 +230,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                           : _selectedProduct!.price,
                       registrationFeeAmount: regAmount,
                       paidAmount: paidAmt,
-                      paymentMode: _selectedPaymentMode,
+                      paymentMode: _selectedRegPaymentMode,
                       productName: _selectedProduct!.name,
                       updatedByName: authState.name,
                     ),
@@ -607,6 +609,32 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                                 return null;
                               },
                             ),
+                            // SizedBox(height: 12.h),
+                            // _buildLabel('Reg Fee Payment Mode *'),
+                            // DropdownButtonFormField<String>(
+                            //   value: _selectedRegPaymentMode,
+                            //   decoration: const InputDecoration(
+                            //     prefixIcon: Icon(Icons.payment_outlined),
+                            //     contentPadding: EdgeInsets.symmetric(
+                            //       horizontal: 12,
+                            //       vertical: 8,
+                            //     ),
+                            //   ),
+                            //   items: ['Cash', 'UPI', 'Card', 'Bank Transfer']
+                            //       .map((m) {
+                            //         return DropdownMenuItem(
+                            //           value: m,
+                            //           child: Text(
+                            //             m,
+                            //             style: TextStyle(fontSize: 14.sp),
+                            //           ),
+                            //         );
+                            //       })
+                            //       .toList(),
+                            //   onChanged: (v) => setState(
+                            //     () => _selectedRegPaymentMode = v ?? 'Cash',
+                            //   ),
+                            // ),
                             SizedBox(height: 20.h),
                           ],
                         );
@@ -684,7 +712,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                           children: [
                             _buildLabel('Payment Mode *'),
                             DropdownButtonFormField<String>(
-                              value: _selectedPaymentMode,
+                              value: _selectedRegPaymentMode,
                               decoration: const InputDecoration(
                                 contentPadding: EdgeInsets.symmetric(
                                   horizontal: 12,
@@ -703,7 +731,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                                   })
                                   .toList(),
                               onChanged: (v) => setState(
-                                () => _selectedPaymentMode = v ?? 'Cash',
+                                () => _selectedRegPaymentMode = v ?? 'Cash',
                               ),
                             ),
                           ],

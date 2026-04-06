@@ -1146,6 +1146,7 @@ class CustomerDetailsPage extends StatelessWidget {
                                   newRegPaid >= customer.registrationFeeAmount
                                   ? 'paid'
                                   : 'partial',
+                              registrationFeePaymentMode: selectedPaymentMode,
                             ),
                           ),
                         );
@@ -1168,6 +1169,14 @@ class CustomerDetailsPage extends StatelessWidget {
                             updatedByName: 'Staff',
                             customerName: customer.name,
                             status: sub.status,
+                            customer: customer.copyWith(
+                              registrationFeePaidAmount: newRegPaid,
+                              registrationFeeStatus:
+                                  newRegPaid >= customer.registrationFeeAmount
+                                  ? 'paid'
+                                  : 'partial',
+                              registrationFeePaymentMode: selectedPaymentMode,
+                            ),
                           ),
                         );
                       }
