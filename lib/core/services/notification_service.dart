@@ -2,6 +2,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -14,7 +15,7 @@ class NotificationService {
   factory NotificationService() => _instance;
   NotificationService._internal();
 
-  final FirebaseMessaging _fcm = FirebaseMessaging.instance;
+  late FirebaseMessaging _fcm;
   final FlutterLocalNotificationsPlugin _localNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
@@ -23,8 +24,9 @@ class NotificationService {
   Future<void> initialize() async {
     if (_isInitialized) return;
 
-    // 1. Request FCM Permission (may throw SERVICE_NOT_AVAILABLE if device has
-    //    no internet or Google Play Services is unavailable — handle gracefully)
+    _fcm = FirebaseMessaging.instance;
+
+    // 1. Request FCM Permission
     try {
       await _fcm.requestPermission(
         alert: true,
@@ -35,78 +37,85 @@ class NotificationService {
       debugPrint('FCM requestPermission error (non-fatal): $e');
     }
 
-    // 2. Initialize Local Notifications
-    const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/launcher_icon');
-    
-    const DarwinInitializationSettings initializationSettingsIOS =
-        DarwinInitializationSettings(
-      requestSoundPermission: true,
-      requestBadgePermission: true,
-      requestAlertPermission: true,
-    );
+    // 2. Initialize Local Notifications — mobile only
+    if (!kIsWeb) {
+      const AndroidInitializationSettings initializationSettingsAndroid =
+          AndroidInitializationSettings('@mipmap/launcher_icon');
 
-    const InitializationSettings initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid,
-      iOS: initializationSettingsIOS,
-    );
+      const DarwinInitializationSettings initializationSettingsIOS =
+          DarwinInitializationSettings(
+        requestSoundPermission: true,
+        requestBadgePermission: true,
+        requestAlertPermission: true,
+      );
 
-    await _localNotificationsPlugin.initialize(
-      settings: initializationSettings,
-      onDidReceiveNotificationResponse: (NotificationResponse response) {
-        debugPrint('Notification clicked: ${response.payload}');
-      },
-    );
+      const InitializationSettings initializationSettings =
+          InitializationSettings(
+        android: initializationSettingsAndroid,
+        iOS: initializationSettingsIOS,
+      );
 
-    // 3. Create Custom Sound Channel (Android)
-    const AndroidNotificationChannel channel = AndroidNotificationChannel(
-      'custom_sound_channel',
-      'Specific Alerts',
-      description: 'Used for important staff alerts',
-      importance: Importance.max,
-      playSound: true,
-    );
+      await _localNotificationsPlugin.initialize(
+        settings: initializationSettings,
+        onDidReceiveNotificationResponse: (NotificationResponse response) {
+          debugPrint('Notification clicked: ${response.payload}');
+        },
+      );
 
-    await _localNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(channel);
+      // 3. Create Custom Sound Channel (Android only)
+      const AndroidNotificationChannel channel = AndroidNotificationChannel(
+        'custom_sound_channel',
+        'Specific Alerts',
+        description: 'Used for important staff alerts',
+        importance: Importance.max,
+        playSound: true,
+      );
+
+      await _localNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.createNotificationChannel(channel);
+    }
 
     // 4. Register Background Handler + Foreground listener
-    //    Also wrapped — FCM listener setup can fail on devices without Play Services
     try {
-      FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+      if (!kIsWeb) {
+        FirebaseMessaging.onBackgroundMessage(
+            _firebaseMessagingBackgroundHandler);
+      }
 
-      // 5. Handle Foreground Messages
-      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-        RemoteNotification? notification = message.notification;
-        AndroidNotification? android = message.notification?.android;
+      // 5. Handle Foreground Messages (mobile only for local notifications)
+      if (!kIsWeb) {
+        FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+          RemoteNotification? notification = message.notification;
+          AndroidNotification? android = message.notification?.android;
 
-        if (notification != null && android != null) {
-          _localNotificationsPlugin.show(
-            id: notification.hashCode,
-            title: notification.title,
-            body: notification.body,
-            notificationDetails: NotificationDetails(
-              android: AndroidNotificationDetails(
-                channel.id,
-                channel.name,
-                channelDescription: channel.description,
-                icon: '@mipmap/launcher_icon',
-                importance: Importance.max,
-                priority: Priority.max,
-                playSound: true,
+          if (notification != null && android != null) {
+            _localNotificationsPlugin.show(
+              id: notification.hashCode,
+              title: notification.title,
+              body: notification.body,
+              notificationDetails: const NotificationDetails(
+                android: AndroidNotificationDetails(
+                  'custom_sound_channel',
+                  'Specific Alerts',
+                  channelDescription: 'Used for important staff alerts',
+                  icon: '@mipmap/launcher_icon',
+                  importance: Importance.max,
+                  priority: Priority.max,
+                  playSound: true,
+                ),
+                iOS: DarwinNotificationDetails(
+                  sound: 'notification_sound.caf',
+                  presentAlert: true,
+                  presentBadge: true,
+                  presentSound: true,
+                ),
               ),
-              iOS: const DarwinNotificationDetails(
-                sound: 'notification_sound.caf',
-                presentAlert: true,
-                presentBadge: true,
-                presentSound: true,
-              ),
-            ),
-          );
-        }
-      });
+            );
+          }
+        });
+      }
     } catch (e) {
       debugPrint('FCM listener setup error (non-fatal): $e');
     }

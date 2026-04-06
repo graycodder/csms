@@ -30,11 +30,20 @@ Future<void> bootstrap(AppConfig config) async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
-    // Initialize Firebase with environment-specific options
-    await Firebase.initializeApp(options: config.firebaseOptions);
+    // Initialize Firebase. On Web, the JS SDK is already initialized via index.html
+    // to avoid the getApp() race condition. The duplicate-app error is expected and safe.
+    try {
+      await Firebase.initializeApp(options: config.firebaseOptions);
+    } catch (e) {
+      if (!e.toString().contains('duplicate-app')) {
+        rethrow;
+      }
+    }
 
     // Pass all uncaught "fatal" errors from the framework to Crashlytics
-    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+    if (!kIsWeb) {
+      FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+    }
 
     // Initialize Custom Notification Channels + Push Subscriptions cleanly
     await NotificationService().initialize();
@@ -52,10 +61,12 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
-  PlatformDispatcher.instance.onError = (error, stack) {
-    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-    return true;
-  };
+  if (!kIsWeb) {
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+  }
 
   // Default to production if run directly from main.dart
   await bootstrap(

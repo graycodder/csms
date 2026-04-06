@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/foundation.dart';
 
 // Core Connectivity
 import 'package:csms/core/connectivity/presentation/bloc/connectivity_bloc.dart';
@@ -193,7 +194,9 @@ Future<void> init() async {
 
   sl.registerLazySingleton(() {
     final db = FirebaseDatabase.instance;
-    db.setPersistenceEnabled(true);
+    if (!kIsWeb) {
+      db.setPersistenceEnabled(true);
+    }
     return db;
   });
   sl.registerLazySingleton(() => FirebaseAuth.instance);

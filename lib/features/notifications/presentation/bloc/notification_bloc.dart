@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -80,8 +81,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   bool _isInitialLoad = true;
   String _shopCategory = '';
 
-  final FlutterLocalNotificationsPlugin _localPlugin =
-      FlutterLocalNotificationsPlugin();
+  FlutterLocalNotificationsPlugin? _localPlugin;
 
   static const AndroidNotificationDetails _androidDetails =
       AndroidNotificationDetails(
@@ -107,6 +107,9 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   );
 
   NotificationBloc({required this.repository}) : super(NotificationInitial()) {
+    if (!kIsWeb) {
+      _localPlugin = FlutterLocalNotificationsPlugin();
+    }
     on<StartListeningNotifications>(_onStartListening);
     on<_NotificationsUpdatedInternal>(_onNotificationsUpdated);
     on<_NotificationErrorInternal>(_onErrorInternal);
@@ -188,13 +191,15 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
               .replaceAll('Customer', term.customerLabel)
               .replaceAll('customer', term.customerLabel.toLowerCase());
 
-          await _localPlugin.show(
-            id: notif.id.hashCode,
-            title: displayTitle,
-            body: displayBody,
-            notificationDetails: _notificationDetails,
-            payload: notif.id,
-          );
+          if (!kIsWeb && _localPlugin != null) {
+            await _localPlugin!.show(
+              id: notif.id.hashCode,
+              title: displayTitle,
+              body: displayBody,
+              notificationDetails: _notificationDetails,
+              payload: notif.id,
+            );
+          }
         }
       }
     }
