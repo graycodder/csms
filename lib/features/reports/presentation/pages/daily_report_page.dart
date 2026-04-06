@@ -20,6 +20,13 @@ class DailyReportView extends StatefulWidget {
 class _DailyReportViewState extends State<DailyReportView> {
   DateTime _referenceDate = DateTime.now();
   DashboardLoaded? _lastDashState;
+  final ScrollController _chartScrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _chartScrollController.dispose();
+    super.dispose();
+  }
 
   void _triggerFilter(DashboardLoaded dashState) {
     context.read<ReportBloc>().add(
@@ -643,123 +650,175 @@ class _DailyReportViewState extends State<DailyReportView> {
             style: TextStyle(fontSize: 11.sp, color: AppColors.textLight),
           ),
           SizedBox(height: 16.h),
-          SizedBox(
-            height: 200.h,
-            child: BarChart(
-              BarChartData(
-                alignment: BarChartAlignment.spaceAround,
-                maxY: yLimit,
-                minY: 0,
-                barTouchData: BarTouchData(
-                  touchTooltipData: BarTouchTooltipData(
-                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                      final label =
-                          report.revenueChartData[group.x.toInt()].label;
-                      return BarTooltipItem(
-                        '₹${rod.toY.toInt()}\n$label',
-                        TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11.sp,
+          Row(
+            children: [
+              // Pinned Y-Axis
+              Padding(
+                padding: EdgeInsets.only(bottom: 40.h), // Match bottom titles + padding
+                child: SizedBox(
+                  width: 45.w,
+                  height: 190.h, // Adjusted for alignment
+                  child: BarChart(
+                    BarChartData(
+                      maxY: yLimit,
+                      minY: 0,
+                      titlesData: FlTitlesData(
+                        show: true,
+                        leftTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            interval: 1000,
+                            getTitlesWidget: (val, meta) {
+                              final v = val.toInt();
+                              if (v == 1000 || (v > 0 && v % 10000 == 0)) {
+                                return Text(
+                                  '₹$v',
+                                  style: TextStyle(
+                                    color: AppColors.textLight,
+                                    fontSize: 9.sp,
+                                  ),
+                                );
+                              }
+                              return const SizedBox.shrink();
+                            },
+                            reservedSize: 45.w,
+                          ),
                         ),
-                      );
-                    },
-                  ),
-                ),
-                titlesData: FlTitlesData(
-                  show: true,
-                  rightTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  topTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (val, meta) {
-                        final idx = val.toInt();
-                        if (idx < 0 || idx >= report.revenueChartData.length) {
-                          return const SizedBox.shrink();
-                        }
-                        // Only show every 4th label to avoid crowding
-                        if (report.revenueChartData.length > 8 &&
-                            idx % 4 != 0) {
-                          return const SizedBox.shrink();
-                        }
-                        return Padding(
-                          padding: EdgeInsets.only(top: 6.h),
-                          child: Text(
-                            report.revenueChartData[idx].label,
-                            style: TextStyle(
-                              color: AppColors.textLight,
-                              fontSize: 9.sp,
-                            ),
-                          ),
-                        );
-                      },
-                      reservedSize: 28.h,
-                    ),
-                  ),
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      interval: 1000,
-                      getTitlesWidget: (val, meta) {
-                        final v = val.toInt();
-                        if (v == 1000 || (v > 0 && v % 10000 == 0)) {
-                          return Text(
-                            '₹$v',
-                            style: TextStyle(
-                              color: AppColors.textLight,
-                              fontSize: 9.sp,
-                            ),
-                          );
-                        }
-                        return const SizedBox.shrink();
-                      },
-                      reservedSize: 45.w,
-                    ),
-                  ),
-                ),
-                gridData: FlGridData(
-                  show: true,
-                  drawVerticalLine: false,
-                  getDrawingHorizontalLine: (_) =>
-                      const FlLine(color: Color(0xFFF3F4F6), strokeWidth: 1),
-                ),
-                borderData: FlBorderData(show: false),
-                barGroups: report.revenueChartData
-                    .asMap()
-                    .entries
-                    .map(
-                      (e) => BarChartGroupData(
-                        x: e.key,
-                        barRods: [
-                          BarChartRodData(
-                            toY: e.value.value,
-                            width: report.revenueChartData.length > 16
-                                ? 6.w
-                                : 10.w,
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(4.r),
-                              topRight: Radius.circular(4.r),
-                            ),
-                            gradient: LinearGradient(
-                              begin: Alignment.bottomCenter,
-                              end: Alignment.topCenter,
-                              colors: [
-                                const Color(0xFF29B6F6),
-                                const Color(0xFF0288D1),
-                              ],
-                            ),
-                          ),
-                        ],
+                        rightTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                        topTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                        bottomTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
                       ),
-                    )
-                    .toList(),
+                      gridData: const FlGridData(show: false),
+                      borderData: FlBorderData(show: false),
+                      barGroups: [],
+                    ),
+                  ),
+                ),
               ),
-            ),
+              // Scrollable Chart Body
+              Expanded(
+                child: SizedBox(
+                  height: 230.h,
+                  child: Scrollbar(
+                    controller: _chartScrollController,
+                    thumbVisibility: true,
+                    thickness: 3.w,
+                    radius: Radius.circular(10.r),
+                    child: SingleChildScrollView(
+                      controller: _chartScrollController,
+                      scrollDirection: Axis.horizontal,
+                      padding: EdgeInsets.only(bottom: 12.h),
+                      child: SizedBox(
+                        width: (report.revenueChartData.length * 45.w).clamp(
+                          MediaQuery.of(context).size.width - 117.w, // Adjusted for pinned y
+                          double.infinity,
+                        ),
+                        child: BarChart(
+                          BarChartData(
+                            alignment: BarChartAlignment.spaceAround,
+                            maxY: yLimit,
+                            minY: 0,
+                            barTouchData: BarTouchData(
+                              touchTooltipData: BarTouchTooltipData(
+                                getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                                  final label =
+                                      report.revenueChartData[group.x.toInt()].label;
+                                  return BarTooltipItem(
+                                    '₹${rod.toY.toInt()}\n$label',
+                                    TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 11.sp,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            titlesData: FlTitlesData(
+                              show: true,
+                              rightTitles: const AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              topTitles: const AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              bottomTitles: AxisTitles(
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  getTitlesWidget: (val, meta) {
+                                    final idx = val.toInt();
+                                    if (idx < 0 ||
+                                        idx >= report.revenueChartData.length) {
+                                      return const SizedBox.shrink();
+                                    }
+                                    return Padding(
+                                      padding: EdgeInsets.only(top: 6.h),
+                                      child: Text(
+                                        report.revenueChartData[idx].label,
+                                        style: TextStyle(
+                                          color: AppColors.textLight,
+                                          fontSize: 9.sp,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  reservedSize: 28.h,
+                                ),
+                              ),
+                              leftTitles: const AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                            ),
+                            gridData: FlGridData(
+                              show: true,
+                              drawVerticalLine: false,
+                              getDrawingHorizontalLine: (_) => const FlLine(
+                                color: Color(0xFFF3F4F6),
+                                strokeWidth: 1,
+                              ),
+                            ),
+                            borderData: FlBorderData(show: false),
+                            barGroups: report.revenueChartData
+                                .asMap()
+                                .entries
+                                .map(
+                                  (e) => BarChartGroupData(
+                                    x: e.key,
+                                    barRods: [
+                                      BarChartRodData(
+                                        toY: e.value.value,
+                                        width: 12.w,
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(4.r),
+                                          topRight: Radius.circular(4.r),
+                                        ),
+                                        gradient: const LinearGradient(
+                                          begin: Alignment.bottomCenter,
+                                          end: Alignment.topCenter,
+                                          colors: [
+                                            Color(0xFF29B6F6),
+                                            Color(0xFF0288D1),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                                .toList(),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
