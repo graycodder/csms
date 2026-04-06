@@ -850,9 +850,16 @@ class _MonthlyReportViewState extends State<MonthlyReportView> {
   Widget _buildRevenueChart(ReportEntity report) {
     final nonZeroData = report.revenueChartData.where((p) => p.value > 0);
     final double maxVal = nonZeroData.isEmpty
-        ? 100
+        ? 2000
         : nonZeroData.fold(0.0, (m, p) => p.value > m ? p.value : m);
-    final double yLimit = (maxVal * 1.25).ceilToDouble();
+
+    double yLimit = (maxVal / 500).ceil() * 500.0;
+    if (yLimit < 2000) {
+      yLimit = 2000;
+    } else if (yLimit == maxVal) {
+      yLimit += 500;
+    }
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(20.r),
@@ -949,6 +956,7 @@ class _MonthlyReportViewState extends State<MonthlyReportView> {
                   leftTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
+                      interval: 500,
                       getTitlesWidget: (val, meta) {
                         if (val == 0) return const SizedBox.shrink();
                         return Text(
