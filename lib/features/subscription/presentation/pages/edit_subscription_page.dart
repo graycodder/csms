@@ -168,6 +168,20 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
                                   inputFormatters: [
                                     FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
                                   ],
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Enter amount';
+                                    }
+                                    final paidAmt = double.tryParse(value) ?? 0;
+                                    final planAmt = double.tryParse(_planAmountController.text) ?? 0;
+                                    if (paidAmt <= 0) {
+                                      return 'Must be greater than 0';
+                                    }
+                                    if (paidAmt > planAmt) {
+                                      return 'Cannot exceed plan amount';
+                                    }
+                                    return null;
+                                  },
                                   decoration: InputDecoration(
                                     hintText: '0',
                                     prefixIcon: Icon(Icons.currency_rupee, size: 18.sp),
