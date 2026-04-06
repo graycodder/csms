@@ -781,12 +781,14 @@ class CustomerDetailsPage extends StatelessWidget {
                         ),
                       ),
                       validator: (value) {
-                        if (value == null || value.isEmpty)
+                        if (value == null || value.isEmpty) {
                           return 'Enter amount';
+                        }
                         final amt = double.tryParse(value);
                         if (amt == null || amt <= 0) return 'Invalid amount';
-                        if (amt > sub.balanceAmount)
+                        if (amt > sub.balanceAmount) {
                           return 'Cannot exceed pending balance';
+                        }
                         return null;
                       },
                     ),
