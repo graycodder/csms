@@ -679,6 +679,36 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                         SizedBox(height: 10.h),
                         const Divider(color: Colors.grey),
                         SizedBox(height: 10.h),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildLabel('Payment Mode *'),
+                            DropdownButtonFormField<String>(
+                              value: _selectedPaymentMode,
+                              decoration: const InputDecoration(
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
+                              ),
+                              items: ['Cash', 'UPI', 'Card', 'Bank Transfer']
+                                  .map((m) {
+                                    return DropdownMenuItem(
+                                      value: m,
+                                      child: Text(
+                                        m,
+                                        style: TextStyle(fontSize: 14.sp),
+                                      ),
+                                    );
+                                  })
+                                  .toList(),
+                              onChanged: (v) => setState(
+                                () => _selectedPaymentMode = v ?? 'Cash',
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 10.h),
                         Row(
                           children: [
                             Expanded(
@@ -697,8 +727,8 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                                       hintText: '0',
                                       prefixIcon: Icon(Icons.currency_rupee),
                                       contentPadding: EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 8,
+                                        horizontal: 5,
+                                        vertical: 5,
                                       ),
                                     ),
                                     onChanged: (_) => setState(() {}),
@@ -716,43 +746,6 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                                       }
                                       return null;
                                     },
-                                  ),
-                                ],
-                              ),
-                            ),
-                            SizedBox(width: 12.w),
-                            Expanded(
-                              flex: 3,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _buildLabel('Payment Mode *'),
-                                  DropdownButtonFormField<String>(
-                                    value: _selectedPaymentMode,
-                                    decoration: const InputDecoration(
-                                      contentPadding: EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 8,
-                                      ),
-                                    ),
-                                    items:
-                                        [
-                                          'Cash',
-                                          'UPI',
-                                          'Card',
-                                          'Bank Transfer',
-                                        ].map((m) {
-                                          return DropdownMenuItem(
-                                            value: m,
-                                            child: Text(
-                                              m,
-                                              style: TextStyle(fontSize: 14.sp),
-                                            ),
-                                          );
-                                        }).toList(),
-                                    onChanged: (v) => setState(
-                                      () => _selectedPaymentMode = v ?? 'Cash',
-                                    ),
                                   ),
                                 ],
                               ),
