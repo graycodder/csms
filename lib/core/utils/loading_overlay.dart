@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:csms/main.dart';
 
 class LoadingOverlayHelper {
   static Route? _loadingRoute;
@@ -33,9 +34,7 @@ class LoadingOverlayHelper {
 
     if (_loadingRoute != null) {
       try {
-        if (_loadingRoute!.isActive) {
-          _loadingRoute!.navigator?.removeRoute(_loadingRoute!);
-        }
+        MyApp.navigatorKey.currentState?.removeRoute(_loadingRoute!);
       } catch (_) {
         // Safe to ignore, route already detached.
       } finally {
