@@ -96,7 +96,10 @@ class CustomerRepositoryImpl implements CustomerRepository {
   }
 
   @override
-  Future<Either<Failure, void>> updateCustomer(CustomerEntity customer) async {
+  Future<Either<Failure, void>> updateCustomer(
+    CustomerEntity customer, {
+    String? paymentMode,
+  }) async {
     try {
       final duplicateCheck = await _isMobileNumberDuplicate(
         shopId: customer.shopId,
@@ -133,6 +136,7 @@ class CustomerRepositoryImpl implements CustomerRepository {
           'registrationFeePaid': diff,
           'paidAmount': 0.0,
           'status': 'active',
+          'paymentMode': paymentMode ?? 'Cash',
         });
       }
 

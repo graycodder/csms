@@ -35,6 +35,7 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
   late TextEditingController _registrationFeePaidController;
   late String _selectedStatus;
   late String _selectedRegStatus;
+  String _selectedPaymentMode = 'Cash';
 
   @override
   void initState() {
@@ -51,6 +52,34 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
     );
     _selectedStatus = widget.customer.status;
     _selectedRegStatus = widget.customer.registrationFeeStatus;
+
+    // Auto-calculate status when numbers change
+    _registrationFeeController.addListener(_updateRegStatus);
+    _registrationFeePaidController.addListener(_updateRegStatus);
+  }
+
+  void _updateRegStatus() {
+    final total =
+        double.tryParse(_registrationFeeController.text.trim()) ?? 0.0;
+    final paid =
+        double.tryParse(_registrationFeePaidController.text.trim()) ?? 0.0;
+
+    String newStatus;
+    if (total <= 0) {
+      newStatus = 'paid';
+    } else if (paid >= total) {
+      newStatus = 'paid';
+    } else if (paid > 0) {
+      newStatus = 'partial';
+    } else {
+      newStatus = 'unpaid';
+    }
+
+    if (newStatus != _selectedRegStatus) {
+      setState(() {
+        _selectedRegStatus = newStatus;
+      });
+    }
   }
 
   @override
@@ -116,11 +145,14 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
               );
 
               // Find if there's an active subscription to log against
-              final subs = context.read<DashboardBloc>().state is DashboardLoaded
+              final subs =
+                  context.read<DashboardBloc>().state is DashboardLoaded
                   ? (context.read<DashboardBloc>().state as DashboardLoaded)
-                      .activeSubs
-                      .where((s) => s.customerId == widget.customer.customerId)
-                      .toList()
+                        .activeSubs
+                        .where(
+                          (s) => s.customerId == widget.customer.customerId,
+                        )
+                        .toList()
                   : <SubscriptionEntity>[];
 
               if (subs.isNotEmpty) {
@@ -134,7 +166,7 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                     registrationFeeAmount: regAmount,
                     registrationFeePaid: regPaid,
                     paidAmount: sub.paidAmount,
-                    paymentMode: 'Cash', // Default for edit page
+                    paymentMode: _selectedPaymentMode,
                     updatedById: widget.customer.updatedById,
                     ownerId: widget.customer.ownerId,
                     shopId: widget.customer.shopId,
@@ -147,7 +179,10 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
               } else {
                 // Standard update
                 context.read<CustomerBloc>().add(
-                  UpdateCustomerInfo(customer: updated),
+                  UpdateCustomerInfo(
+                    customer: updated,
+                    paymentMode: _selectedPaymentMode,
+                  ),
                 );
               }
             },
@@ -292,8 +327,9 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                       counterText: '',
                     ),
                     validator: (v) {
-                      if (v == null || v.trim().isEmpty)
+                      if (v == null || v.trim().isEmpty) {
                         return 'Name is required';
+                      }
                       if (v.length > 20) return 'Maximum 20 characters';
                       if (RegExp(
                         r'[!@#<>?":_`~;[\]\\|=+)(*&^%/-]',
@@ -319,8 +355,9 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                     validator: (v) {
                       if (v == null || v.isEmpty) return 'Phone is required';
                       if (v.length != 10) return 'Must be exactly 10 digits';
-                      if (!RegExp(r'^[0-9]+$').hasMatch(v))
+                      if (!RegExp(r'^[0-9]+$').hasMatch(v)) {
                         return 'Numbers only';
+                      }
                       return null;
                     },
                   ),
@@ -407,26 +444,20 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                   ),
                   SizedBox(height: 20.h),
 
-                  _buildLabel('Registration Status'),
+                  _buildLabel('Payment Mode'),
                   DropdownButtonFormField<String>(
-                    value: _selectedRegStatus,
+                    value: _selectedPaymentMode,
                     decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.assignment_turned_in_outlined),
+                      prefixIcon: Icon(Icons.payment_outlined),
                     ),
-                    items: const [
-                      DropdownMenuItem(value: 'paid', child: Text('Paid')),
-                      DropdownMenuItem(
-                        value: 'partial',
-                        child: Text('Partial'),
-                      ),
-                      DropdownMenuItem(value: 'unpaid', child: Text('Unpaid')),
-                    ],
+                    items: ['Cash', 'UPI', 'Card', 'Bank Transfer'].map((m) {
+                      return DropdownMenuItem(value: m, child: Text(m));
+                    }).toList(),
                     onChanged: (v) {
-                      if (v != null) setState(() => _selectedRegStatus = v);
+                      if (v != null) setState(() => _selectedPaymentMode = v);
                     },
                   ),
                   SizedBox(height: 32.h),
-
                   SizedBox(
                     width: double.infinity,
                     height: 52.h,

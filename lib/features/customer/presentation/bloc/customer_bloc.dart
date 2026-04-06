@@ -54,11 +54,12 @@ class AddCustomerWithSubscription extends CustomerEvent {
 
 class UpdateCustomerInfo extends CustomerEvent {
   final CustomerEntity customer;
+  final String? paymentMode;
 
-  const UpdateCustomerInfo({required this.customer});
+  const UpdateCustomerInfo({required this.customer, this.paymentMode});
 
   @override
-  List<Object?> get props => [customer];
+  List<Object?> get props => [customer, paymentMode];
 }
 
 class AddSubscription extends CustomerEvent {
@@ -309,7 +310,10 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
     Emitter<CustomerState> emit,
   ) async {
     emit(CustomerLoading());
-    final result = await customerRepository.updateCustomer(event.customer);
+    final result = await customerRepository.updateCustomer(
+      event.customer,
+      paymentMode: event.paymentMode,
+    );
 
     result.fold(
       (failure) => emit(CustomerError(failure.message)),
@@ -372,10 +376,20 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
     
     // Check and update customer entity first if provided
     if (event.customer != null) {
-      final custResult = await customerRepository.updateCustomer(event.customer!);
+      final custResult = await customerRepository.updateCustomer(
+        event.customer!,
+        paymentMode: event.paymentMode,
+      );
       if (custResult.isLeft()) {
-         emit(CustomerError(custResult.fold((l) => l.message, (r) => "Error updating customer details")));
-         return;
+        emit(
+          CustomerError(
+            custResult.fold(
+              (l) => l.message,
+              (r) => "Error updating customer details",
+            ),
+          ),
+        );
+        return;
       }
     }
 
