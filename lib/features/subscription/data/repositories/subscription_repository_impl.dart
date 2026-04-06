@@ -443,26 +443,30 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
     String? status,
   }) async {
     try {
-      final subRef = _database.ref().child('subscriptions').child(subscriptionId);
+      final subRef = _database
+          .ref()
+          .child('subscriptions')
+          .child(subscriptionId);
       final snapshot = await subRef.get();
       if (!snapshot.exists) {
         return Left(ServerFailure("Subscription not found"));
       }
 
       final data = Map<String, dynamic>.from(snapshot.value as Map);
-      
+
       // 1. Subscription Payment Diff
       final double oldPaid = (data['paidAmount'] ?? 0.0).toDouble();
       final double subPaid = paidAmount ?? oldPaid;
       final double paymentDifference = subPaid - oldPaid;
-      
+
       // 2. Registration Fee Payment Diff
       final double oldRegPaid = (data['registrationFeePaid'] ?? 0.0).toDouble();
       final double newRegPaid = registrationFeePaid ?? oldRegPaid;
       final double regPaymentDifference = newRegPaid - oldRegPaid;
 
       // 3. Status/Price detection
-      final bool isPayment = (paymentDifference != 0 || regPaymentDifference != 0) &&
+      final bool isPayment =
+          (paymentDifference != 0 || regPaymentDifference != 0) &&
           price == (data['price'] as num? ?? 0.0).toDouble();
 
       final double subPrice = price;
@@ -471,7 +475,9 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
           ? 'paid'
           : (subPaid <= 0 ? 'unpaid' : 'partial');
 
-      final double currentRegAmount = registrationFeeAmount ?? (data['registrationFeeAmount'] ?? 0.0).toDouble();
+      final double currentRegAmount =
+          registrationFeeAmount ??
+          (data['registrationFeeAmount'] ?? 0.0).toDouble();
 
       final Map<String, dynamic> updates = {};
 
@@ -492,21 +498,24 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
       final shopId = data['shopId'] ?? '';
       final customerId = data['customerId'] ?? '';
       final productId = data['productId'] ?? '';
-      final logId = _database.ref().push().key ?? DateTime.now().millisecondsSinceEpoch.toString();
+      final logId =
+          _database.ref().push().key ??
+          DateTime.now().millisecondsSinceEpoch.toString();
 
       final Map<String, dynamic> extraUpdates = {};
 
       // 4. Update customer record (Sync)
       if (customerId.isNotEmpty) {
         if (status != null && productId.isNotEmpty) {
-          extraUpdates['customers/$customerId/assignedProductIds/$productId'] = status;
+          extraUpdates['customers/$customerId/assignedProductIds/$productId'] =
+              status;
         }
-        
-        // Sync Registration Fee to Customer
-        extraUpdates['customers/$customerId/registrationFeeAmount'] = currentRegAmount;
-        extraUpdates['customers/$customerId/registrationFeePaidAmount'] = newRegPaid;
-        extraUpdates['customers/$customerId/registrationFeeStatus'] = 
-            currentRegAmount <= 0 ? 'paid' : (newRegPaid >= currentRegAmount ? 'paid' : (newRegPaid > 0 ? 'partial' : 'unpaid'));
+
+        // // Sync Registration Fee to Customer
+        // extraUpdates['customers/$customerId/registrationFeeAmount'] = currentRegAmount;
+        // extraUpdates['customers/$customerId/registrationFeePaidAmount'] = newRegPaid;
+        // extraUpdates['customers/$customerId/registrationFeeStatus'] =
+        //     currentRegAmount <= 0 ? 'paid' : (newRegPaid >= currentRegAmount ? 'paid' : (newRegPaid > 0 ? 'partial' : 'unpaid'));
 
         extraUpdates['customers/$customerId/updatedAt'] = ServerValue.timestamp;
         extraUpdates['customers/$customerId/updatedById'] = updatedById;
@@ -523,14 +532,16 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
         'endDate': endDate.millisecondsSinceEpoch,
         'price': price,
         'paidAmount': paymentDifference != 0 ? paymentDifference : null,
-        'registrationFeePaid': regPaymentDifference != 0 ? regPaymentDifference : null,
+        'registrationFeePaid': regPaymentDifference != 0
+            ? regPaymentDifference
+            : null,
         'balanceAmount': balance,
         'paymentMode': paymentMode,
         'createdAt': ServerValue.timestamp,
         'createdById': updatedById,
         'updatedById': updatedById,
-        'description': (regPaymentDifference < 0 || paymentDifference < 0) 
-            ? 'Payment Correction (Reduced)' 
+        'description': (regPaymentDifference < 0 || paymentDifference < 0)
+            ? 'Payment Correction (Reduced)'
             : (isPayment ? 'Balance/Fee collected.' : 'Details corrected.'),
         'ownerId': data['ownerId'] ?? '',
         'productId': productId,
