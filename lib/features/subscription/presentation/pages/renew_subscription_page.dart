@@ -141,7 +141,11 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
         ),
         title: Text(
           'Confirm ${TerminologyHelper.getTerminology(widget.shopCategory).renewActionLabel}',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp),
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
         ),
         content: SingleChildScrollView(
           child: Column(
@@ -773,8 +777,8 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
                           ? 'Confirm ${TerminologyHelper.getTerminology(widget.shopCategory).renewActionLabel}'
                           : 'Select a Duration',
                       style: TextStyle(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w600,
                         color: Colors.white,
                       ),
                     ),
