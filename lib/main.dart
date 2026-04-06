@@ -21,6 +21,10 @@ import 'package:csms/features/shop_subscription/presentation/bloc/shop_subscript
 import 'package:csms/features/app_config/presentation/bloc/version_bloc.dart';
 import 'package:csms/core/widgets/global_subscription_guard.dart';
 import 'package:csms/core/widgets/global_version_guard.dart';
+import 'package:csms/core/connectivity/presentation/bloc/connectivity_bloc.dart';
+import 'package:csms/core/connectivity/presentation/bloc/connectivity_event.dart';
+import 'package:csms/core/connectivity/presentation/bloc/connectivity_state.dart';
+import 'package:csms/core/widgets/no_internet_widget.dart';
 
 Future<void> bootstrap(AppConfig config) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -90,6 +94,9 @@ class MyApp extends StatelessWidget {
             BlocProvider(
               create: (_) => di.sl<VersionBloc>()..add(MonitorVersion()),
             ),
+            BlocProvider(
+              create: (_) => di.sl<ConnectivityBloc>()..add(MonitorConnectivity()),
+            ),
           ],
           child: MaterialApp(
             navigatorKey: navigatorKey,
@@ -118,7 +125,19 @@ class MyApp extends StatelessWidget {
               }
 
               return GlobalVersionGuard(
-                child: GlobalSubscriptionGuard(child: content),
+                child: GlobalSubscriptionGuard(
+                  child: BlocBuilder<ConnectivityBloc, ConnectivityState>(
+                    builder: (context, connectivityState) {
+                      return Stack(
+                        children: [
+                          content,
+                          if (connectivityState is ConnectivityOffline)
+                            const NoInternetWidget(),
+                        ],
+                      );
+                    },
+                  ),
+                ),
               );
             },
           ),

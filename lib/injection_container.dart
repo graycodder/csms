@@ -2,6 +2,10 @@ import 'package:get_it/get_it.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+
+// Core Connectivity
+import 'package:csms/core/connectivity/presentation/bloc/connectivity_bloc.dart';
 
 // Auth
 import 'package:csms/features/auth/domain/repositories/auth_repository.dart';
@@ -183,6 +187,8 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetBusinessReport(sl()));
   sl.registerFactory(() => ReportBloc(getBusinessReport: sl()));
 
+  sl.registerFactory(() => ConnectivityBloc(connectivity: sl()));
+
   //! External
 
   sl.registerLazySingleton(() {
@@ -192,4 +198,5 @@ Future<void> init() async {
   });
   sl.registerLazySingleton(() => FirebaseAuth.instance);
   sl.registerLazySingleton(() => FirebaseFirestore.instance);
+  sl.registerLazySingleton(() => Connectivity());
 }
