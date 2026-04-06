@@ -733,10 +733,7 @@ class _MonthlyReportViewState extends State<MonthlyReportView> {
       ('Other', const Color(0xFF757575), const Color(0xFFF5F5F5)),
     ];
 
-    final total = report.paymentModeBreakdown.values.fold(
-      0.0,
-      (s, v) => s + v,
-    );
+    final total = report.paymentModeBreakdown.values.fold(0.0, (s, v) => s + v);
     final hasData = total > 0;
 
     return Container(
@@ -765,25 +762,23 @@ class _MonthlyReportViewState extends State<MonthlyReportView> {
             ),
           ),
           SizedBox(height: 14.h),
-          if (hasData) ...
-            [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8.r),
-                child: Row(
-                  children: modes.map((m) {
-                    final val = report.paymentModeBreakdown[m.$1] ?? 0.0;
-                    final frac = val / total;
-                    if (frac <= 0) return const SizedBox.shrink();
-                    return Flexible(
-                      flex: (frac * 1000).round(),
-                      child: Container(height: 10.h, color: m.$2),
-                    );
-                  }).toList(),
-                ),
+          if (hasData) ...[
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8.r),
+              child: Row(
+                children: modes.map((m) {
+                  final val = report.paymentModeBreakdown[m.$1] ?? 0.0;
+                  final frac = val / total;
+                  if (frac <= 0) return const SizedBox.shrink();
+                  return Flexible(
+                    flex: (frac * 1000).round(),
+                    child: Container(height: 10.h, color: m.$2),
+                  );
+                }).toList(),
               ),
-              SizedBox(height: 16.h),
-            ]
-          else
+            ),
+            SizedBox(height: 16.h),
+          ] else
             Container(
               height: 10.h,
               decoration: BoxDecoration(
@@ -853,11 +848,11 @@ class _MonthlyReportViewState extends State<MonthlyReportView> {
         ? 2000
         : nonZeroData.fold(0.0, (m, p) => p.value > m ? p.value : m);
 
-    double yLimit = (maxVal / 500).ceil() * 500.0;
-    if (yLimit < 2000) {
-      yLimit = 2000;
+    double yLimit = (maxVal / 10000).ceil() * 10000.0;
+    if (yLimit < 80000) {
+      yLimit = 80000;
     } else if (yLimit == maxVal) {
-      yLimit += 500;
+      yLimit += 10000;
     }
 
     return Container(
@@ -956,16 +951,19 @@ class _MonthlyReportViewState extends State<MonthlyReportView> {
                   leftTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
-                      interval: 500,
+                      interval: 1000,
                       getTitlesWidget: (val, meta) {
-                        if (val == 0) return const SizedBox.shrink();
-                        return Text(
-                          '₹${val.toInt()}',
-                          style: TextStyle(
-                            color: AppColors.textLight,
-                            fontSize: 9.sp,
-                          ),
-                        );
+                        final v = val.toInt();
+                        if (v == 1000 || (v > 0 && v % 10000 == 0)) {
+                          return Text(
+                            '₹$v',
+                            style: TextStyle(
+                              color: AppColors.textLight,
+                              fontSize: 9.sp,
+                            ),
+                          );
+                        }
+                        return const SizedBox.shrink();
                       },
                       reservedSize: 45.w,
                     ),
@@ -989,7 +987,9 @@ class _MonthlyReportViewState extends State<MonthlyReportView> {
                       getDotPainter: (spot, percent, barData, index) =>
                           FlDotCirclePainter(
                             radius: spot.y > 0 ? 5 : 3,
-                            color: spot.y > 0 ? AppColors.primary : Colors.grey.shade300,
+                            color: spot.y > 0
+                                ? AppColors.primary
+                                : Colors.grey.shade300,
                             strokeWidth: 2,
                             strokeColor: Colors.white,
                           ),
@@ -1017,4 +1017,3 @@ class _MonthlyReportViewState extends State<MonthlyReportView> {
     );
   }
 }
-

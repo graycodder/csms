@@ -485,10 +485,7 @@ class _DailyReportViewState extends State<DailyReportView> {
       ('Other', const Color(0xFF757575), const Color(0xFFF5F5F5)),
     ];
 
-    final total = report.paymentModeBreakdown.values.fold(
-      0.0,
-      (s, v) => s + v,
-    );
+    final total = report.paymentModeBreakdown.values.fold(0.0, (s, v) => s + v);
 
     final hasData = total > 0;
 
@@ -518,29 +515,24 @@ class _DailyReportViewState extends State<DailyReportView> {
             ),
           ),
           SizedBox(height: 14.h),
-          if (hasData) ...
-            [
-              // Stacked progress bar
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8.r),
-                child: Row(
-                  children: modes.map((m) {
-                    final val = report.paymentModeBreakdown[m.$1] ?? 0.0;
-                    final frac = val / total;
-                    if (frac <= 0) return const SizedBox.shrink();
-                    return Flexible(
-                      flex: (frac * 1000).round(),
-                      child: Container(
-                        height: 10.h,
-                        color: m.$2,
-                      ),
-                    );
-                  }).toList(),
-                ),
+          if (hasData) ...[
+            // Stacked progress bar
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8.r),
+              child: Row(
+                children: modes.map((m) {
+                  final val = report.paymentModeBreakdown[m.$1] ?? 0.0;
+                  final frac = val / total;
+                  if (frac <= 0) return const SizedBox.shrink();
+                  return Flexible(
+                    flex: (frac * 1000).round(),
+                    child: Container(height: 10.h, color: m.$2),
+                  );
+                }).toList(),
               ),
-              SizedBox(height: 16.h),
-            ]
-          else
+            ),
+            SizedBox(height: 16.h),
+          ] else
             Container(
               height: 10.h,
               decoration: BoxDecoration(
@@ -613,11 +605,11 @@ class _DailyReportViewState extends State<DailyReportView> {
         ? 2000
         : nonZeroData.fold(0.0, (m, p) => p.value > m ? p.value : m);
 
-    double yLimit = (maxVal / 500).ceil() * 500.0;
-    if (yLimit < 2000) {
-      yLimit = 2000;
+    double yLimit = (maxVal / 10000).ceil() * 10000.0;
+    if (yLimit < 80000) {
+      yLimit = 80000;
     } else if (yLimit == maxVal) {
-      yLimit += 500;
+      yLimit += 10000;
     }
 
     return Container(
@@ -687,8 +679,7 @@ class _DailyReportViewState extends State<DailyReportView> {
                       showTitles: true,
                       getTitlesWidget: (val, meta) {
                         final idx = val.toInt();
-                        if (idx < 0 ||
-                            idx >= report.revenueChartData.length) {
+                        if (idx < 0 || idx >= report.revenueChartData.length) {
                           return const SizedBox.shrink();
                         }
                         // Only show every 4th label to avoid crowding
@@ -713,16 +704,19 @@ class _DailyReportViewState extends State<DailyReportView> {
                   leftTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
-                      interval: 500,
+                      interval: 1000,
                       getTitlesWidget: (val, meta) {
-                        if (val == 0) return const SizedBox.shrink();
-                        return Text(
-                          '₹${val.toInt()}',
-                          style: TextStyle(
-                            color: AppColors.textLight,
-                            fontSize: 9.sp,
-                          ),
-                        );
+                        final v = val.toInt();
+                        if (v == 1000 || (v > 0 && v % 10000 == 0)) {
+                          return Text(
+                            '₹$v',
+                            style: TextStyle(
+                              color: AppColors.textLight,
+                              fontSize: 9.sp,
+                            ),
+                          );
+                        }
+                        return const SizedBox.shrink();
                       },
                       reservedSize: 45.w,
                     ),
@@ -731,10 +725,8 @@ class _DailyReportViewState extends State<DailyReportView> {
                 gridData: FlGridData(
                   show: true,
                   drawVerticalLine: false,
-                  getDrawingHorizontalLine: (_) => const FlLine(
-                    color: Color(0xFFF3F4F6),
-                    strokeWidth: 1,
-                  ),
+                  getDrawingHorizontalLine: (_) =>
+                      const FlLine(color: Color(0xFFF3F4F6), strokeWidth: 1),
                 ),
                 borderData: FlBorderData(show: false),
                 barGroups: report.revenueChartData
