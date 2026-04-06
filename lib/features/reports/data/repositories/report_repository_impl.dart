@@ -175,31 +175,25 @@ class ReportRepositoryImpl implements ReportRepository {
       final Map<String, double> paymentModeBreakdown = {};
 
       final Map<String, double> loggedSubPaidMap = {}; // subscriptionId -> sum
-      final Map<String, double> loggedRegPaidMap = {}; // customerId -> sum
 
-      // 1. Sum all payments from logs in the period
+      // 1. Sum all subscription payments from logs in the period
       for (var l in periodLogs) {
         if (l.action == 'payment' ||
             l.action == 'create' ||
             l.action == 'renew') {
           final double sPaid = l.paidAmount ?? 0.0;
-          final double rPaid = l.registrationFeePaid ?? 0.0;
-          final double totalPaid = sPaid + rPaid;
 
           totalSubRevenue += sPaid;
-          totalRegRevenue += rPaid;
 
           if (l.subscriptionId != null) {
             loggedSubPaidMap[l.subscriptionId!] =
                 (loggedSubPaidMap[l.subscriptionId!] ?? 0.0) + sPaid;
           }
-          loggedRegPaidMap[l.customerId] =
-              (loggedRegPaidMap[l.customerId] ?? 0.0) + rPaid;
 
-          if (totalPaid > 0) {
+          if (sPaid > 0) {
             final mode = _normaliseMode(l.paymentMode);
             paymentModeBreakdown[mode] =
-                (paymentModeBreakdown[mode] ?? 0.0) + totalPaid;
+                (paymentModeBreakdown[mode] ?? 0.0) + sPaid;
           }
         }
       }
@@ -216,24 +210,24 @@ class ReportRepositoryImpl implements ReportRepository {
       }
       totalSubRevenue += missingSubRevenue;
 
-      // 3. Fallback for Customers: Add missing reg fee from logs
-      double missingRegRevenue = 0.0;
-      for (var c in newCustomers) {
-        final double logged = loggedRegPaidMap[c.customerId] ?? 0.0;
-        final double missing = (c.registrationFeePaidAmount - logged).clamp(
-          0,
-          double.infinity,
-        );
-        missingRegRevenue += missing;
-      }
-      totalRegRevenue += missingRegRevenue;
-
-      // 4. Assign fallback revenue to "Other"
-      final double totalMissing = missingSubRevenue + missingRegRevenue;
-      if (totalMissing > 0) {
+      // 3. Fallback/Other assignment
+      if (missingSubRevenue > 0) {
         final modeOther = _normaliseMode('Other');
         paymentModeBreakdown[modeOther] =
-            (paymentModeBreakdown[modeOther] ?? 0.0) + totalMissing;
+            (paymentModeBreakdown[modeOther] ?? 0.0) + missingSubRevenue;
+      }
+
+      // 3. Registration Fee Collected: Calculate purely from Customers Collection 
+      // (as per business logic: Reg fees are tied to newly created customers in this period)
+      for (var c in newCustomers) {
+        totalRegRevenue += c.registrationFeePaidAmount;
+        
+        // Ensure this revenue is captured in the payment mode breakdown
+        if (c.registrationFeePaidAmount > 0) {
+          final modeOther = _normaliseMode('Other');
+          paymentModeBreakdown[modeOther] =
+              (paymentModeBreakdown[modeOther] ?? 0.0) + c.registrationFeePaidAmount;
+        }
       }
 
 
@@ -300,7 +294,7 @@ class ReportRepositoryImpl implements ReportRepository {
         (sum, s) => sum + (s.balanceAmount > 0 ? s.balanceAmount : 0),
       );
 
-      final double totalPendingRegBalance = activeStatusCustomers.fold(
+      final double totalPendingRegBalance = customersInScope.fold(
         0.0,
         (sum, c) =>
             sum +
@@ -327,25 +321,23 @@ class ReportRepositoryImpl implements ReportRepository {
           ? DateTime(dt.year, dt.month, dt.day, dt.hour)
           : DateTime(dt.year, dt.month, dt.day);
 
-      // Add revenue from logs
+      // Add subscription revenue from logs
       for (var l in periodLogs) {
         if (l.action == 'payment' ||
             l.action == 'create' ||
             l.action == 'renew') {
           final double sPaid = l.paidAmount ?? 0.0;
-          final double rPaid = l.registrationFeePaid ?? 0.0;
-          final double totalPaid = sPaid + rPaid;
 
-          if (totalPaid > 0) {
+          if (sPaid > 0) {
             final b = getBucket(l.createdAt.toLocal());
             if (hourlyRev.containsKey(b)) {
-              hourlyRev[b] = (hourlyRev[b] ?? 0.0) + totalPaid;
+              hourlyRev[b] = (hourlyRev[b] ?? 0.0) + sPaid;
             }
           }
         }
       }
 
-      // Add fallback missing revenues
+      // Add subscription fallback missing revenues
       for (var s in newSubs) {
         final double logged = loggedSubPaidMap[s.subscriptionId] ?? 0.0;
         final double missing = (s.paidAmount - logged).clamp(
@@ -360,16 +352,12 @@ class ReportRepositoryImpl implements ReportRepository {
         }
       }
 
+      // Add Registration fee collected directly from customers collection
       for (var c in newCustomers) {
-        final double logged = loggedRegPaidMap[c.customerId] ?? 0.0;
-        final double missing = (c.registrationFeePaidAmount - logged).clamp(
-          0,
-          double.infinity,
-        );
-        if (missing > 0) {
+        if (c.registrationFeePaidAmount > 0) {
           final b = getBucket(c.createdAt.toLocal());
           if (hourlyRev.containsKey(b)) {
-            hourlyRev[b] = (hourlyRev[b] ?? 0.0) + missing;
+            hourlyRev[b] = (hourlyRev[b] ?? 0.0) + c.registrationFeePaidAmount;
           }
         }
       }
