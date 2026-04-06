@@ -233,7 +233,7 @@ class _DailyReportViewState extends State<DailyReportView> {
                   ),
                   SizedBox(height: 4.h),
                   Text(
-                    '₹${report.totalRevenueCollected.toStringAsFixed(2)}',
+                    '₹${report.totalRevenueCollected.toStringAsFixed(0)}',
                     style: TextStyle(
                       color: Colors.black,
                       fontSize: 24.sp,
