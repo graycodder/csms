@@ -75,6 +75,8 @@ class NotificationError extends NotificationState {
 class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   final NotificationRepository repository;
   StreamSubscription? _subscription;
+  String? _currentOwnerId;
+  String? _currentShopId;
 
   // Track IDs we've already shown popups for to avoid duplicates on re-listen
   final Set<String> _shownIds = {};
@@ -129,8 +131,17 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     StartListeningNotifications event,
     Emitter<NotificationState> emit,
   ) {
+    // Optimization: Don't restart the stream if we're already listening to the same shop/owner.
+    if (_subscription != null &&
+        _currentOwnerId == event.ownerId &&
+        _currentShopId == event.shopId) {
+      return;
+    }
+
     _subscription?.cancel();
     _isInitialLoad = true;
+    _currentOwnerId = event.ownerId;
+    _currentShopId = event.shopId;
     _shopCategory = event.shopCategory;
     _subscription = repository
         .streamNotifications(event.ownerId, event.shopId)

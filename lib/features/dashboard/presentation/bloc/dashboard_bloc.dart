@@ -1,3 +1,4 @@
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:dartz/dartz.dart';
@@ -115,7 +116,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     required this.subscriptionRepository,
     required this.shopRepository,
   }) : super(DashboardInitial()) {
-    on<LoadDashboardData>(_onLoadDashboardData);
+    on<LoadDashboardData>(_onLoadDashboardData, transformer: restartable());
     on<LoadMoreCustomers>(_onLoadMoreCustomers);
     on<ResetDashboard>((event, emit) => emit(DashboardInitial()));
   }

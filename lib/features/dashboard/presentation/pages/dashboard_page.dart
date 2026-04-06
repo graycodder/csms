@@ -30,6 +30,7 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   String _selectedProductId = '';
   String _searchQuery = '';
+  String? _lastLoadedShopId; // Track the last loaded shop ID to prevent redundant reloads
   late FocusNode _searchFocusNode;
   late TextEditingController _searchController;
   late ScrollController _scrollController;
@@ -70,28 +71,36 @@ class _DashboardPageState extends State<DashboardPage> {
     super.dispose();
   }
 
-  void _tryLoad() {
+  void _tryLoad({bool forced = false}) {
     final shopState = context.read<ShopContextBloc>().state;
     final authState = context.read<AuthBloc>().state;
     if (shopState is ShopSelected && authState is AuthAuthenticated) {
+      final currentShopId = shopState.selectedShop.shopId;
+
+      // Prevent redundant reloads if the shopId hasn't changed, unless forced (e.g. after adding a customer).
+      if (!forced && _lastLoadedShopId == currentShopId) {
+        return;
+      }
+      _lastLoadedShopId = currentShopId;
+
       print(
-        'DEBUG: DashboardPage _tryLoad - Triggering LoadDashboardData for shopId: ${shopState.selectedShop.shopId}',
+        'DEBUG: DashboardPage _tryLoad - Triggering LoadDashboardData for shopId: $currentShopId',
       );
       context.read<DashboardBloc>().add(
         LoadDashboardData(
-          shopId: shopState.selectedShop.shopId,
+          shopId: currentShopId,
           ownerId: authState.ownerId,
         ),
       );
       context.read<NotificationBloc>().add(
         StartListeningNotifications(
           authState.ownerId,
-          shopState.selectedShop.shopId,
+          currentShopId,
           shopState.selectedShop.category,
         ),
       );
       context.read<ShopSubscriptionBloc>().add(
-        ListenToShopSubscriptionStatus(shopState.selectedShop.shopId),
+        ListenToShopSubscriptionStatus(currentShopId),
       );
     } else if (authState is AuthAuthenticated && shopState is! ShopSelected) {
       context.read<ShopContextBloc>().add(
@@ -111,25 +120,7 @@ class _DashboardPageState extends State<DashboardPage> {
         BlocListener<ShopContextBloc, ShopContextState>(
           listener: (context, shopState) {
             if (shopState is ShopSelected) {
-              final authState = context.read<AuthBloc>().state;
-              if (authState is AuthAuthenticated) {
-                context.read<DashboardBloc>().add(
-                  LoadDashboardData(
-                    shopId: shopState.selectedShop.shopId,
-                    ownerId: authState.ownerId,
-                  ),
-                );
-                context.read<NotificationBloc>().add(
-                  StartListeningNotifications(
-                    authState.ownerId,
-                    shopState.selectedShop.shopId,
-                    shopState.selectedShop.category,
-                  ),
-                );
-                context.read<ShopSubscriptionBloc>().add(
-                  ListenToShopSubscriptionStatus(shopState.selectedShop.shopId),
-                );
-              }
+              _tryLoad();
             }
           },
         ),
@@ -242,7 +233,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       ),
                     ),
                   ).then((_) {
-                    _tryLoad();
+                    _tryLoad(forced: true);
                   });
                 },
                 backgroundColor: const Color(0xFF1E56F0),
@@ -340,7 +331,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     MaterialPageRoute(
                       builder: (_) => const NotificationsPage(),
                     ),
-                  ).then((_) => _tryLoad());
+                  ).then((_) => _tryLoad(forced: true));
                 },
               );
             },
@@ -354,7 +345,7 @@ class _DashboardPageState extends State<DashboardPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const SettingsPage()),
-              ).then((_) => _tryLoad());
+              ).then((_) => _tryLoad(forced: true));
             },
           ),
         ],

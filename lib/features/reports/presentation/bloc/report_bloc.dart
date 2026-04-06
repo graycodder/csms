@@ -1,3 +1,4 @@
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:csms/features/reports/domain/entities/report_entity.dart';
@@ -78,8 +79,8 @@ class ReportBloc extends Bloc<ReportEvent, ReportState> {
   final GetBusinessReport getBusinessReport;
 
   ReportBloc({required this.getBusinessReport}) : super(ReportInitial()) {
-    on<LoadReport>(_onLoadReport);
-    on<ChangeReportFilter>(_onChangeReportFilter);
+    on<LoadReport>(_onLoadReport, transformer: restartable());
+    on<ChangeReportFilter>(_onChangeReportFilter, transformer: restartable());
   }
 
   Future<void> _onLoadReport(LoadReport event, Emitter<ReportState> emit) async {

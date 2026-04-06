@@ -43,21 +43,21 @@ class ReportRepositoryImpl implements ReportRepository {
         _database
             .ref()
             .child('customers')
-            .orderByChild('ownerId')
-            .equalTo(ownerId)
+            .orderByChild('shopId')
+            .equalTo(shopId)
             .get(),
         _database
             .ref()
             .child('subscriptions')
-            .orderByChild('ownerId')
-            .equalTo(ownerId)
+            .orderByChild('shopId')
+            .equalTo(shopId)
             .get(),
         _database.ref().child('subscription_logs').child(shopId).get(),
         _database
             .ref()
             .child('products')
-            .orderByChild('ownerId')
-            .equalTo(ownerId)
+            .orderByChild('shopId')
+            .equalTo(shopId)
             .get(),
         _database.ref().child('shops').child(shopId).get(),
       ]);
@@ -85,9 +85,7 @@ class ReportRepositoryImpl implements ReportRepository {
           final data = customerSnap.value as Map<dynamic, dynamic>;
           data.forEach((key, val) {
             final map = Map<String, dynamic>.from(val as Map);
-            if (map['shopId'] == shopId) {
-              list.add(CustomerModel.fromJson(map, key.toString()));
-            }
+            list.add(CustomerModel.fromJson(map, key.toString()));
           });
         }
         return list;
@@ -99,9 +97,7 @@ class ReportRepositoryImpl implements ReportRepository {
           final data = subSnap.value as Map<dynamic, dynamic>;
           data.forEach((key, val) {
             final map = Map<String, dynamic>.from(val as Map);
-            if (map['shopId'] == shopId) {
-              list.add(SubscriptionModel.fromJson(map, key.toString()));
-            }
+            list.add(SubscriptionModel.fromJson(map, key.toString()));
           });
         }
         return list;
@@ -129,9 +125,7 @@ class ReportRepositoryImpl implements ReportRepository {
           final data = productSnap.value as Map<dynamic, dynamic>;
           data.forEach((key, val) {
             final map = Map<String, dynamic>.from(val as Map);
-            if (map['shopId'] == shopId) {
-              list.add(ProductModel.fromJson(map, key.toString()));
-            }
+            list.add(ProductModel.fromJson(map, key.toString()));
           });
         }
         return list;
