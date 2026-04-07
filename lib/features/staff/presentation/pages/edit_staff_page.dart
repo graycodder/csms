@@ -152,10 +152,7 @@ class _EditStaffPageState extends State<EditStaffPage> {
             LoadingOverlayHelper.hide();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(
-                  state.message,
-                  style: TextStyle(fontSize: 14.sp),
-                ),
+                content: Text(state.message, style: TextStyle(fontSize: 14.sp)),
                 backgroundColor: Colors.green,
                 behavior: SnackBarBehavior.floating,
               ),
@@ -192,11 +189,31 @@ class _EditStaffPageState extends State<EditStaffPage> {
                   _buildLabel('Phone Number *'),
                   TextFormField(
                     controller: _phoneController,
-                    keyboardType: TextInputType.phone,
-                    decoration: _inputDecoration('Enter phone number'),
-                    validator: (v) =>
-                        (v == null || v.isEmpty) ? 'Required' : null,
+                    keyboardType: TextInputType.number,
+                    maxLength: 10,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    decoration: const InputDecoration(
+                      hintText: 'Enter 10-digit phone number',
+                      prefixIcon: Icon(Icons.phone_outlined),
+                      counterText: '',
+                    ),
+                    validator: (v) {
+                      if (v == null || v.isEmpty) return 'Phone is required';
+                      if (v.length != 10) return 'Must be exactly 10 digits';
+                      if (!RegExp(r'^[0-9]+$').hasMatch(v)) {
+                        return 'Numbers only';
+                      }
+                      return null;
+                    },
                   ),
+                  // _buildLabel('Phone Number *'),
+                  // TextFormField(
+                  //   controller: _phoneController,
+                  //   keyboardType: TextInputType.phone,
+                  //   decoration: _inputDecoration('Enter phone number'),
+                  //   validator: (v) =>
+                  //       (v == null || v.isEmpty) ? 'Required' : null,
+                  // ),
                   SizedBox(height: 16.h),
                   _buildLabel('Email Address *'),
                   TextFormField(
