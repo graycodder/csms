@@ -53,10 +53,12 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
   }
 
   void _updateControllers(ProductEntity p) {
-    _priceController.text = p.price.toStringAsFixed(0);
-    _validityController.text = p.validityValue.toString();
-    _customValidityUnit = p.validityUnit;
-    _paidAmountController.text = _computedAmount.toStringAsFixed(0);
+    setState(() {
+      _priceController.text = p.price.toStringAsFixed(0);
+      _validityController.text = p.validityValue.toString();
+      _customValidityUnit = p.validityUnit;
+      _paidAmountController.text = _computedAmount.toStringAsFixed(0);
+    });
   }
 
   @override
@@ -461,7 +463,12 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                         hintText: 'Enter price',
                         prefixIcon: Icon(Icons.currency_rupee),
                       ),
-                      onChanged: (_) => setState(() {}),
+                      onChanged: (_) {
+                        setState(() {
+                          _paidAmountController.text =
+                              _computedAmount.toStringAsFixed(0);
+                        });
+                      },
                       validator: (v) {
                         if (v == null || v.trim().isEmpty) {
                           return 'Price is required';
@@ -596,7 +603,12 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                                 hintText: 'Enter registration fee',
                                 prefixIcon: Icon(Icons.currency_rupee),
                               ),
-                              onChanged: (_) => setState(() {}),
+                              onChanged: (_) {
+                                setState(() {
+                                  _paidAmountController.text =
+                                      _computedAmount.toStringAsFixed(0);
+                                });
+                              },
                               validator: (v) {
                                 if (v == null || v.trim().isEmpty) {
                                   return 'Registration fee is required';
