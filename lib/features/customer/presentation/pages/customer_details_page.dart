@@ -12,11 +12,9 @@ import 'package:csms/features/customer/domain/entities/customer_entity.dart';
 import 'package:csms/features/subscription/domain/entities/subscription_entity.dart';
 import 'package:csms/features/product/domain/entities/product_entity.dart';
 import 'package:csms/features/customer/presentation/bloc/customer_bloc.dart';
-// import 'package:csms/injection_container.dart' as di;
 import 'package:csms/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_state.dart';
 import 'package:csms/features/subscription/presentation/pages/subscription_history_page.dart';
-// import 'package:csms/features/subscription/presentation/bloc/subscription_bloc.dart';
 import 'package:csms/features/shop/presentation/bloc/shop_context_bloc.dart';
 import 'package:csms/core/utils/date_utils.dart';
 import 'package:csms/core/utils/launcher_utils.dart';
@@ -964,7 +962,7 @@ class CustomerDetailsPage extends StatelessWidget {
                 border: Border.all(color: statusColor.withOpacity(0.5)),
               ),
               child: Text(
-                status.toUpperCase(),
+                status[0].toUpperCase() + status.substring(1),
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 11.sp,
@@ -1082,12 +1080,14 @@ class CustomerDetailsPage extends StatelessWidget {
                         ),
                       ),
                       validator: (value) {
-                        if (value == null || value.isEmpty)
+                        if (value == null || value.isEmpty) {
                           return 'Enter amount';
+                        }
                         final amt = double.tryParse(value);
                         if (amt == null || amt <= 0) return 'Invalid amount';
-                        if (amt > balance)
+                        if (amt > balance) {
                           return 'Cannot exceed pending balance';
+                        }
                         return null;
                       },
                     ),
@@ -1164,7 +1164,7 @@ class CustomerDetailsPage extends StatelessWidget {
                                 customer.registrationFeeAmount,
                             registrationFeePaid: newRegPaid,
                             paidAmount: sub.paidAmount,
-                            paymentMode: selectedPaymentMode,
+                            paymentMode: sub.paymentMode,
                             updatedById: customer.updatedById,
                             ownerId: customer.ownerId,
                             shopId: customer.shopId,
