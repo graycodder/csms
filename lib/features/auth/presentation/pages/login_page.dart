@@ -36,7 +36,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _onLoginPressed() {
-    FocusScope.of(context).unfocus();
+    FocusManager.instance.primaryFocus?.unfocus();
     if (!_agreedToTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -52,12 +52,17 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
     if (_formKey.currentState?.validate() ?? false) {
-      context.read<AuthBloc>().add(
-        LoginRequested(
-          email: _emailController.text.trim(),
-          password: _passwordController.text.trim(),
-        ),
-      );
+      // Add a small delay to ensure keyboard dismissal has started
+      // before showing the loading overlay
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (!mounted) return;
+        context.read<AuthBloc>().add(
+          LoginRequested(
+            email: _emailController.text.trim(),
+            password: _passwordController.text.trim(),
+          ),
+        );
+      });
     }
   }
 
@@ -80,7 +85,7 @@ class _LoginPageState extends State<LoginPage> {
                     Padding(
                       padding: EdgeInsets.symmetric(vertical: 40.h),
                       child: Column(
-                        //  mainAxisSize: MainAxisSize.min,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
                             'Business Manager',
@@ -118,7 +123,7 @@ class _LoginPageState extends State<LoginPage> {
                         key: _formKey,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
-                          //  mainAxisSize: MainAxisSize.min,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
                               'Welcome Back',
