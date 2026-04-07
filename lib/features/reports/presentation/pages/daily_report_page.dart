@@ -272,7 +272,7 @@ class _DailyReportViewState extends State<DailyReportView> {
             children: [
               Expanded(
                 child: _buildRevenueGridItem(
-                  'Subscription:',
+                  '${term.subscriptionLabel}s',
                   '₹${report.subscriptionRevenueCollected.toStringAsFixed(0)}',
                   Icons.autorenew,
                   const Color(0xFFE0F7FA),

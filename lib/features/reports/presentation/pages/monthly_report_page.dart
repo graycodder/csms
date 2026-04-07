@@ -403,7 +403,7 @@ class _MonthlyReportViewState extends State<MonthlyReportView> {
             children: [
               Expanded(
                 child: _buildRevenueGridItem(
-                  'Subscription:',
+                  '${term.subscriptionLabel}s',
                   '₹${report.subscriptionRevenueCollected.toStringAsFixed(0)}',
                   Icons.autorenew,
                   const Color(0xFFE0F7FA),
