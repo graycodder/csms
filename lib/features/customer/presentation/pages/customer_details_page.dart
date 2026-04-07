@@ -481,7 +481,7 @@ class CustomerDetailsPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
-                        sub.balanceAmount > 0 ? 'Collect Balance' : 'Price',
+                        sub.balanceAmount > 0 ? 'Paid Amount' : 'Price',
                         style: TextStyle(
                           color: sub.balanceAmount > 0
                               ? AppColors.primary

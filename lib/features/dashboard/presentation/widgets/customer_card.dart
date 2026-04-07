@@ -84,7 +84,7 @@ class CustomerCard extends StatelessWidget {
         ? Colors.red.withOpacity(0.1)
         : (isWarn ? const Color(0xFFFFF3E0) : const Color(0xFFE8F5E9));
 
-    final price = sub != null ? sub.price.toStringAsFixed(0) : '—';
+    // final price = sub != null ? sub.price.toStringAsFixed(0) : '—';
 
     return GestureDetector(
       onTap: () {
@@ -258,7 +258,7 @@ class CustomerCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      price,
+                      sub != null ? sub.paidAmount.toStringAsFixed(0) : '0',
                       style: TextStyle(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.bold,
