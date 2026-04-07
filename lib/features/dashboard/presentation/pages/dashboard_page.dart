@@ -326,12 +326,14 @@ class _DashboardPageState extends State<DashboardPage> {
                 onTap: () {
                   FocusScope.of(context).unfocus();
                   _searchFocusNode.unfocus();
+                  LoadingOverlayHelper.hide(); // clear any in-progress overlay
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (_) => const NotificationsPage(),
                     ),
-                  ).then((_) => _tryLoad(forced: true));
+                  );
+                  // No forced reload — notifications don't mutate dashboard data
                 },
               );
             },
@@ -342,10 +344,12 @@ class _DashboardPageState extends State<DashboardPage> {
             onTap: () {
               FocusScope.of(context).unfocus();
               _searchFocusNode.unfocus();
+              LoadingOverlayHelper.hide(); // clear any in-progress overlay
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const SettingsPage()),
-              ).then((_) => _tryLoad(forced: true));
+              );
+              // No forced reload — settings don't mutate customer/dashboard data
             },
           ),
         ],

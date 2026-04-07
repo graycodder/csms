@@ -80,7 +80,7 @@ class _LoginPageState extends State<LoginPage> {
                     Padding(
                       padding: EdgeInsets.symmetric(vertical: 40.h),
                       child: Column(
-                        mainAxisSize: MainAxisSize.min,
+                        //  mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
                             'Business Manager',
@@ -105,6 +105,7 @@ class _LoginPageState extends State<LoginPage> {
                     // ── Bottom white card ─────────────────────────────────
                     Container(
                       width: double.infinity,
+                      height: MediaQuery.of(context).size.height * 0.9,
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.only(
@@ -117,7 +118,7 @@ class _LoginPageState extends State<LoginPage> {
                         key: _formKey,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
-                          mainAxisSize: MainAxisSize.min,
+                          //  mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
                               'Welcome Back',
@@ -144,13 +145,18 @@ class _LoginPageState extends State<LoginPage> {
                               keyboardType: TextInputType.emailAddress,
                               decoration: InputDecoration(
                                 hintText: 'Enter your email',
-                                prefixIcon: Icon(Icons.email_outlined, size: 22.sp),
+                                prefixIcon: Icon(
+                                  Icons.email_outlined,
+                                  size: 22.sp,
+                                ),
                               ),
                               validator: (value) {
                                 if (value == null || value.trim().isEmpty) {
                                   return 'Please enter your email';
                                 }
-                                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value.trim())) {
+                                if (!RegExp(
+                                  r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                ).hasMatch(value.trim())) {
                                   return 'Enter a valid email';
                                 }
                                 return null;
@@ -173,10 +179,15 @@ class _LoginPageState extends State<LoginPage> {
                               obscureText: _obscurePassword,
                               decoration: InputDecoration(
                                 hintText: 'Enter your password',
-                                prefixIcon: Icon(Icons.lock_outline, size: 22.sp),
+                                prefixIcon: Icon(
+                                  Icons.lock_outline,
+                                  size: 22.sp,
+                                ),
                                 suffixIcon: IconButton(
                                   icon: Icon(
-                                    _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                                    _obscurePassword
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
                                     color: const Color(0xFFBDBDBD),
                                     size: 22.sp,
                                   ),
@@ -212,8 +223,9 @@ class _LoginPageState extends State<LoginPage> {
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(4.r),
                                     ),
-                                    onChanged: (v) =>
-                                        setState(() => _agreedToTerms = v ?? false),
+                                    onChanged: (v) => setState(
+                                      () => _agreedToTerms = v ?? false,
+                                    ),
                                   ),
                                 ),
                                 SizedBox(width: 8.w),
@@ -232,7 +244,8 @@ class _LoginPageState extends State<LoginPage> {
                                             color: AppColors.primary,
                                             fontWeight: FontWeight.w600,
                                             fontSize: 12.sp,
-                                            decoration: TextDecoration.underline,
+                                            decoration:
+                                                TextDecoration.underline,
                                           ),
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
@@ -241,7 +254,8 @@ class _LoginPageState extends State<LoginPage> {
                                                 MaterialPageRoute(
                                                   builder: (_) => const WebViewPage(
                                                     title: 'Terms & Conditions',
-                                                    url: 'https://csms-saas-platform.web.app/legal/terms',
+                                                    url:
+                                                        'https://csms-saas-platform.web.app/legal/terms',
                                                   ),
                                                 ),
                                               );
@@ -260,7 +274,8 @@ class _LoginPageState extends State<LoginPage> {
                                             color: AppColors.primary,
                                             fontWeight: FontWeight.w600,
                                             fontSize: 12.sp,
-                                            decoration: TextDecoration.underline,
+                                            decoration:
+                                                TextDecoration.underline,
                                           ),
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
@@ -269,7 +284,8 @@ class _LoginPageState extends State<LoginPage> {
                                                 MaterialPageRoute(
                                                   builder: (_) => const WebViewPage(
                                                     title: 'Privacy Policy',
-                                                    url: 'https://csms-saas-platform.web.app/legal/privacy',
+                                                    url:
+                                                        'https://csms-saas-platform.web.app/legal/privacy',
                                                   ),
                                                 ),
                                               );
@@ -292,15 +308,17 @@ class _LoginPageState extends State<LoginPage> {
                                     } else if (state is AuthAuthenticated) {
                                       LoadingOverlayHelper.hide();
                                       context.read<ShopContextBloc>().add(
-                                            LoadShops(
-                                              ownerId: state.ownerId,
-                                              shopId: state.shopId,
-                                              role: state.role,
-                                            ),
-                                          );
+                                        LoadShops(
+                                          ownerId: state.ownerId,
+                                          shopId: state.shopId,
+                                          role: state.role,
+                                        ),
+                                      );
                                     } else if (state is AuthError) {
                                       LoadingOverlayHelper.hide();
-                                      ScaffoldMessenger.of(context).showSnackBar(
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
                                         SnackBar(content: Text(state.message)),
                                       );
                                     }
@@ -311,17 +329,25 @@ class _LoginPageState extends State<LoginPage> {
                                     if (state is ShopSelected) {
                                       Navigator.pushReplacement(
                                         context,
-                                        MaterialPageRoute(builder: (_) => DashboardPage()),
+                                        MaterialPageRoute(
+                                          builder: (_) => DashboardPage(),
+                                        ),
                                       );
                                     } else if (state is ShopContextLoaded) {
                                       Navigator.pushReplacement(
                                         context,
-                                        MaterialPageRoute(builder: (_) => const ShopSelectionPage()),
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              const ShopSelectionPage(),
+                                        ),
                                       );
                                     } else if (state is ShopContextEmpty) {
                                       Navigator.pushReplacement(
                                         context,
-                                        MaterialPageRoute(builder: (_) => const OnboardingPage()),
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              const OnboardingPage(),
+                                        ),
                                       );
                                     }
                                   },
@@ -352,7 +378,8 @@ class _LoginPageState extends State<LoginPage> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (_) => ForgotPasswordPage(
-                                        initialEmail: _emailController.text.trim(),
+                                        initialEmail: _emailController.text
+                                            .trim(),
                                       ),
                                     ),
                                   );
@@ -392,7 +419,8 @@ class _LoginPageState extends State<LoginPage> {
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (_) => const OnboardingPage(),
+                                              builder: (_) =>
+                                                  const OnboardingPage(),
                                             ),
                                           );
                                         },

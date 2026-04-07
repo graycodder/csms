@@ -1,7 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 
 @pragma('vm:entry-point')
@@ -24,64 +23,73 @@ class NotificationService {
   Future<void> initialize() async {
     if (_isInitialized) return;
 
-    _fcm = FirebaseMessaging.instance;
-
-    // 1. Request FCM Permission
     try {
-      await _fcm.requestPermission(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
+      _fcm = FirebaseMessaging.instance;
+
+      // 1. Request FCM Permission
+      try {
+        await _fcm.requestPermission(alert: true, badge: true, sound: true);
+      } catch (e) {
+        debugPrint('FCM requestPermission error (non-fatal): $e');
+      }
     } catch (e) {
-      debugPrint('FCM requestPermission error (non-fatal): $e');
+      debugPrint('FCM instance error (likely SERVICE_NOT_AVAILABLE): $e');
+      _isInitialized =
+          true; // Mark as initialized anyway so we don't keep retrying and crashing
+      return;
     }
 
     // 2. Initialize Local Notifications — mobile only
     if (!kIsWeb) {
-      const AndroidInitializationSettings initializationSettingsAndroid =
-          AndroidInitializationSettings('@mipmap/launcher_icon');
+      try {
+        const AndroidInitializationSettings initializationSettingsAndroid =
+            AndroidInitializationSettings('@mipmap/launcher_icon');
 
-      const DarwinInitializationSettings initializationSettingsIOS =
-          DarwinInitializationSettings(
-        requestSoundPermission: true,
-        requestBadgePermission: true,
-        requestAlertPermission: true,
-      );
+        const DarwinInitializationSettings initializationSettingsIOS =
+            DarwinInitializationSettings(
+              requestSoundPermission: true,
+              requestBadgePermission: true,
+              requestAlertPermission: true,
+            );
 
-      const InitializationSettings initializationSettings =
-          InitializationSettings(
-        android: initializationSettingsAndroid,
-        iOS: initializationSettingsIOS,
-      );
+        const InitializationSettings initializationSettings =
+            InitializationSettings(
+              android: initializationSettingsAndroid,
+              iOS: initializationSettingsIOS,
+            );
 
-      await _localNotificationsPlugin.initialize(
-        settings: initializationSettings,
-        onDidReceiveNotificationResponse: (NotificationResponse response) {
-          debugPrint('Notification clicked: ${response.payload}');
-        },
-      );
+        await _localNotificationsPlugin.initialize(
+          settings: initializationSettings,
+          onDidReceiveNotificationResponse: (NotificationResponse response) {
+            debugPrint('Notification clicked: ${response.payload}');
+          },
+        );
 
-      // 3. Create Custom Sound Channel (Android only)
-      const AndroidNotificationChannel channel = AndroidNotificationChannel(
-        'custom_sound_channel',
-        'Specific Alerts',
-        description: 'Used for important staff alerts',
-        importance: Importance.max,
-        playSound: true,
-      );
+        // 3. Create Custom Sound Channel (Android only)
+        const AndroidNotificationChannel channel = AndroidNotificationChannel(
+          'custom_sound_channel',
+          'Specific Alerts',
+          description: 'Used for important staff alerts',
+          importance: Importance.max,
+          playSound: true,
+        );
 
-      await _localNotificationsPlugin
-          .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>()
-          ?.createNotificationChannel(channel);
+        await _localNotificationsPlugin
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >()
+            ?.createNotificationChannel(channel);
+      } catch (e) {
+        debugPrint('Local notifications initialization error: $e');
+      }
     }
 
     // 4. Register Background Handler + Foreground listener
     try {
       if (!kIsWeb) {
         FirebaseMessaging.onBackgroundMessage(
-            _firebaseMessagingBackgroundHandler);
+          _firebaseMessagingBackgroundHandler,
+        );
       }
 
       // 5. Handle Foreground Messages (mobile only for local notifications)
@@ -124,10 +132,11 @@ class NotificationService {
   }
 
   Future<String?> getToken() async {
+    if (!_isInitialized) return null;
     try {
       return await _fcm.getToken();
     } catch (e) {
-      debugPrint("FCM Token error: $e");
+      debugPrint("FCM Token error (likely SERVICE_NOT_AVAILABLE): $e");
       return null;
     }
   }
