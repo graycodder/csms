@@ -83,6 +83,14 @@ class StaffLoaded extends StaffState {
   List<Object?> get props => [staffList];
 }
 
+class StaffActionSuccess extends StaffLoaded {
+  final String message;
+  const StaffActionSuccess(this.message, List<StaffEntity> staffList)
+    : super(staffList);
+  @override
+  List<Object?> get props => [message, staffList];
+}
+
 class StaffError extends StaffState {
   final String message;
   const StaffError(this.message);
@@ -117,6 +125,8 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
   }
 
   Future<void> _onAddStaff(AddStaff event, Emitter<StaffState> emit) async {
+    final currentList =
+        state is StaffLoaded ? (state as StaffLoaded).staffList : <StaffEntity>[];
     emit(StaffOperationInProgress());
     final result = await repository.addStaff(
       event.shopId,
@@ -124,28 +134,57 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
       event.staff,
       password: event.password,
     );
-    result.fold((failure) => emit(StaffError(failure.message)), (_) => null);
-    // No need to manually load, stream will update
+    result.fold(
+      (failure) => emit(StaffError(failure.message)),
+      (newId) {
+        final newStaff = StaffEntity(
+          staffId: newId,
+          shopId: event.staff.shopId,
+          ownerId: event.staff.ownerId,
+          name: event.staff.name,
+          phone: event.staff.phone,
+          email: event.staff.email,
+          role: event.staff.role,
+          status: event.staff.status,
+          createdAt: event.staff.createdAt,
+        );
+        final newList = List<StaffEntity>.from(currentList)..add(newStaff);
+        newList.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        emit(StaffActionSuccess('Staff added successfully!', newList));
+      },
+    );
   }
 
   Future<void> _onUpdateStaff(
     UpdateStaff event,
     Emitter<StaffState> emit,
   ) async {
+    final currentList =
+        state is StaffLoaded ? (state as StaffLoaded).staffList : <StaffEntity>[];
     emit(StaffOperationInProgress());
     final result = await repository.updateStaff(
       event.shopId,
       event.ownerId,
       event.staff,
     );
-    result.fold((failure) => emit(StaffError(failure.message)), (_) => null);
-    // No need to manually load, stream will update
+    result.fold(
+      (failure) => emit(StaffError(failure.message)),
+      (_) {
+        final newList = currentList
+            .map((s) => s.staffId == event.staff.staffId ? event.staff : s)
+            .toList();
+        emit(StaffActionSuccess('Staff member updated successfully!', newList));
+      },
+    );
   }
 
   Future<void> _onToggleStaffStatus(
     ToggleStaffStatus event,
     Emitter<StaffState> emit,
   ) async {
+    final currentList =
+        state is StaffLoaded ? (state as StaffLoaded).staffList : <StaffEntity>[];
+
     emit(StaffOperationInProgress());
     final newStatus = event.staff.status == 'active' ? 'inactive' : 'active';
     final updatedStaff = StaffEntity(
@@ -164,7 +203,14 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
       event.ownerId,
       updatedStaff,
     );
-    result.fold((failure) => emit(StaffError(failure.message)), (_) => null);
-    // No need to manually load, stream will update
+    result.fold(
+      (failure) => emit(StaffError(failure.message)),
+      (_) {
+        final newList = currentList
+            .map((s) => s.staffId == event.staff.staffId ? updatedStaff : s)
+            .toList();
+        emit(StaffLoaded(newList));
+      },
+    );
   }
 }

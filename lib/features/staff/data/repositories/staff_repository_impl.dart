@@ -39,7 +39,7 @@ class StaffRepositoryImpl implements StaffRepository {
   }
 
   @override
-  Future<Either<Failure, void>> addStaff(String shopId, String ownerId, StaffEntity staff, {String? password}) async {
+  Future<Either<Failure, String>> addStaff(String shopId, String ownerId, StaffEntity staff, {String? password}) async {
     try {
       // --- Pre-check Email Uniqueness ---
       final emailCheckSnapshot = await _usersRef.orderByChild('ownerId').equalTo(ownerId).get();
@@ -114,7 +114,7 @@ class StaffRepositoryImpl implements StaffRepository {
       }
       
       await _usersRef.child(staffIdToUse).set(data);
-      return const Right(null);
+      return Right(staffIdToUse);
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }

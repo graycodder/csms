@@ -42,10 +42,13 @@ class LoadingOverlayHelper {
     _timeoutTimer = null;
 
     if (_loadingRoute != null) {
+      final route = _loadingRoute!;
+      _loadingRoute = null;
       try {
-        final route = _loadingRoute!;
-        _loadingRoute = null;
-        MyApp.navigatorKey.currentState?.removeRoute(route);
+        final navigator = MyApp.navigatorKey.currentState;
+        if (navigator != null && route.navigator != null) {
+          navigator.removeRoute(route);
+        }
       } catch (_) {
         // Safe to ignore if route already detached
       }

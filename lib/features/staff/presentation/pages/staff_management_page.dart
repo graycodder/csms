@@ -340,6 +340,7 @@ class _StaffManagementPageState extends State<StaffManagementPage> {
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {
+                    Navigator.pop(context);
                     final shop = _shopContext(this.context);
                     if (shop != null) {
                       LoadingOverlayHelper.show(this.context);
@@ -350,7 +351,6 @@ class _StaffManagementPageState extends State<StaffManagementPage> {
                                 staff: staff),
                           );
                     }
-                    Navigator.pop(context);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: color,

@@ -132,12 +132,12 @@ class _AddStaffPageState extends State<AddStaffPage> {
         listener: (context, state) {
           if (state is StaffLoading || state is StaffOperationInProgress) {
             LoadingOverlayHelper.show(context);
-          } else if (state is StaffLoaded) {
+          } else if (state is StaffActionSuccess) {
             LoadingOverlayHelper.hide();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                  'Staff added successfully!',
+                  state.message,
                   style: TextStyle(fontSize: 14.sp),
                 ),
                 backgroundColor: Colors.green,
