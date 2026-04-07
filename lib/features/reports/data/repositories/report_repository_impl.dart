@@ -191,7 +191,7 @@ class ReportRepositoryImpl implements ReportRepository {
                 (loggedSubPaidMap[l.subscriptionId!] ?? 0.0) + sPaid;
           }
 
-          if (sPaid > 0) {
+          if (sPaid != 0) {
             final mode = _normaliseMode(l.paymentMode);
             paymentModeBreakdown[mode] =
                 (paymentModeBreakdown[mode] ?? 0.0) + sPaid;
@@ -326,7 +326,7 @@ class ReportRepositoryImpl implements ReportRepository {
             l.action == 'renew') {
           final double sPaid = l.paidAmount ?? 0.0;
 
-          if (sPaid > 0) {
+          if (sPaid != 0) {
             final b = getBucket(l.createdAt.toLocal());
             if (hourlyRev.containsKey(b)) {
               hourlyRev[b] = (hourlyRev[b] ?? 0.0) + sPaid;
