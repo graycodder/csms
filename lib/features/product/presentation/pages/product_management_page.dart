@@ -11,7 +11,6 @@ import 'package:csms/features/product/presentation/widgets/product_item_card.dar
 import 'package:csms/features/product/presentation/pages/add_product_page.dart';
 import 'package:csms/features/product/presentation/pages/edit_product_page.dart';
 import 'package:csms/core/utils/loading_overlay.dart';
-import 'package:lottie/lottie.dart';
 
 class ProductManagementPage extends StatefulWidget {
   const ProductManagementPage({super.key});
@@ -135,11 +134,7 @@ class _ProductManagementPageState extends State<ProductManagementPage> {
                       Center(
                         child: Padding(
                           padding: EdgeInsets.all(32.r),
-                          child: Lottie.asset(
-                            'assets/animations/loading.json',
-                            width: 80.w,
-                            height: 80.w,
-                          ),
+                          child: const AppLoadingSpinner(size: 48),
                         ),
                       )
                     else if (state is ProductError)

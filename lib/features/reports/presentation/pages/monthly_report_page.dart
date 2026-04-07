@@ -19,8 +19,18 @@ class MonthlyReportView extends StatefulWidget {
 
 class _MonthlyReportViewState extends State<MonthlyReportView> {
   DateTime _referenceDate = DateTime.now();
-  DashboardLoaded? _lastDashState;
   final ScrollController _chartScrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final dashState = context.read<DashboardBloc>().state;
+      if (dashState is DashboardLoaded) {
+        _triggerFilter(dashState);
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -201,56 +211,59 @@ class _MonthlyReportViewState extends State<MonthlyReportView> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<DashboardBloc, DashboardState>(
-      builder: (context, dashState) {
+    return BlocListener<DashboardBloc, DashboardState>(
+      listenWhen: (previous, current) =>
+          current is DashboardLoaded && previous != current,
+      listener: (context, dashState) {
         if (dashState is DashboardLoaded) {
-          if (_lastDashState != dashState) {
-            _lastDashState = dashState;
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) _triggerFilter(dashState);
-            });
-          }
-          final term = TerminologyHelper.getTerminology(
-            dashState.shop.category,
-          );
-
-          return BlocListener<ReportBloc, ReportState>(
-            listener: (context, reportState) {
-              if (reportState is ReportLoading) {
-                LoadingOverlayHelper.show(context);
-              } else {
-                LoadingOverlayHelper.hide();
-              }
-            },
-            child: BlocBuilder<ReportBloc, ReportState>(
-              builder: (context, reportState) {
-                if (reportState is ReportLoaded) {
-                  return _buildContent(
-                    context,
-                    reportState.report,
-                    term,
-                    dashState,
-                  );
-                } else if (reportState is ReportLoading &&
-                    reportState.report != null) {
-                  // While loading, if we have cached data, show it.
-                  // The LoadingOverlayHelper will handle the spinner.
-                  return _buildContent(
-                    context,
-                    reportState.report!,
-                    term,
-                    dashState,
-                  );
-                } else if (reportState is ReportError) {
-                  return Center(child: Text('Error: ${reportState.message}'));
-                }
-                return const SizedBox.shrink();
-              },
-            ),
-          );
+          _triggerFilter(dashState);
         }
-        return const SizedBox.shrink();
       },
+      child: BlocBuilder<DashboardBloc, DashboardState>(
+        builder: (context, dashState) {
+          if (dashState is DashboardLoaded) {
+            final term = TerminologyHelper.getTerminology(
+              dashState.shop.category,
+            );
+
+            return BlocListener<ReportBloc, ReportState>(
+              listener: (context, reportState) {
+                if (reportState is ReportLoading) {
+                  LoadingOverlayHelper.show(context);
+                } else {
+                  LoadingOverlayHelper.hide();
+                }
+              },
+              child: BlocBuilder<ReportBloc, ReportState>(
+                builder: (context, reportState) {
+                  if (reportState is ReportLoaded) {
+                    return _buildContent(
+                      context,
+                      reportState.report,
+                      term,
+                      dashState,
+                    );
+                  } else if (reportState is ReportLoading &&
+                      reportState.report != null) {
+                    // While loading, if we have cached data, show it.
+                    // The LoadingOverlayHelper will handle the spinner.
+                    return _buildContent(
+                      context,
+                      reportState.report!,
+                      term,
+                      dashState,
+                    );
+                  } else if (reportState is ReportError) {
+                    return Center(child: Text('Error: ${reportState.message}'));
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+            );
+          }
+          return const SizedBox.shrink();
+        },
+      ),
     );
   }
 

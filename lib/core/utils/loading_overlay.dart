@@ -1,15 +1,24 @@
 import 'dart:async';
+import 'dart:math' show pi;
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
 import 'package:csms/main.dart';
+import 'package:csms/core/theme/app_colors.dart';
 
 class LoadingOverlayHelper {
   static Route? _loadingRoute;
   static Timer? _timeoutTimer;
+  static DateTime? _lastShowTime;
 
   static void show(BuildContext context) {
+    final now = DateTime.now();
+    // Guard against rapid re-showing (debounce)
     if (_loadingRoute != null) return;
+    if (_lastShowTime != null &&
+        now.difference(_lastShowTime!) < const Duration(milliseconds: 200)) {
+      return;
+    }
 
+    _lastShowTime = now;
     _loadingRoute = PageRouteBuilder(
       opaque: false,
       barrierColor: Colors.black.withValues(alpha: 0.3),
@@ -34,13 +43,63 @@ class LoadingOverlayHelper {
 
     if (_loadingRoute != null) {
       try {
-        MyApp.navigatorKey.currentState?.removeRoute(_loadingRoute!);
-      } catch (_) {
-        // Safe to ignore, route already detached.
-      } finally {
+        final route = _loadingRoute!;
         _loadingRoute = null;
+        MyApp.navigatorKey.currentState?.removeRoute(route);
+      } catch (_) {
+        // Safe to ignore if route already detached
       }
     }
+  }
+}
+
+/// A reusable animated loading spinner that does not use Lottie.
+class AppLoadingSpinner extends StatefulWidget {
+  final double size;
+  final Color? color;
+  const AppLoadingSpinner({super.key, this.size = 40, this.color});
+
+  @override
+  State<AppLoadingSpinner> createState() => _AppLoadingSpinnerState();
+}
+
+class _AppLoadingSpinnerState extends State<AppLoadingSpinner>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color = widget.color ?? AppColors.primary;
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (_, __) => Transform.rotate(
+        angle: _controller.value * 2 * pi,
+        child: SizedBox(
+          width: widget.size,
+          height: widget.size,
+          child: CircularProgressIndicator(
+            strokeWidth: widget.size * 0.08,
+            valueColor: AlwaysStoppedAnimation<Color>(color),
+            strokeCap: StrokeCap.round,
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -51,40 +110,29 @@ class LoadingOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final spinner = AppLoadingSpinner(size: size ?? 44);
+
     if (!useBox) {
-      return Center(
-        child: Lottie.asset(
-          'assets/animations/loading.json',
-          width: size ?? 70,
-          height: size ?? 70,
-          fit: BoxFit.contain,
-        ),
-      );
+      return Center(child: spinner);
     }
 
     return Center(
-      child: Material(
-        color: Colors.transparent,
-        child: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Lottie.asset(
-            'assets/animations/loading.json',
-            width: size ?? 70,
-            height: size ?? 70,
-            fit: BoxFit.contain,
-          ),
+      child: Container(
+        width: (size ?? 44) + 32,
+        height: (size ?? 44) + 32,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.12),
+              blurRadius: 20,
+              offset: const Offset(0, 6),
+            ),
+          ],
         ),
+        child: spinner,
       ),
     );
   }

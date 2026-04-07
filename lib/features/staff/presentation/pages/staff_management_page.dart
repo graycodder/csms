@@ -9,7 +9,6 @@ import 'package:csms/features/staff/presentation/widgets/staff_item_card.dart';
 import 'package:csms/features/staff/presentation/pages/add_staff_page.dart';
 import 'package:csms/features/staff/presentation/pages/edit_staff_page.dart';
 import 'package:csms/core/utils/loading_overlay.dart';
-import 'package:lottie/lottie.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_state.dart';
 
@@ -138,11 +137,7 @@ class _StaffManagementPageState extends State<StaffManagementPage> {
                       Center(
                         child: Padding(
                           padding: EdgeInsets.all(32.r),
-                          child: Lottie.asset(
-                            'assets/animations/loading.json',
-                            width: 80.w,
-                            height: 80.w,
-                          ),
+                          child: const AppLoadingSpinner(size: 48),
                         ),
                       )
                     else if (state is StaffError)

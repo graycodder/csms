@@ -8,7 +8,7 @@ import 'package:csms/features/auth/presentation/pages/login_page.dart';
 import 'package:csms/features/shop/presentation/pages/shop_selection_page.dart';
 import 'package:csms/features/shop/presentation/bloc/shop_context_bloc.dart';
 import 'package:csms/features/dashboard/presentation/pages/dashboard_page.dart';
-import 'package:lottie/lottie.dart';
+import 'package:csms/core/utils/loading_overlay.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -119,11 +119,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 height: 140.w,
               ),
               SizedBox(height: 32.h),
-              Lottie.asset(
-                'assets/animations/loading.json',
-                width: 80.w,
-                height: 80.w,
-              ),
+              const AppLoadingSpinner(size: 48),
             ],
           ),
         ),

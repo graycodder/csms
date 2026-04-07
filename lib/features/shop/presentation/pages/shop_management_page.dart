@@ -7,7 +7,6 @@ import 'package:csms/features/shop/presentation/widgets/shop_info_card.dart';
 import 'package:csms/features/shop/presentation/widgets/shop_settings_card.dart';
 import 'package:csms/features/shop/presentation/pages/shop_edit_page.dart';
 import 'package:csms/features/shop/presentation/pages/shop_settings_edit_page.dart';
-import 'package:lottie/lottie.dart';
 import 'package:csms/core/utils/loading_overlay.dart';
 
 class ShopManagementPage extends StatefulWidget {
@@ -74,12 +73,8 @@ class _ShopManagementPageState extends State<ShopManagementPage> {
                     ),
                   );
                 } else if (state is ShopContextLoading) {
-                  return Center(
-                    child: Lottie.asset(
-                      'assets/animations/loading.json',
-                      width: 80.w,
-                      height: 80.w,
-                    ),
+                  return const Center(
+                    child: AppLoadingSpinner(size: 48),
                   );
                 } else if (state is ShopContextError) {
                   return Center(

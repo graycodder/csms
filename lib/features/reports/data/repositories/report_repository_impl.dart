@@ -39,25 +39,27 @@ class ReportRepositoryImpl implements ReportRepository {
       }
 
       // ── Fetch Data ────────────────────────────────────────────────────────
+      // NOTE: Rules only permit orderByChild('ownerId') at the collection level.
+      // We fetch by ownerId and then filter by shopId in Dart.
       final results = await Future.wait([
         _database
             .ref()
             .child('customers')
-            .orderByChild('shopId')
-            .equalTo(shopId)
+            .orderByChild('ownerId')
+            .equalTo(ownerId)
             .get(),
         _database
             .ref()
             .child('subscriptions')
-            .orderByChild('shopId')
-            .equalTo(shopId)
+            .orderByChild('ownerId')
+            .equalTo(ownerId)
             .get(),
         _database.ref().child('subscription_logs').child(shopId).get(),
         _database
             .ref()
             .child('products')
-            .orderByChild('shopId')
-            .equalTo(shopId)
+            .orderByChild('ownerId')
+            .equalTo(ownerId)
             .get(),
         _database.ref().child('shops').child(shopId).get(),
       ]);
@@ -85,7 +87,9 @@ class ReportRepositoryImpl implements ReportRepository {
           final data = customerSnap.value as Map<dynamic, dynamic>;
           data.forEach((key, val) {
             final map = Map<String, dynamic>.from(val as Map);
-            list.add(CustomerModel.fromJson(map, key.toString()));
+            if (map['shopId'] == shopId) {
+              list.add(CustomerModel.fromJson(map, key.toString()));
+            }
           });
         }
         return list;
@@ -97,7 +101,9 @@ class ReportRepositoryImpl implements ReportRepository {
           final data = subSnap.value as Map<dynamic, dynamic>;
           data.forEach((key, val) {
             final map = Map<String, dynamic>.from(val as Map);
-            list.add(SubscriptionModel.fromJson(map, key.toString()));
+            if (map['shopId'] == shopId) {
+              list.add(SubscriptionModel.fromJson(map, key.toString()));
+            }
           });
         }
         return list;
@@ -125,7 +131,9 @@ class ReportRepositoryImpl implements ReportRepository {
           final data = productSnap.value as Map<dynamic, dynamic>;
           data.forEach((key, val) {
             final map = Map<String, dynamic>.from(val as Map);
-            list.add(ProductModel.fromJson(map, key.toString()));
+            if (map['shopId'] == shopId) {
+              list.add(ProductModel.fromJson(map, key.toString()));
+            }
           });
         }
         return list;
