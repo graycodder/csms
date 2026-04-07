@@ -1164,7 +1164,7 @@ class CustomerDetailsPage extends StatelessWidget {
                                 customer.registrationFeeAmount,
                             registrationFeePaid: newRegPaid,
                             paidAmount: sub.paidAmount,
-                            paymentMode: sub.paymentMode,
+                            paymentMode: selectedPaymentMode,
                             updatedById: customer.updatedById,
                             ownerId: customer.ownerId,
                             shopId: customer.shopId,

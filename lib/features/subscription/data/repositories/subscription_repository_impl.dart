@@ -527,9 +527,13 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
       // 5. Create History Log(s)
       final String oldMode = data['paymentMode'] ?? 'Cash';
       final String newMode = paymentMode ?? oldMode;
-      final bool modeChanged = newMode != oldMode && oldPaid > 0;
 
-      if (modeChanged) {
+      // Logic: If we are adding NEW money (balance collection), just log the ADDED amount in the NEW mode.
+      // If we are NOT adding money (zero difference) but the mode changed, then it's a correction of the whole history.
+      final bool isBalanceCollection = paymentDifference > 0 || regPaymentDifference > 0;
+      final bool isPureModeCorrection = !isBalanceCollection && (newMode != oldMode) && oldPaid > 0;
+
+      if (isPureModeCorrection) {
         // Reversal Log for Old Mode
         final reversalLogId = "${logId}_rev";
         extraUpdates['subscription_logs/$shopId/$reversalLogId'] = {
@@ -574,6 +578,8 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
         };
       } else {
         // Regular Payment/Edit Log
+        // If it's a balance collection, we ONLY log the difference.
+        // This ensures old payments stay in their original modes in logs.
         extraUpdates['subscription_logs/$shopId/$logId'] = {
           'logId': logId,
           'subscriptionId': subscriptionId,
@@ -588,7 +594,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
               ? regPaymentDifference
               : null,
           'balanceAmount': balance,
-          'paymentMode': paymentMode,
+          'paymentMode': newMode, // The mode of THIS specific payment event
           'createdAt': ServerValue.timestamp,
           'createdById': updatedById,
           'updatedById': updatedById,
