@@ -10,10 +10,7 @@ import 'package:csms/core/utils/loading_overlay.dart';
 class EditStaffPage extends StatefulWidget {
   final StaffEntity staff;
 
-  const EditStaffPage({
-    super.key,
-    required this.staff,
-  });
+  const EditStaffPage({super.key, required this.staff});
 
   @override
   State<EditStaffPage> createState() => _EditStaffPageState();
@@ -31,13 +28,16 @@ class _EditStaffPageState extends State<EditStaffPage> {
   @override
   void initState() {
     super.initState();
-    final sanitizedName = widget.staff.name.replaceAll(RegExp(r'[^a-zA-Z\s]'), '');
+    final sanitizedName = widget.staff.name.replaceAll(
+      RegExp(r'[^a-zA-Z\s]'),
+      '',
+    );
     final sanitizedPhone = widget.staff.phone.replaceAll(RegExp(r'[^0-9]'), '');
-    
+
     _nameController = TextEditingController(text: sanitizedName);
     _phoneController = TextEditingController(text: sanitizedPhone);
     _emailController = TextEditingController(text: widget.staff.email);
-    
+
     _roles = ['Admin', 'Staff', 'Sales'];
     if (widget.staff.role.isNotEmpty && !_roles.contains(widget.staff.role)) {
       _roles.add(widget.staff.role);
@@ -64,44 +64,60 @@ class _EditStaffPageState extends State<EditStaffPage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
-        title: Text('Confirm Changes', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp)),
-        content: Text('Are you sure you want to save the changes to this staff member?', style: TextStyle(fontSize: 14.sp)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        title: Text(
+          'Confirm Changes',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp),
+        ),
+        content: Text(
+          'Are you sure you want to save the changes to this staff member?',
+          style: TextStyle(fontSize: 14.sp),
+        ),
         actions: [
           TextButton(
             onPressed: () {
               FocusManager.instance.primaryFocus?.unfocus();
               Navigator.pop(ctx);
             },
-            child: Text('Cancel', style: TextStyle(color: AppColors.textLight, fontSize: 14.sp)),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: AppColors.textLight, fontSize: 14.sp),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
               FocusManager.instance.primaryFocus?.unfocus();
               Navigator.pop(ctx); // Close dialog
               context.read<StaffBloc>().add(
-                    UpdateStaff(
-                      shopId: widget.staff.shopId,
-                      ownerId: widget.staff.ownerId,
-                      staff: StaffEntity(
-                        staffId: widget.staff.staffId,
-                        shopId: widget.staff.shopId,
-                        ownerId: widget.staff.ownerId,
-                        name: _nameController.text.trim(),
-                        phone: _phoneController.text.trim(),
-                        email: _emailController.text.trim(),
-                        role: _selectedRole ?? 'Staff',
-                        status: widget.staff.status,
-                        createdAt: widget.staff.createdAt,
-                      ),
-                    ),
-                  );
+                UpdateStaff(
+                  shopId: widget.staff.shopId,
+                  ownerId: widget.staff.ownerId,
+                  staff: StaffEntity(
+                    staffId: widget.staff.staffId,
+                    shopId: widget.staff.shopId,
+                    ownerId: widget.staff.ownerId,
+                    name: _nameController.text.trim(),
+                    phone: _phoneController.text.trim(),
+                    email: _emailController.text.trim(),
+                    role: _selectedRole ?? 'Staff',
+                    status: widget.staff.status,
+                    createdAt: widget.staff.createdAt,
+                  ),
+                ),
+              );
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.r),
+              ),
             ),
-            child: Text('Confirm', style: TextStyle(color: Colors.white, fontSize: 14.sp)),
+            child: Text(
+              'Confirm',
+              style: TextStyle(color: Colors.white, fontSize: 14.sp),
+            ),
           ),
         ],
       ),
@@ -136,7 +152,10 @@ class _EditStaffPageState extends State<EditStaffPage> {
             LoadingOverlayHelper.hide();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Staff updated successfully!', style: TextStyle(fontSize: 14.sp)),
+                content: Text(
+                  'Staff updated successfully!',
+                  style: TextStyle(fontSize: 14.sp),
+                ),
                 backgroundColor: Colors.green,
                 behavior: SnackBarBehavior.floating,
               ),
@@ -164,8 +183,10 @@ class _EditStaffPageState extends State<EditStaffPage> {
                   _buildLabel('Full Name *'),
                   TextFormField(
                     controller: _nameController,
+                    textCapitalization: TextCapitalization.words,
                     decoration: _inputDecoration('Enter full name'),
-                    validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
+                    validator: (v) =>
+                        (v == null || v.isEmpty) ? 'Required' : null,
                   ),
                   SizedBox(height: 16.h),
                   _buildLabel('Phone Number *'),
@@ -173,7 +194,8 @@ class _EditStaffPageState extends State<EditStaffPage> {
                     controller: _phoneController,
                     keyboardType: TextInputType.phone,
                     decoration: _inputDecoration('Enter phone number'),
-                    validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
+                    validator: (v) =>
+                        (v == null || v.isEmpty) ? 'Required' : null,
                   ),
                   SizedBox(height: 16.h),
                   _buildLabel('Email Address *'),
@@ -181,13 +203,21 @@ class _EditStaffPageState extends State<EditStaffPage> {
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: _inputDecoration('Enter email address'),
-                    validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
+                    validator: (v) =>
+                        (v == null || v.isEmpty) ? 'Required' : null,
                   ),
                   SizedBox(height: 16.h),
                   _buildLabel('Role *'),
                   DropdownButtonFormField<String>(
                     value: _selectedRole,
-                    items: _roles.map((r) => DropdownMenuItem(value: r, child: Text(r, style: TextStyle(fontSize: 14.sp)))).toList(),
+                    items: _roles
+                        .map(
+                          (r) => DropdownMenuItem(
+                            value: r,
+                            child: Text(r, style: TextStyle(fontSize: 14.sp)),
+                          ),
+                        )
+                        .toList(),
                     onChanged: (v) => setState(() => _selectedRole = v),
                     decoration: _inputDecoration('Select role'),
                     validator: (v) => v == null ? 'Required' : null,
@@ -200,12 +230,18 @@ class _EditStaffPageState extends State<EditStaffPage> {
                       onPressed: _submit,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
                         elevation: 0,
                       ),
                       child: Text(
                         'Save Changes',
-                        style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.white),
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),

@@ -6,7 +6,8 @@ import 'package:csms/features/shop/domain/entities/shop_entity.dart';
 
 class ShopEditCard extends StatefulWidget {
   final ShopEntity shop;
-  final Function(String name, String shopAddress, String category, String phone) onSave;
+  final Function(String name, String shopAddress, String category, String phone)
+  onSave;
   final VoidCallback onCancel;
 
   const ShopEditCard({
@@ -63,7 +64,9 @@ class _ShopEditCardState extends State<ShopEditCard> {
               title: 'Business Name',
               controller: _nameController,
               maxLength: 20,
-              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9\s]'))],
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9\s]')),
+              ],
               validator: (v) {
                 if (v == null || v.trim().isEmpty) return 'Required';
                 if (v.length > 20) return 'Max 20 characters';
@@ -75,7 +78,9 @@ class _ShopEditCardState extends State<ShopEditCard> {
               title: 'Business Address',
               controller: _addressController,
               maxLength: 40,
-              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9\s,.-]'))],
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9\s,.-]')),
+              ],
               validator: (v) {
                 if (v == null || v.trim().isEmpty) return 'Required';
                 if (v.length > 40) return 'Max 40 characters';
@@ -87,7 +92,9 @@ class _ShopEditCardState extends State<ShopEditCard> {
               title: 'Category',
               controller: _categoryController,
               maxLength: 20,
-              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9\s]'))],
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9\s]')),
+              ],
               validator: (v) {
                 if (v == null || v.trim().isEmpty) return 'Required';
                 if (v.length > 20) return 'Max 20 characters';
@@ -193,6 +200,7 @@ class _ShopEditCardState extends State<ShopEditCard> {
         SizedBox(height: 8.h),
         TextFormField(
           controller: controller,
+          textCapitalization: TextCapitalization.words,
           maxLength: maxLength,
           inputFormatters: inputFormatters,
           validator: validator,

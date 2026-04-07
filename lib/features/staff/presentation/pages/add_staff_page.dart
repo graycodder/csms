@@ -11,11 +11,7 @@ class AddStaffPage extends StatefulWidget {
   final String shopId;
   final String ownerId;
 
-  const AddStaffPage({
-    super.key,
-    required this.shopId,
-    required this.ownerId,
-  });
+  const AddStaffPage({super.key, required this.shopId, required this.ownerId});
 
   @override
   State<AddStaffPage> createState() => _AddStaffPageState();
@@ -52,16 +48,27 @@ class _AddStaffPageState extends State<AddStaffPage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
-        title: Text('Confirm New Staff', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp)),
-        content: Text('Are you sure you want to add this new staff member?', style: TextStyle(fontSize: 14.sp)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        title: Text(
+          'Confirm New Staff',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp),
+        ),
+        content: Text(
+          'Are you sure you want to add this new staff member?',
+          style: TextStyle(fontSize: 14.sp),
+        ),
         actions: [
           TextButton(
             onPressed: () {
               FocusManager.instance.primaryFocus?.unfocus();
               Navigator.pop(ctx);
             },
-            child: Text('Cancel', style: TextStyle(color: AppColors.textLight, fontSize: 14.sp)),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: AppColors.textLight, fontSize: 14.sp),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
@@ -87,9 +94,14 @@ class _AddStaffPageState extends State<AddStaffPage> {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.r),
+              ),
             ),
-            child: Text('Confirm', style: TextStyle(color: Colors.white, fontSize: 14.sp)),
+            child: Text(
+              'Confirm',
+              style: TextStyle(color: Colors.white, fontSize: 14.sp),
+            ),
           ),
         ],
       ),
@@ -124,7 +136,10 @@ class _AddStaffPageState extends State<AddStaffPage> {
             LoadingOverlayHelper.hide();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Staff added successfully!', style: TextStyle(fontSize: 14.sp)),
+                content: Text(
+                  'Staff added successfully!',
+                  style: TextStyle(fontSize: 14.sp),
+                ),
                 backgroundColor: Colors.green,
                 behavior: SnackBarBehavior.floating,
               ),
@@ -152,8 +167,10 @@ class _AddStaffPageState extends State<AddStaffPage> {
                   _buildLabel('Full Name *'),
                   TextFormField(
                     controller: _nameController,
+                    textCapitalization: TextCapitalization.words,
                     decoration: _inputDecoration('Enter full name'),
-                    validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
+                    validator: (v) =>
+                        (v == null || v.isEmpty) ? 'Required' : null,
                   ),
                   SizedBox(height: 16.h),
                   _buildLabel('Phone Number *'),
@@ -161,7 +178,8 @@ class _AddStaffPageState extends State<AddStaffPage> {
                     controller: _phoneController,
                     keyboardType: TextInputType.phone,
                     decoration: _inputDecoration('Enter phone number'),
-                    validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
+                    validator: (v) =>
+                        (v == null || v.isEmpty) ? 'Required' : null,
                   ),
                   SizedBox(height: 16.h),
                   _buildLabel('Email Address *'),
@@ -169,13 +187,21 @@ class _AddStaffPageState extends State<AddStaffPage> {
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: _inputDecoration('Enter email address'),
-                    validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
+                    validator: (v) =>
+                        (v == null || v.isEmpty) ? 'Required' : null,
                   ),
                   SizedBox(height: 16.h),
                   _buildLabel('Role *'),
                   DropdownButtonFormField<String>(
                     value: _selectedRole,
-                    items: _roles.map((r) => DropdownMenuItem(value: r, child: Text(r, style: TextStyle(fontSize: 14.sp)))).toList(),
+                    items: _roles
+                        .map(
+                          (r) => DropdownMenuItem(
+                            value: r,
+                            child: Text(r, style: TextStyle(fontSize: 14.sp)),
+                          ),
+                        )
+                        .toList(),
                     onChanged: (v) => setState(() => _selectedRole = v),
                     decoration: _inputDecoration('Select role'),
                     validator: (v) => v == null ? 'Required' : null,
@@ -188,11 +214,18 @@ class _AddStaffPageState extends State<AddStaffPage> {
                     decoration: _inputDecoration(
                       'Enter password',
                       suffixIcon: IconButton(
-                        icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
-                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                        ),
+                        onPressed: () => setState(
+                          () => _obscurePassword = !_obscurePassword,
+                        ),
                       ),
                     ),
-                    validator: (v) => (v == null || v.length < 6) ? 'Min 6 characters' : null,
+                    validator: (v) =>
+                        (v == null || v.length < 6) ? 'Min 6 characters' : null,
                   ),
                   SizedBox(height: 32.h),
                   SizedBox(
@@ -202,12 +235,18 @@ class _AddStaffPageState extends State<AddStaffPage> {
                       onPressed: _submit,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
                         elevation: 0,
                       ),
                       child: Text(
                         'Add Staff',
-                        style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.white),
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),

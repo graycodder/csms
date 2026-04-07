@@ -318,6 +318,7 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                   ),
                   TextFormField(
                     controller: _nameController,
+                    textCapitalization: TextCapitalization.words,
                     maxLength: 20,
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(

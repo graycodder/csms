@@ -373,6 +373,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                   ),
                   TextFormField(
                     controller: _nameController,
+                    textCapitalization: TextCapitalization.words,
                     maxLength: 20,
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(

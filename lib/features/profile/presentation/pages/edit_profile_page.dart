@@ -48,9 +48,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
             );
             Navigator.pop(context, true);
           } else if (state is ProfileError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.message)));
           }
         },
         builder: (context, state) {
@@ -65,7 +65,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
               ),
               title: Text(
                 'Edit Profile',
-                style: TextStyle(color: AppColors.textDark, fontWeight: FontWeight.bold, fontSize: 18.sp),
+                style: TextStyle(
+                  color: AppColors.textDark,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18.sp,
+                ),
               ),
             ),
             body: SingleChildScrollView(
@@ -73,17 +77,30 @@ class _EditProfilePageState extends State<EditProfilePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Full Name', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.sp)),
+                  Text(
+                    'Full Name',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15.sp,
+                    ),
+                  ),
                   SizedBox(height: 12.h),
                   TextField(
                     controller: _nameController,
+                    textCapitalization: TextCapitalization.words,
                     decoration: const InputDecoration(
                       prefixIcon: Icon(Icons.person_outline),
                       hintText: 'Enter your full name',
                     ),
                   ),
                   const SizedBox(height: 24),
-                  Text('Phone Number', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.sp)),
+                  Text(
+                    'Phone Number',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15.sp,
+                    ),
+                  ),
                   SizedBox(height: 12.h),
                   TextField(
                     controller: _phoneController,
@@ -98,23 +115,33 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     width: double.infinity,
                     height: 56.h,
                     child: ElevatedButton(
-                      onPressed: state is ProfileLoading ? null : () {
-                        final updatedProfile = widget.profile.copyWith(
-                          fullName: _nameController.text.trim(),
-                          phone: _phoneController.text.trim(),
-                          updatedAt: DateTime.now(),
-                        );
-                        context.read<ProfileBloc>().add(UpdateProfile(updatedProfile));
-                      },
+                      onPressed: state is ProfileLoading
+                          ? null
+                          : () {
+                              final updatedProfile = widget.profile.copyWith(
+                                fullName: _nameController.text.trim(),
+                                phone: _phoneController.text.trim(),
+                                updatedAt: DateTime.now(),
+                              );
+                              context.read<ProfileBloc>().add(
+                                UpdateProfile(updatedProfile),
+                              );
+                            },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16.r),
+                        ),
                       ),
                       child: state is ProfileLoading
                           ? const LoadingOverlay(useBox: false, size: 24)
                           : Text(
                               'Save Changes',
-                              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: Colors.white),
+                              style: TextStyle(
+                                fontSize: 18.sp,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
                             ),
                     ),
                   ),
