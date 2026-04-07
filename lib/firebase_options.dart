@@ -46,8 +46,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '1034933865940',
     projectId: 'csms-b03e1',
     authDomain: 'csms-b03e1.firebaseapp.com',
-    databaseURL:
-        'https://csms-b03e1-default-rtdb.asia-southeast1.firebasedatabase.app',
+    databaseURL: 'https://csms-b03e1-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'csms-b03e1.firebasestorage.app',
   );
 
@@ -56,8 +55,7 @@ class DefaultFirebaseOptions {
     appId: '1:1034933865940:android:4fc91b536d6e4f3c369a41',
     messagingSenderId: '1034933865940',
     projectId: 'csms-b03e1',
-    databaseURL:
-        'https://csms-b03e1-default-rtdb.asia-southeast1.firebasedatabase.app',
+    databaseURL: 'https://csms-b03e1-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'csms-b03e1.firebasestorage.app',
   );
 
@@ -66,8 +64,7 @@ class DefaultFirebaseOptions {
     appId: '1:1034933865940:ios:ed536875546a0219369a41',
     messagingSenderId: '1034933865940',
     projectId: 'csms-b03e1',
-    databaseURL:
-        'https://csms-b03e1-default-rtdb.asia-southeast1.firebasedatabase.app',
+    databaseURL: 'https://csms-b03e1-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'csms-b03e1.firebasestorage.app',
     iosBundleId: 'com.live.csms',
   );
@@ -77,8 +74,7 @@ class DefaultFirebaseOptions {
     appId: '1:1034933865940:ios:e9335613def6566d369a41',
     messagingSenderId: '1034933865940',
     projectId: 'csms-b03e1',
-    databaseURL:
-        'https://csms-b03e1-default-rtdb.asia-southeast1.firebasedatabase.app',
+    databaseURL: 'https://csms-b03e1-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'csms-b03e1.firebasestorage.app',
     iosBundleId: 'com.example.csms',
   );
@@ -89,8 +85,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '1034933865940',
     projectId: 'csms-b03e1',
     authDomain: 'csms-b03e1.firebaseapp.com',
-    databaseURL:
-        'https://csms-b03e1-default-rtdb.asia-southeast1.firebasedatabase.app',
+    databaseURL: 'https://csms-b03e1-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'csms-b03e1.firebasestorage.app',
   );
+
 }
