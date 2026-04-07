@@ -72,6 +72,7 @@ class NotificationService {
           description: 'Used for important staff alerts',
           importance: Importance.max,
           playSound: true,
+          sound: RawResourceAndroidNotificationSound('notification'),
         );
 
         await _localNotificationsPlugin
@@ -112,9 +113,10 @@ class NotificationService {
                   importance: Importance.max,
                   priority: Priority.max,
                   playSound: true,
+                  sound: RawResourceAndroidNotificationSound('notification'),
                 ),
                 iOS: DarwinNotificationDetails(
-                  sound: 'notification_sound.caf',
+                  sound: 'notification.mp3',
                   presentAlert: true,
                   presentBadge: true,
                   presentSound: true,
