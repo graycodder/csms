@@ -258,9 +258,11 @@ class CustomerCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      sub != null ? sub.paidAmount.toStringAsFixed(0) : '0',
+                      sub != null
+                          ? '₹${sub.paidAmount.toStringAsFixed(0)}'
+                          : '₹0',
                       style: TextStyle(
-                        fontSize: 18.sp,
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.bold,
                         color: const Color(0xFF1A1A1A),
                       ),
