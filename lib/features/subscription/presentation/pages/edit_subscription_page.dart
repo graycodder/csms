@@ -51,6 +51,7 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
     );
     _selectedDate = widget.subscription.endDate;
     _selectedStatus = widget.subscription.status;
+    _selectedPaymentMode = widget.subscription.paymentMode;
   }
 
   @override
@@ -122,7 +123,13 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Plan Amount *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp)),
+                Text(
+                  'Plan Amount *',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14.sp,
+                  ),
+                ),
                 SizedBox(height: 5.h),
                 Form(
                   key: _formKey,
@@ -130,9 +137,13 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
                     children: [
                       TextFormField(
                         controller: _planAmountController,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
                         inputFormatters: [
-                          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                          FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d*\.?\d*'),
+                          ),
                           LengthLimitingTextInputFormatter(6),
                         ],
                         readOnly: widget.priceType == 'fixed',
@@ -140,7 +151,9 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
                           hintText: 'Enter plan amount',
                           prefixIcon: Icon(Icons.currency_rupee, size: 18.sp),
                           filled: widget.priceType == 'fixed',
-                          fillColor: widget.priceType == 'fixed' ? Colors.grey[100] : null,
+                          fillColor: widget.priceType == 'fixed'
+                              ? Colors.grey[100]
+                              : null,
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -160,20 +173,32 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Amount Paid *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp)),
+                                Text(
+                                  'Amount Paid *',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14.sp,
+                                  ),
+                                ),
                                 SizedBox(height: 5.h),
                                 TextFormField(
                                   controller: _paidAmountController,
                                   keyboardType: TextInputType.number,
                                   inputFormatters: [
-                                    FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                                    FilteringTextInputFormatter.allow(
+                                      RegExp(r'^\d*\.?\d*'),
+                                    ),
                                   ],
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
                                       return 'Enter amount';
                                     }
                                     final paidAmt = double.tryParse(value) ?? 0;
-                                    final planAmt = double.tryParse(_planAmountController.text) ?? 0;
+                                    final planAmt =
+                                        double.tryParse(
+                                          _planAmountController.text,
+                                        ) ??
+                                        0;
                                     if (paidAmt <= 0) {
                                       return 'Must be greater than 0';
                                     }
@@ -184,7 +209,10 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
                                   },
                                   decoration: InputDecoration(
                                     hintText: '0',
-                                    prefixIcon: Icon(Icons.currency_rupee, size: 18.sp),
+                                    prefixIcon: Icon(
+                                      Icons.currency_rupee,
+                                      size: 18.sp,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -195,23 +223,48 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Payment Mode *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp)),
+                                Text(
+                                  'Payment Mode *',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14.sp,
+                                  ),
+                                ),
                                 SizedBox(height: 5.h),
                                 DropdownButtonFormField<String>(
                                   value: _selectedPaymentMode,
                                   decoration: InputDecoration(
-                                    contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+                                    contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 12.w,
+                                      vertical: 12.h,
+                                    ),
                                     filled: true,
                                     fillColor: Colors.white,
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12.r),
-                                      borderSide: const BorderSide(color: AppColors.border),
+                                      borderSide: const BorderSide(
+                                        color: AppColors.border,
+                                      ),
                                     ),
                                   ),
-                                  items: ['Cash', 'UPI', 'Card', 'Bank Transfer'].map((m) {
-                                    return DropdownMenuItem(value: m, child: Text(m, style: TextStyle(fontSize: 14.sp)));
-                                  }).toList(),
-                                  onChanged: (v) => setState(() => _selectedPaymentMode = v ?? 'Cash'),
+                                  items:
+                                      [
+                                        'Cash',
+                                        'UPI',
+                                        'Card',
+                                        'Bank Transfer',
+                                      ].map((m) {
+                                        return DropdownMenuItem(
+                                          value: m,
+                                          child: Text(
+                                            m,
+                                            style: TextStyle(fontSize: 14.sp),
+                                          ),
+                                        );
+                                      }).toList(),
+                                  onChanged: (v) => setState(
+                                    () => _selectedPaymentMode = v ?? 'Cash',
+                                  ),
                                 ),
                               ],
                             ),
@@ -222,12 +275,21 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
                   ),
                 ),
                 SizedBox(height: 12.h),
-                Text('Expiry Date *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp)),
+                Text(
+                  'Expiry Date *',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14.sp,
+                  ),
+                ),
                 SizedBox(height: 5.h),
                 InkWell(
                   onTap: _pickDate,
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 14.h,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       border: Border.all(color: AppColors.border),
@@ -235,11 +297,18 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.calendar_today, size: 20.sp, color: AppColors.textLight),
+                        Icon(
+                          Icons.calendar_today,
+                          size: 20.sp,
+                          color: AppColors.textLight,
+                        ),
                         SizedBox(width: 12.w),
                         Text(
                           _df.format(_selectedDate),
-                          style: TextStyle(fontSize: 16.sp, color: AppColors.textDark),
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            color: AppColors.textDark,
+                          ),
                         ),
                       ],
                     ),
@@ -247,13 +316,22 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
                 ),
 
                 SizedBox(height: 12.h),
-                
-                Text('Status *', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp)),
+
+                Text(
+                  'Status *',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14.sp,
+                  ),
+                ),
                 SizedBox(height: 5.h),
                 DropdownButtonFormField<String>(
                   value: _selectedStatus,
                   decoration: InputDecoration(
-                    contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 14.h,
+                    ),
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -263,7 +341,10 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
                   ),
                   items: const [
                     DropdownMenuItem(value: 'active', child: Text('Active')),
-                    DropdownMenuItem(value: 'inactive', child: Text('Inactive')),
+                    DropdownMenuItem(
+                      value: 'inactive',
+                      child: Text('Inactive'),
+                    ),
                   ],
                   onChanged: (value) {
                     if (value != null) {
@@ -271,9 +352,9 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
                     }
                   },
                 ),
-                
+
                 SizedBox(height: 40.h),
-                
+
                 SizedBox(
                   width: double.infinity,
                   height: 56.h,
@@ -286,12 +367,18 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16.r),
+                      ),
                       elevation: 0,
                     ),
                     child: Text(
                       'Save Changes',
-                      style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: Colors.white),
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
@@ -307,7 +394,9 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.r),
+        ),
         title: const Text('Confirm Changes'),
         content: Text(
           'Are you sure you want to save the changes for the "${widget.productName}" plan?',
@@ -318,36 +407,51 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
               FocusManager.instance.primaryFocus?.unfocus();
               Navigator.pop(context);
             },
-            child: const Text('Cancel', style: TextStyle(color: AppColors.textLight)),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: AppColors.textLight),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
               FocusManager.instance.primaryFocus?.unfocus();
               Navigator.pop(context); // Close dialog
-              
-              final planAmt = double.tryParse(_planAmountController.text) ?? widget.subscription.price;
-              final paidAmt = double.tryParse(_paidAmountController.text) ?? widget.subscription.paidAmount;
-              
+
+              final planAmt =
+                  double.tryParse(_planAmountController.text) ??
+                  widget.subscription.price;
+              final paidAmt =
+                  double.tryParse(_paidAmountController.text) ??
+                  widget.subscription.paidAmount;
+
               final authState = context.read<AuthBloc>().state;
-              final name = authState is AuthAuthenticated ? authState.name : 'Staff';
-              
-              context.read<CustomerBloc>().add(UpdateSubscription(
-                subscriptionId: widget.subscription.subscriptionId,
-                endDate: _selectedDate,
-                price: planAmt,
-                paidAmount: paidAmt,
-                paymentMode: _selectedPaymentMode,
-                updatedById: authState is AuthAuthenticated ? authState.userId : widget.subscription.updatedById,
-                ownerId: widget.subscription.ownerId,
-                shopId: widget.subscription.shopId,
-                updatedByName: name,
-                customerName: widget.customerName,
-                status: _selectedStatus,
-              ));
+              final name = authState is AuthAuthenticated
+                  ? authState.name
+                  : 'Staff';
+
+              context.read<CustomerBloc>().add(
+                UpdateSubscription(
+                  subscriptionId: widget.subscription.subscriptionId,
+                  endDate: _selectedDate,
+                  price: planAmt,
+                  paidAmount: paidAmt,
+                  paymentMode: _selectedPaymentMode,
+                  updatedById: authState is AuthAuthenticated
+                      ? authState.userId
+                      : widget.subscription.updatedById,
+                  ownerId: widget.subscription.ownerId,
+                  shopId: widget.subscription.shopId,
+                  updatedByName: name,
+                  customerName: widget.customerName,
+                  status: _selectedStatus,
+                ),
+              );
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.r),
+              ),
             ),
             child: const Text('Confirm', style: TextStyle(color: Colors.white)),
           ),

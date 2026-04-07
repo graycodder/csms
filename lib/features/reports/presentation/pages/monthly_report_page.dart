@@ -523,14 +523,14 @@ class _MonthlyReportViewState extends State<MonthlyReportView> {
           const Color(0xFF00838F),
         ),
         _buildActivityCard(
-          'Active Members',
-          report.activeSubscriptions.toString(),
+          'Active ${term.subscriptionLabel}s',
+          report.activeCustomers.toString(),
           Icons.group,
           const Color(0xFFE0F7FA),
           const Color(0xFF00838F),
         ),
         _buildActivityCard(
-          'Inactive Members',
+          'Inactive ${term.subscriptionLabel}s',
           report.inactiveCustomers.toString(),
           Icons.group_off,
           const Color(0xFFE0F7FA),
@@ -910,7 +910,9 @@ class _MonthlyReportViewState extends State<MonthlyReportView> {
             children: [
               // Pinned Y-Axis
               Padding(
-                padding: EdgeInsets.only(bottom: 42.h), // Match bottom titles + padding
+                padding: EdgeInsets.only(
+                  bottom: 42.h,
+                ), // Match bottom titles + padding
                 child: SizedBox(
                   width: 45.w,
                   height: 196.h, // Adjusted for alignment
@@ -972,7 +974,8 @@ class _MonthlyReportViewState extends State<MonthlyReportView> {
                       padding: EdgeInsets.only(bottom: 12.h),
                       child: SizedBox(
                         width: (report.revenueChartData.length * 40.w).clamp(
-                          MediaQuery.of(context).size.width - 117.w, // Adjusted for pinned y
+                          MediaQuery.of(context).size.width -
+                              117.w, // Adjusted for pinned y
                           double.infinity,
                         ),
                         child: BarChart(
@@ -982,18 +985,20 @@ class _MonthlyReportViewState extends State<MonthlyReportView> {
                             minY: 0,
                             barTouchData: BarTouchData(
                               touchTooltipData: BarTouchTooltipData(
-                                getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                                  final label =
-                                      report.revenueChartData[group.x.toInt()].label;
-                                  return BarTooltipItem(
-                                    '₹${rod.toY.toInt()}\n$label',
-                                    TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 11.sp,
-                                    ),
-                                  );
-                                },
+                                getTooltipItem:
+                                    (group, groupIndex, rod, rodIndex) {
+                                      final label = report
+                                          .revenueChartData[group.x.toInt()]
+                                          .label;
+                                      return BarTooltipItem(
+                                        '₹${rod.toY.toInt()}\n$label',
+                                        TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 11.sp,
+                                        ),
+                                      );
+                                    },
                               ),
                             ),
                             titlesData: FlTitlesData(
@@ -1016,8 +1021,7 @@ class _MonthlyReportViewState extends State<MonthlyReportView> {
                                     return Padding(
                                       padding: EdgeInsets.only(top: 8.h),
                                       child: Text(
-                                        report.revenueChartData[idx]
-                                            .label
+                                        report.revenueChartData[idx].label
                                             .split('/')[0],
                                         style: TextStyle(
                                           color: AppColors.textLight,
@@ -1060,7 +1064,9 @@ class _MonthlyReportViewState extends State<MonthlyReportView> {
                                           begin: Alignment.bottomCenter,
                                           end: Alignment.topCenter,
                                           colors: [
-                                            AppColors.primary.withValues(alpha: 0.7),
+                                            AppColors.primary.withValues(
+                                              alpha: 0.7,
+                                            ),
                                             AppColors.primary,
                                           ],
                                         ),

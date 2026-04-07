@@ -169,7 +169,7 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                     registrationFeeAmount: regAmount,
                     registrationFeePaid: regPaid,
                     paidAmount: sub.paidAmount,
-                    paymentMode: _selectedRegPaymentMode,
+                    paymentMode: sub.paymentMode,
                     updatedById: widget.customer.updatedById,
                     ownerId: widget.customer.ownerId,
                     shopId: widget.customer.shopId,

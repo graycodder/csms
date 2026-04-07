@@ -97,6 +97,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
         'paymentStatus': subPaymentStatus,
         'registrationFeeAmount': totalRegAmount,
         'registrationFeePaid': regPaidInThisSub,
+        'paymentMode': paymentMode ?? 'Cash',
         'updatedById': updatedById,
         'ownerId': ownerId,
       };
@@ -240,6 +241,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
         'balanceAmount': balance,
         'paymentStatus': paymentStatus,
         'status': 'active', // Mark as active so it shows in current plans
+        'paymentMode': paymentMode ?? 'Cash',
         'createdAt': ServerValue.timestamp,
         'updatedAt': ServerValue.timestamp,
         'updatedById': updatedById,
@@ -490,6 +492,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
         'paymentStatus': paymentStatus,
         'registrationFeeAmount': currentRegAmount,
         'registrationFeePaid': newRegPaid,
+        'paymentMode': paymentMode ?? data['paymentMode'] ?? 'Cash',
         'status': status ?? data['status'],
         'updatedAt': ServerValue.timestamp,
         'updatedById': updatedById,
@@ -521,31 +524,81 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
         extraUpdates['customers/$customerId/updatedById'] = updatedById;
       }
 
-      // 5. Create History Log
-      extraUpdates['subscription_logs/$shopId/$logId'] = {
-        'logId': logId,
-        'subscriptionId': subscriptionId,
-        'customerId': customerId,
-        'shopId': shopId,
-        'action': isPayment ? 'payment' : 'edit',
-        'status': status ?? data['status'],
-        'endDate': endDate.millisecondsSinceEpoch,
-        'price': price,
-        'paidAmount': paymentDifference != 0 ? paymentDifference : null,
-        'registrationFeePaid': regPaymentDifference != 0
-            ? regPaymentDifference
-            : null,
-        'balanceAmount': balance,
-        'paymentMode': paymentMode,
-        'createdAt': ServerValue.timestamp,
-        'createdById': updatedById,
-        'updatedById': updatedById,
-        'description': (regPaymentDifference < 0 || paymentDifference < 0)
-            ? 'Payment Correction (Reduced)'
-            : (isPayment ? 'Balance/Fee collected.' : 'Details corrected.'),
-        'ownerId': data['ownerId'] ?? '',
-        'productId': productId,
-      };
+      // 5. Create History Log(s)
+      final String oldMode = data['paymentMode'] ?? 'Cash';
+      final String newMode = paymentMode ?? oldMode;
+      final bool modeChanged = newMode != oldMode && oldPaid > 0;
+
+      if (modeChanged) {
+        // Reversal Log for Old Mode
+        final reversalLogId = "${logId}_rev";
+        extraUpdates['subscription_logs/$shopId/$reversalLogId'] = {
+          'logId': reversalLogId,
+          'subscriptionId': subscriptionId,
+          'customerId': customerId,
+          'shopId': shopId,
+          'action': 'payment',
+          'status': status ?? data['status'],
+          'endDate': endDate.millisecondsSinceEpoch,
+          'price': price,
+          'paidAmount': -oldPaid, // Reverse the old payment
+          'balanceAmount': balance,
+          'paymentMode': oldMode,
+          'createdAt': ServerValue.timestamp,
+          'createdById': updatedById,
+          'updatedById': updatedById,
+          'description': 'Payment Mode Correction (Reversal of $oldMode)',
+          'ownerId': data['ownerId'] ?? '',
+          'productId': productId,
+        };
+
+        // Addition Log for New Mode (The full amount including any difference)
+        extraUpdates['subscription_logs/$shopId/$logId'] = {
+          'logId': logId,
+          'subscriptionId': subscriptionId,
+          'customerId': customerId,
+          'shopId': shopId,
+          'action': 'payment',
+          'status': status ?? data['status'],
+          'endDate': endDate.millisecondsSinceEpoch,
+          'price': price,
+          'paidAmount': subPaid, // The full corrected amount in the new mode
+          'balanceAmount': balance,
+          'paymentMode': newMode,
+          'createdAt': ServerValue.timestamp,
+          'createdById': updatedById,
+          'updatedById': updatedById,
+          'description': 'Payment Mode Correction (Correction to $newMode)',
+          'ownerId': data['ownerId'] ?? '',
+          'productId': productId,
+        };
+      } else {
+        // Regular Payment/Edit Log
+        extraUpdates['subscription_logs/$shopId/$logId'] = {
+          'logId': logId,
+          'subscriptionId': subscriptionId,
+          'customerId': customerId,
+          'shopId': shopId,
+          'action': isPayment ? 'payment' : 'edit',
+          'status': status ?? data['status'],
+          'endDate': endDate.millisecondsSinceEpoch,
+          'price': price,
+          'paidAmount': paymentDifference != 0 ? paymentDifference : null,
+          'registrationFeePaid': regPaymentDifference != 0
+              ? regPaymentDifference
+              : null,
+          'balanceAmount': balance,
+          'paymentMode': paymentMode,
+          'createdAt': ServerValue.timestamp,
+          'createdById': updatedById,
+          'updatedById': updatedById,
+          'description': (regPaymentDifference < 0 || paymentDifference < 0)
+              ? 'Payment Correction (Reduced)'
+              : (isPayment ? 'Balance/Fee collected.' : 'Details corrected.'),
+          'ownerId': data['ownerId'] ?? '',
+          'productId': productId,
+        };
+      }
 
       if (extraUpdates.isNotEmpty) {
         updates.addAll(

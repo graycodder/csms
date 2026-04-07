@@ -392,14 +392,14 @@ class _DailyReportViewState extends State<DailyReportView> {
           const Color(0xFF00838F),
         ),
         _buildActivityCard(
-          'Active Members',
+          'Active ${term.subscriptionLabel}s',
           report.activeCustomers.toString(),
           Icons.group,
           const Color(0xFFE0F7FA),
           const Color(0xFF00838F),
         ),
         _buildActivityCard(
-          'Inactive Members',
+          'Inactive ${term.subscriptionLabel}s',
           report.inactiveCustomers.toString(),
           Icons.group_off,
           const Color(0xFFE0F7FA),
@@ -667,7 +667,9 @@ class _DailyReportViewState extends State<DailyReportView> {
             children: [
               // Pinned Y-Axis
               Padding(
-                padding: EdgeInsets.only(bottom: 40.h), // Match bottom titles + padding
+                padding: EdgeInsets.only(
+                  bottom: 40.h,
+                ), // Match bottom titles + padding
                 child: SizedBox(
                   width: 45.w,
                   height: 190.h, // Adjusted for alignment
@@ -729,7 +731,8 @@ class _DailyReportViewState extends State<DailyReportView> {
                       padding: EdgeInsets.only(bottom: 12.h),
                       child: SizedBox(
                         width: (report.revenueChartData.length * 45.w).clamp(
-                          MediaQuery.of(context).size.width - 117.w, // Adjusted for pinned y
+                          MediaQuery.of(context).size.width -
+                              117.w, // Adjusted for pinned y
                           double.infinity,
                         ),
                         child: BarChart(
@@ -739,18 +742,20 @@ class _DailyReportViewState extends State<DailyReportView> {
                             minY: 0,
                             barTouchData: BarTouchData(
                               touchTooltipData: BarTouchTooltipData(
-                                getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                                  final label =
-                                      report.revenueChartData[group.x.toInt()].label;
-                                  return BarTooltipItem(
-                                    '₹${rod.toY.toInt()}\n$label',
-                                    TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 11.sp,
-                                    ),
-                                  );
-                                },
+                                getTooltipItem:
+                                    (group, groupIndex, rod, rodIndex) {
+                                      final label = report
+                                          .revenueChartData[group.x.toInt()]
+                                          .label;
+                                      return BarTooltipItem(
+                                        '₹${rod.toY.toInt()}\n$label',
+                                        TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 11.sp,
+                                        ),
+                                      );
+                                    },
                               ),
                             ),
                             titlesData: FlTitlesData(
