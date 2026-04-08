@@ -30,7 +30,8 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   String _selectedProductId = '';
   String _searchQuery = '';
-  String? _lastLoadedShopId; // Track the last loaded shop ID to prevent redundant reloads
+  String?
+  _lastLoadedShopId; // Track the last loaded shop ID to prevent redundant reloads
   late FocusNode _searchFocusNode;
   late TextEditingController _searchController;
   late ScrollController _scrollController;
@@ -87,10 +88,7 @@ class _DashboardPageState extends State<DashboardPage> {
         'DEBUG: DashboardPage _tryLoad - Triggering LoadDashboardData for shopId: $currentShopId',
       );
       context.read<DashboardBloc>().add(
-        LoadDashboardData(
-          shopId: currentShopId,
-          ownerId: authState.ownerId,
-        ),
+        LoadDashboardData(shopId: currentShopId, ownerId: authState.ownerId),
       );
       context.read<NotificationBloc>().add(
         StartListeningNotifications(
@@ -502,17 +500,17 @@ class _DashboardPageState extends State<DashboardPage> {
       padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Container(
         height: 45.h,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10.r,
-              offset: Offset(0, 4.h),
-            ),
-          ],
-        ),
+        // decoration: BoxDecoration(
+        //   color: Colors.white,
+        //   borderRadius: BorderRadius.circular(16.r),
+        //   boxShadow: [
+        //     BoxShadow(
+        //       color: Colors.black.withOpacity(0.05),
+        //       blurRadius: 10.r,
+        //       offset: Offset(0, 4.h),
+        //     ),
+        //   ],
+        // ),
         child: TextField(
           controller: _searchController,
           focusNode: _searchFocusNode,
@@ -562,10 +560,8 @@ class _DashboardPageState extends State<DashboardPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => CustomerListPage(
-                    term: term,
-                    onReturn: _tryLoad,
-                  ),
+                  builder: (_) =>
+                      CustomerListPage(term: term, onReturn: _tryLoad),
                 ),
               );
             },
