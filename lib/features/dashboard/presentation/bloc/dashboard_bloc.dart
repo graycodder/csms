@@ -212,7 +212,10 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
                           activeSubs: activeSubs,
                           logs: logs,
                           totalCustomers: customers.length,
-                          activeSubscriptions: activeSubs.length,
+                          activeSubscriptions: activeSubs
+                              .where((s) =>
+                                  !s.endDate.toLocal().isBefore(DateTime.now()))
+                              .length,
                           shop: shop,
                           hasMore: customers.length >= _customerPageSize,
                           lastDoc: customers.isNotEmpty ? customers.last.owner_createdAt : null,

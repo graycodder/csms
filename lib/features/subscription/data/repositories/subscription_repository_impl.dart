@@ -374,7 +374,6 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
         .onValue
         .map((event) {
           try {
-            final now = DateTime.now().millisecondsSinceEpoch;
             final activeSubs = <SubscriptionEntity>[];
             if (event.snapshot.value != null) {
               final data = event.snapshot.value as Map<dynamic, dynamic>;
@@ -382,9 +381,8 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
                 final subData = Map<String, dynamic>.from(value as Map);
                 final status = subData['status'] ?? '';
                 final sId = subData['shopId'] ?? '';
-                final endDate = subData['endDate'] as int? ?? 0;
 
-                if (status == 'active' && sId == shopId && endDate >= now) {
+                if (status == 'active' && sId == shopId) {
                   activeSubs.add(
                     SubscriptionModel.fromJson(subData, key.toString()),
                   );
