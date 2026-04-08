@@ -443,6 +443,7 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
                   shopId: widget.subscription.shopId,
                   updatedByName: name,
                   customerName: widget.customerName,
+                  shopCategory: widget.shopCategory,
                   status: _selectedStatus,
                 ),
               );

@@ -62,7 +62,8 @@ void main() {
     blocTest<CustomerBloc, CustomerState>(
       'emits [CustomerLoading, CustomerSuccess] when UpdateCustomerInfo is successful',
       build: () {
-        when(() => mockCustomerRepository.updateCustomer(any()))
+        when(() => mockCustomerRepository.updateCustomer(any(),
+                paymentMode: any(named: 'paymentMode')))
             .thenAnswer((_) async => const Right(null));
         return customerBloc;
       },
@@ -72,14 +73,16 @@ void main() {
         isA<CustomerSuccess>(),
       ],
       verify: (_) {
-        verify(() => mockCustomerRepository.updateCustomer(tCustomer)).called(1);
+        verify(() => mockCustomerRepository.updateCustomer(tCustomer,
+            paymentMode: any(named: 'paymentMode'))).called(1);
       },
     );
 
     blocTest<CustomerBloc, CustomerState>(
       'emits [CustomerLoading, CustomerError] when UpdateCustomerInfo fails',
       build: () {
-        when(() => mockCustomerRepository.updateCustomer(any()))
+        when(() => mockCustomerRepository.updateCustomer(any(),
+                paymentMode: any(named: 'paymentMode')))
             .thenAnswer((_) async => const Left(ServerFailure('Update Failed')));
         return customerBloc;
       },
@@ -124,6 +127,7 @@ void main() {
         price: 100,
         updatedByName: 'Staff',
         customerName: 'John',
+        shopCategory: 'Health and Fitness',
       )),
       expect: () => [
         isA<CustomerLoading>(),

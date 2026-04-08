@@ -399,6 +399,7 @@ class _AddSubscriptionPageState extends State<AddSubscriptionPage> {
                     paymentMode: _selectedPaymentMode,
                     customerName: widget.customerName,
                     productName: _selectedProduct!.name,
+                    shopCategory: widget.shopCategory,
                   ));
               
               // Navigator.pop(context); // REMOVED: Wait for Bloc state

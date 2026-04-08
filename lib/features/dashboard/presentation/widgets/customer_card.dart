@@ -491,6 +491,7 @@ class CustomerCard extends StatelessWidget {
                           shopId: sub.shopId,
                           updatedByName: updatedByName,
                           customerName: customer.name,
+                          shopCategory: state.shop.category,
                           status: sub.status,
                         ),
                       );

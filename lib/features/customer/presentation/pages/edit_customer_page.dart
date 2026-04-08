@@ -15,12 +15,14 @@ class EditCustomerPage extends StatefulWidget {
   final CustomerEntity customer;
   final List<ProductEntity> products;
   final String shopCategory;
+  final bool registrationFeeEnabled;
 
   const EditCustomerPage({
     super.key,
     required this.customer,
     required this.products,
     required this.shopCategory,
+    this.registrationFeeEnabled = true,
   });
 
   @override
@@ -175,6 +177,7 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                     shopId: widget.customer.shopId,
                     updatedByName: 'Staff',
                     customerName: updated.name,
+                    shopCategory: widget.shopCategory,
                     status: sub.status,
                     customer: updated,
                     // Pass the fully updated entity
@@ -394,77 +397,78 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                   SizedBox(height: 20.h),
 
                   // Registration Fee
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildLabel('Total Reg Fee'),
-                            TextFormField(
-                              controller: _registrationFeeController,
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                    decimal: true,
+                  if (widget.registrationFeeEnabled) ...[
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildLabel('Total Reg Fee'),
+                              TextFormField(
+                                controller: _registrationFeeController,
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                      decimal: true,
+                                    ),
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.allow(
+                                    RegExp(r'^\d*\.?\d*'),
                                   ),
-                              inputFormatters: [
-                                FilteringTextInputFormatter.allow(
-                                  RegExp(r'^\d*\.?\d*'),
+                                ],
+                                decoration: const InputDecoration(
+                                  hintText: 'Total',
+                                  prefixIcon: Icon(Icons.currency_rupee),
                                 ),
-                              ],
-                              decoration: const InputDecoration(
-                                hintText: 'Total',
-                                prefixIcon: Icon(Icons.currency_rupee),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                      SizedBox(width: 12.w),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildLabel('Amount Paid'),
-                            TextFormField(
-                              controller: _registrationFeePaidController,
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                    decimal: true,
+                        SizedBox(width: 12.w),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildLabel('Amount Paid'),
+                              TextFormField(
+                                controller: _registrationFeePaidController,
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                      decimal: true,
+                                    ),
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.allow(
+                                    RegExp(r'^\d*\.?\d*'),
                                   ),
-                              inputFormatters: [
-                                FilteringTextInputFormatter.allow(
-                                  RegExp(r'^\d*\.?\d*'),
+                                ],
+                                decoration: const InputDecoration(
+                                  hintText: 'Paid',
+                                  prefixIcon: Icon(Icons.currency_rupee),
                                 ),
-                              ],
-                              decoration: const InputDecoration(
-                                hintText: 'Paid',
-                                prefixIcon: Icon(Icons.currency_rupee),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 20.h),
-
-                  _buildLabel('Payment Mode'),
-                  DropdownButtonFormField<String>(
-                    value: _selectedRegPaymentMode,
-                    decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.payment_outlined),
+                      ],
                     ),
-                    items: ['Cash', 'UPI', 'Card', 'Bank Transfer'].map((m) {
-                      return DropdownMenuItem(value: m, child: Text(m));
-                    }).toList(),
-                    onChanged: (v) {
-                      if (v != null) {
-                        setState(() => _selectedRegPaymentMode = v);
-                      }
-                    },
-                  ),
-                  SizedBox(height: 32.h),
+                    SizedBox(height: 20.h),
+                    _buildLabel('Payment Mode'),
+                    DropdownButtonFormField<String>(
+                      value: _selectedRegPaymentMode,
+                      decoration: const InputDecoration(
+                        prefixIcon: Icon(Icons.payment_outlined),
+                      ),
+                      items: ['Cash', 'UPI', 'Card', 'Bank Transfer'].map((m) {
+                        return DropdownMenuItem(value: m, child: Text(m));
+                      }).toList(),
+                      onChanged: (v) {
+                        if (v != null) {
+                          setState(() => _selectedRegPaymentMode = v);
+                        }
+                      },
+                    ),
+                    SizedBox(height: 32.h),
+                  ],
                   SizedBox(
                     width: double.infinity,
                     height: 52.h,

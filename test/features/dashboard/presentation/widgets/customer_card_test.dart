@@ -65,8 +65,13 @@ void main() {
     );
   }
 
-  testWidgets('CustomerCard displays customer info and status correctly', (WidgetTester tester) async {
-    final activeSub = createSub(id: 'sub1', endDate: DateTime.now().add(const Duration(days: 25)));
+  testWidgets('CustomerCard displays customer info and status correctly', (
+    WidgetTester tester,
+  ) async {
+    final activeSub = createSub(
+      id: 'sub1',
+      endDate: DateTime.now().add(const Duration(days: 25)),
+    );
 
     final tState = DashboardLoaded(
       shop: tShop,
@@ -76,6 +81,7 @@ void main() {
       customers: [tCustomer],
       totalCustomers: 1,
       activeSubscriptions: 1,
+      logs: [],
     );
 
     await tester.pumpWidget(
@@ -100,8 +106,13 @@ void main() {
     expect(find.textContaining('days left'), findsOneWidget);
   });
 
-  testWidgets('CustomerCard shows Expiring Soon status', (WidgetTester tester) async {
-    final expiringSub = createSub(id: 'sub2', endDate: DateTime.now().add(const Duration(days: 3)));
+  testWidgets('CustomerCard shows Expiring Soon status', (
+    WidgetTester tester,
+  ) async {
+    final expiringSub = createSub(
+      id: 'sub2',
+      endDate: DateTime.now().add(const Duration(days: 3)),
+    );
 
     final tState = DashboardLoaded(
       shop: tShop,
@@ -111,6 +122,7 @@ void main() {
       customers: [tCustomer],
       totalCustomers: 1,
       activeSubscriptions: 1,
+      logs: [],
     );
 
     await tester.pumpWidget(

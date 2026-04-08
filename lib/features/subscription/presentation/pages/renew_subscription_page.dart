@@ -276,6 +276,7 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
             paymentMode: _selectedPaymentMode,
             updatedByName: authState.name,
             customerName: widget.customerName,
+            shopCategory: widget.shopCategory,
           ),
         );
       }

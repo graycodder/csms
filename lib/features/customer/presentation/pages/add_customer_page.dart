@@ -234,6 +234,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                       paymentMode: _selectedRegPaymentMode,
                       productName: _selectedProduct!.name,
                       updatedByName: authState.name,
+                      shopCategory: widget.shopCategory,
                     ),
                   );
 

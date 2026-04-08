@@ -90,7 +90,9 @@ class CustomerDetailsPage extends StatelessWidget {
               return Stack(
                 children: [
                   Container(
-                    height: 320.h,
+                    height: state.shop.settings.registrationFeeEnabled
+                        ? 320.h
+                        : 280.h,
                     decoration: BoxDecoration(
                       color: AppColors.primary,
                       borderRadius: BorderRadius.only(
@@ -111,13 +113,23 @@ class CustomerDetailsPage extends StatelessWidget {
                             ),
                             children: [
                               _buildHeaderInfo(customer),
-                              SizedBox(height: 8.h),
-                              _buildRegistrationFeeCard(
-                                context,
-                                customer,
-                                uniqueSubs,
-                              ),
-                              SizedBox(height: 24.h),
+                              if (state
+                                  .shop
+                                  .settings
+                                  .registrationFeeEnabled) ...[
+                                _buildRegistrationFeeCard(
+                                  context,
+                                  customer,
+                                  uniqueSubs,
+                                ),
+                                SizedBox(height: 8.h),
+                              ],
+                              if (!state
+                                  .shop
+                                  .settings
+                                  .registrationFeeEnabled) ...[
+                                SizedBox(height: 45.h),
+                              ],
                               Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
@@ -610,6 +622,8 @@ class CustomerDetailsPage extends StatelessWidget {
                         customer: customer,
                         products: products,
                         shopCategory: state.shop.category,
+                        registrationFeeEnabled:
+                            state.shop.settings.registrationFeeEnabled,
                       ),
                     ),
                   ),
@@ -836,6 +850,7 @@ class CustomerDetailsPage extends StatelessWidget {
                       final addedAmt = double.parse(amountController.text);
                       final newPaidAmount = sub.paidAmount + addedAmt;
 
+                      final shopState = pageContext.read<ShopContextBloc>().state;
                       final authState = pageContext.read<AuthBloc>().state;
                       final updatedByName = authState is AuthAuthenticated
                           ? authState.name
@@ -843,6 +858,9 @@ class CustomerDetailsPage extends StatelessWidget {
                       final updatedById = authState is AuthAuthenticated
                           ? authState.userId
                           : sub.updatedById;
+                      final shopCategory = shopState is ShopSelected 
+                          ? shopState.selectedShop.category 
+                          : 'Other';
 
                       pageContext.read<CustomerBloc>().add(
                         UpdateSubscription(
@@ -856,6 +874,7 @@ class CustomerDetailsPage extends StatelessWidget {
                           shopId: sub.shopId,
                           updatedByName: updatedByName,
                           customerName: customer.name,
+                          shopCategory: shopCategory,
                           status: sub.status,
                         ),
                       );
@@ -1138,6 +1157,15 @@ class CustomerDetailsPage extends StatelessWidget {
                       final newRegPaid =
                           customer.registrationFeePaidAmount + addedAmt;
 
+                      final shopState = pageContext.read<ShopContextBloc>().state;
+                      final authState = pageContext.read<AuthBloc>().state;
+                      final updatedByName = authState is AuthAuthenticated
+                          ? authState.name
+                          : 'Staff';
+                      final shopCategory = shopState is ShopSelected 
+                          ? shopState.selectedShop.category 
+                          : 'Other';
+
                       if (subs.isEmpty) {
                         // If no subscription, update customer only (Fallback)
                         pageContext.read<CustomerBloc>().add(
@@ -1168,8 +1196,9 @@ class CustomerDetailsPage extends StatelessWidget {
                             updatedById: customer.updatedById,
                             ownerId: customer.ownerId,
                             shopId: customer.shopId,
-                            updatedByName: 'Staff',
+                            updatedByName: updatedByName,
                             customerName: customer.name,
+                            shopCategory: shopCategory,
                             status: sub.status,
                             customer: customer.copyWith(
                               registrationFeePaidAmount: newRegPaid,

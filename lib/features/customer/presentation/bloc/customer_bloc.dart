@@ -4,6 +4,7 @@ import 'package:csms/features/customer/domain/entities/customer_entity.dart';
 import 'package:csms/features/customer/domain/repositories/customer_repository.dart';
 import 'package:csms/features/subscription/domain/repositories/subscription_repository.dart';
 import 'package:csms/features/notifications/domain/repositories/notification_repository.dart';
+import 'package:csms/core/utils/terminology_helper.dart';
 
 // Events
 abstract class CustomerEvent extends Equatable {
@@ -23,6 +24,7 @@ class AddCustomerWithSubscription extends CustomerEvent {
   final String? paymentMode;
   final String productName;
   final String updatedByName;
+  final String shopCategory;
 
   const AddCustomerWithSubscription({
     required this.customer,
@@ -35,6 +37,7 @@ class AddCustomerWithSubscription extends CustomerEvent {
     this.paymentMode,
     required this.productName,
     required this.updatedByName,
+    required this.shopCategory,
   });
 
   @override
@@ -77,6 +80,7 @@ class AddSubscription extends CustomerEvent {
   final String customerName;
   final String productName;
   final String updatedByName;
+  final String shopCategory;
 
   const AddSubscription({
     required this.shopId,
@@ -93,6 +97,7 @@ class AddSubscription extends CustomerEvent {
     required this.customerName,
     required this.productName,
     required this.updatedByName,
+    required this.shopCategory,
   });
 
   @override
@@ -134,6 +139,7 @@ class RenewCustomerSubscription extends CustomerEvent {
   final String productName;
   final String updatedByName;
   final String customerName;
+  final String shopCategory;
 
   const RenewCustomerSubscription({
     required this.subscriptionId,
@@ -145,6 +151,7 @@ class RenewCustomerSubscription extends CustomerEvent {
     required this.productName,
     required this.updatedByName,
     required this.customerName,
+    required this.shopCategory,
     this.price,
     this.paidAmount,
     this.paymentMode,
@@ -164,6 +171,7 @@ class RenewCustomerSubscription extends CustomerEvent {
     productName,
     updatedByName,
     customerName,
+    shopCategory,
   ];
 }
 
@@ -176,6 +184,7 @@ class UpdateSubscription extends CustomerEvent {
   final String shopId;
   final String updatedByName;
   final String customerName;
+  final String shopCategory;
   final double? registrationFeeAmount;
   final double? registrationFeePaid;
   final double? paidAmount;
@@ -192,6 +201,7 @@ class UpdateSubscription extends CustomerEvent {
     required this.shopId,
     required this.updatedByName,
     required this.customerName,
+    required this.shopCategory,
     this.registrationFeeAmount,
     this.registrationFeePaid,
     this.paidAmount,
@@ -214,6 +224,7 @@ class UpdateSubscription extends CustomerEvent {
     shopId,
     updatedByName,
     customerName,
+    shopCategory,
     status,
     customer,
   ];
@@ -289,12 +300,13 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
         await subResult.fold(
           (failure) async => emit(CustomerError(failure.message)),
           (_) async {
+            final term = TerminologyHelper.getTerminology(event.shopCategory);
             await notificationRepository.pushNotification(
               ownerId: event.customer.ownerId,
               shopId: event.customer.shopId,
-              title: 'New Membership',
+              title: 'New ${term.subscriptionLabel}',
               body:
-                  "${event.customer.name}'s membership was added by ${event.updatedByName}",
+                  "${event.customer.name}'s ${term.subscriptionLabel.toLowerCase()} was added by ${event.updatedByName}",
               type: 'subscription',
               updatedById: event.customer.updatedById,
             );
@@ -355,12 +367,13 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
     await result.fold((failure) async => emit(CustomerError(failure.message)), (
       _,
     ) async {
+      final term = TerminologyHelper.getTerminology(event.shopCategory);
       await notificationRepository.pushNotification(
         ownerId: event.ownerId,
         shopId: event.shopId,
-        title: 'Membership Renewed',
+        title: '${term.subscriptionLabel} Renewed',
         body:
-            "${event.customerName}'s membership for ${event.productName} has been renewed by ${event.updatedByName}",
+            "${event.customerName}'s ${term.subscriptionLabel.toLowerCase()} for ${event.productName} has been renewed by ${event.updatedByName}",
         type: 'renewal',
         updatedById: event.updatedById,
       );
@@ -407,12 +420,13 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
     await result.fold((failure) async => emit(CustomerError(failure.message)), (
       _,
     ) async {
+      final term = TerminologyHelper.getTerminology(event.shopCategory);
       await notificationRepository.pushNotification(
         ownerId: event.ownerId,
         shopId: event.shopId,
-        title: 'Membership Corrected',
+        title: '${term.subscriptionLabel} Corrected',
         body:
-            "${event.customerName}'s membership details have been corrected by ${event.updatedByName}",
+            "${event.customerName}'s ${term.subscriptionLabel.toLowerCase()} details have been corrected by ${event.updatedByName}",
         type: 'edit',
         updatedById: event.updatedById,
       );
@@ -443,12 +457,13 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
     await result.fold((failure) async => emit(CustomerError(failure.message)), (
       _,
     ) async {
+      final term = TerminologyHelper.getTerminology(event.shopCategory);
       await notificationRepository.pushNotification(
         ownerId: event.ownerId,
         shopId: event.shopId,
-        title: 'New Membership Added',
+        title: 'New ${term.subscriptionLabel} Added',
         body:
-            "${event.customerName}'s membership for ${event.productName} was added by ${event.updatedByName}",
+            "${event.customerName}'s ${term.subscriptionLabel.toLowerCase()} for ${event.productName} was added by ${event.updatedByName}",
         type: 'subscription',
         updatedById: event.updatedById,
       );

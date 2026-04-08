@@ -152,7 +152,11 @@ class _DailyReportViewState extends State<DailyReportView> {
           children: [
             _buildReportTitleSection(dashState),
             SizedBox(height: 16.h),
-            _buildRevenueHeroCard(report, term),
+            _buildRevenueHeroCard(
+              report,
+              term,
+              dashState.shop.settings.registrationFeeEnabled,
+            ),
             SizedBox(height: 10.h),
             _buildPaymentModeCard(report),
             SizedBox(height: 10.h),
@@ -220,7 +224,11 @@ class _DailyReportViewState extends State<DailyReportView> {
     );
   }
 
-  Widget _buildRevenueHeroCard(ReportEntity report, BusinessTerminology term) {
+  Widget _buildRevenueHeroCard(
+    ReportEntity report,
+    BusinessTerminology term,
+    bool registrationFeeEnabled,
+  ) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(20.r),
@@ -279,16 +287,18 @@ class _DailyReportViewState extends State<DailyReportView> {
                   const Color(0xFF006064),
                 ),
               ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: _buildRevenueGridItem(
-                  'Reg. Fees',
-                  '₹${report.registrationFeeCollected.toStringAsFixed(0)}',
-                  Icons.badge_outlined,
-                  const Color(0xFFE0F2F1),
-                  const Color(0xFF004D40),
+              if (registrationFeeEnabled) ...[
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: _buildRevenueGridItem(
+                    'Reg. Fees',
+                    '₹${report.registrationFeeCollected.toStringAsFixed(0)}',
+                    Icons.badge_outlined,
+                    const Color(0xFFE0F2F1),
+                    const Color(0xFF004D40),
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
           SizedBox(height: 12.h),
@@ -303,16 +313,18 @@ class _DailyReportViewState extends State<DailyReportView> {
                   const Color(0xFFE65100),
                 ),
               ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: _buildRevenueGridItem(
-                  'Pending Reg. Fees',
-                  '₹${report.registrationFeePending.toStringAsFixed(0)}',
-                  Icons.access_time,
-                  const Color(0xFFFFF3E0),
-                  const Color(0xFFE65100),
+              if (registrationFeeEnabled) ...[
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: _buildRevenueGridItem(
+                    'Pending Reg. Fees',
+                    '₹${report.registrationFeePending.toStringAsFixed(0)}',
+                    Icons.access_time,
+                    const Color(0xFFFFF3E0),
+                    const Color(0xFFE65100),
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
         ],
