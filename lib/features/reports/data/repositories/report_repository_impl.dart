@@ -269,13 +269,13 @@ class ReportRepositoryImpl implements ReportRepository {
         return days >= 0 && days <= expiringThreshold;
       }).toList();
 
-      final Set<String> activeMemberIds = activeSubsAtEnd
-          .map((s) => s.customerId)
-          .toSet();
-
       // 4. Counts
-      final activeCount = activeMemberIds.length;
-      final inactiveCount = customersInScope.length - activeCount;
+      final activeCount = customersInScope
+          .where((c) => c.status.toLowerCase() == 'active')
+          .length;
+      final inactiveCount = customersInScope
+          .where((c) => c.status.toLowerCase() == 'inactive')
+          .length;
       final expiredCount = expiredSubsAtEnd.length;
 
       // ── PENDING CALCULATIONS: Current live state ──────────────────────────
