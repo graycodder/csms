@@ -1,14 +1,14 @@
 {
   "project_info": {
-    "project_number": "1034933865940",
-    "firebase_url": "https://csms-b03e1-default-rtdb.asia-southeast1.firebasedatabase.app",
-    "project_id": "csms-b03e1",
-    "storage_bucket": "csms-b03e1.firebasestorage.app"
+    "project_number": "192075236305",
+    "firebase_url": "https://csms-a87ef-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "csms-a87ef",
+    "storage_bucket": "csms-a87ef.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1034933865940:android:4fc91b536d6e4f3c369a41",
+        "mobilesdk_app_id": "1:192075236305:android:a487b3189d7ba2d2cb96f0",
         "android_client_info": {
           "package_name": "com.live.csms"
         }
@@ -16,7 +16,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCosq6Mk5Yam7cm7LJGe2WNSs_TIhSV9VU"
+          "current_key": "AIzaSyAic-rPCw_FL8DY6EXnlz20KITdsB21v98"
         }
       ],
       "services": {

@@ -11,7 +11,7 @@ import 'package:csms/features/shop/presentation/bloc/shop_context_bloc.dart';
 import 'package:csms/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:csms/features/notifications/presentation/bloc/notification_bloc.dart';
 import 'package:csms/injection_container.dart' as di;
-import 'package:csms/firebase_options.dart';
+import 'package:csms/firebase_options_prod.dart';
 import 'package:csms/core/services/notification_service.dart';
 import 'package:csms/core/config/app_config.dart';
 import 'package:csms/features/customer/presentation/bloc/customer_bloc.dart';
