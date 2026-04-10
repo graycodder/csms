@@ -46,6 +46,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '436543272299',
     projectId: 'csms-staging-179d8',
     authDomain: 'csms-staging-179d8.firebaseapp.com',
+    databaseURL: 'https://csms-staging-179d8-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'csms-staging-179d8.firebasestorage.app',
   );
 
@@ -54,6 +55,7 @@ class DefaultFirebaseOptions {
     appId: '1:436543272299:android:2e28a79c605379079e482e',
     messagingSenderId: '436543272299',
     projectId: 'csms-staging-179d8',
+    databaseURL: 'https://csms-staging-179d8-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'csms-staging-179d8.firebasestorage.app',
   );
 
@@ -62,6 +64,7 @@ class DefaultFirebaseOptions {
     appId: '1:436543272299:ios:efe1f9660d5cff689e482e',
     messagingSenderId: '436543272299',
     projectId: 'csms-staging-179d8',
+    databaseURL: 'https://csms-staging-179d8-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'csms-staging-179d8.firebasestorage.app',
     iosBundleId: 'com.live.csms',
   );
@@ -71,6 +74,7 @@ class DefaultFirebaseOptions {
     appId: '1:436543272299:ios:8c6228318ab3716d9e482e',
     messagingSenderId: '436543272299',
     projectId: 'csms-staging-179d8',
+    databaseURL: 'https://csms-staging-179d8-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'csms-staging-179d8.firebasestorage.app',
     iosBundleId: 'com.example.csms',
   );
@@ -81,6 +85,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '436543272299',
     projectId: 'csms-staging-179d8',
     authDomain: 'csms-staging-179d8.firebaseapp.com',
+    databaseURL: 'https://csms-staging-179d8-default-rtdb.asia-southeast1.firebasedatabase.app',
     storageBucket: 'csms-staging-179d8.firebasestorage.app',
   );
 }
