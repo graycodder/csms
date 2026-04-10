@@ -330,9 +330,6 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
         .map((event) {
           try {
             final now = DateTime.now();
-            final threshold = now
-                .add(Duration(days: notificationDaysBefore))
-                .millisecondsSinceEpoch;
 
             final expiringSubs = <SubscriptionEntity>[];
             if (event.snapshot.value != null) {
@@ -340,16 +337,26 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
               data.forEach((key, value) {
                 final subData = Map<String, dynamic>.from(value as Map);
                 final status = subData['status'] ?? '';
-                final endDate = subData['endDate'] as int? ?? 0;
+                final endDateInt = subData['endDate'] as int? ?? 0;
                 final sId = subData['shopId'] ?? '';
 
-                if (status == 'active' &&
-                    endDate <= threshold &&
-                    endDate >= now.millisecondsSinceEpoch &&
-                    sId == shopId) {
-                  expiringSubs.add(
-                    SubscriptionModel.fromJson(subData, key.toString()),
-                  );
+                if (status == 'active' && sId == shopId) {
+                  final eDate = DateTime.fromMillisecondsSinceEpoch(
+                    endDateInt,
+                    isUtc: true,
+                  ).toLocal();
+
+                  // EXACT same logic as report_repository_impl.dart:
+                  // 1. Must pass activeSubsAtEnd filter: !s.endDate.toLocal().isBefore(statusRefPoint)
+                  if (!eDate.isBefore(now)) {
+                    // 2. Must pass expiringSoonSubs filter: days >= 0 && days <= threshold
+                    final days = eDate.difference(now).inDays;
+                    if (days >= 0 && days <= notificationDaysBefore) {
+                      expiringSubs.add(
+                        SubscriptionModel.fromJson(subData, key.toString()),
+                      );
+                    }
+                  }
                 }
               });
             }
