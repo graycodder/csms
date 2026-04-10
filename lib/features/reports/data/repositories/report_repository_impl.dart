@@ -229,10 +229,13 @@ class ReportRepositoryImpl implements ReportRepository {
         }
       }
 
-      // ── HISTORICAL STATUS: Snapshot as of rangeTo ────────────────────────
-      // 1. All customers created before or at rangeTo
+      // ── HISTORICAL STATUS: Snapshot as of statusRefPoint ────────────────────────
+      final refNow = DateTime.now();
+      final statusRefPoint = rangeTo.isAfter(refNow) ? refNow : rangeTo;
+
+      // 1. All customers created before or at statusRefPoint
       final customersInScope = allCustomers
-          .where((c) => !c.createdAt.toLocal().isAfter(rangeTo))
+          .where((c) => !c.createdAt.toLocal().isAfter(statusRefPoint))
           .toList();
 
       // 2. Customers currently marked as 'active' (case-insensitive)
@@ -243,7 +246,7 @@ class ReportRepositoryImpl implements ReportRepository {
           .map((c) => c.customerId)
           .toSet();
 
-      // 3. Subscription pools (Snapshot as of rangeTo)
+      // 3. Subscription pools (Snapshot as of statusRefPoint)
       // Any subscription with status == 'active' is considered a member's current plan pool
       final activeStatusSubs = allSubscriptions.where((s) {
         final isStatusActive = s.status.toLowerCase() == 'active';
@@ -252,27 +255,32 @@ class ReportRepositoryImpl implements ReportRepository {
       }).toList();
 
       // CATEGORIZE THE POOL:
-      // Active: Plan is current (or starts in future)
+      // Active: Plan is current (or starts in future) relative to statusRefPoint
       final activeSubsAtEnd = activeStatusSubs.where((s) {
-        return !s.endDate.toLocal().isBefore(rangeTo);
+        return !s.endDate.toLocal().isBefore(statusRefPoint);
       }).toList();
 
       // Expired: Plan status is 'active' but date is in the past
       final expiredSubsAtEnd = activeStatusSubs.where((s) {
-        return s.endDate.toLocal().isBefore(rangeTo);
+        final localEnd = s.endDate.toLocal();
+        if (filter == ReportFilter.daily) {
+          // Daily: Total expired people as of that day (Cumulative / Stock)
+          return localEnd.isBefore(statusRefPoint);
+        } else {
+          // Monthly: Only those who expired DURING the month (Period-specific / Flow)
+          return localEnd.isBefore(statusRefPoint) && !localEnd.isBefore(rangeFrom);
+        }
       }).toList();
 
-      // Expiring Soon: Active plans ending in the next X days from rangeTo
+      // Expiring Soon: Active plans ending in the next X days from statusRefPoint
       // Matches Dashboard logic (threshold from shop settings)
       final expiringSoonSubs = activeSubsAtEnd.where((s) {
-        final days = s.endDate.toLocal().difference(rangeTo).inDays;
+        final days = s.endDate.toLocal().difference(statusRefPoint).inDays;
         return days >= 0 && days <= expiringThreshold;
       }).toList();
 
       // 4. Counts
-      final activeCount = customersInScope
-          .where((c) => c.status.toLowerCase() == 'active')
-          .length;
+      final activeCount = activeStatusCustomers.length;
       final inactiveCount = customersInScope
           .where((c) => c.status.toLowerCase() == 'inactive')
           .length;
