@@ -94,7 +94,7 @@ class _AddProductPageState extends State<AddProductPage> {
                     controller: _nameController,
                     maxLength: 20,
                     inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')),
+                      FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9\s]')),
                     ],
                     validator: (v) {
                       if (v == null || v.trim().isEmpty) return 'Product name is required';

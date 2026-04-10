@@ -33,7 +33,7 @@ class _EditProductPageState extends State<EditProductPage> {
   @override
   void initState() {
     super.initState();
-    final sanitizedName = widget.product.name.replaceAll(RegExp(r'[^a-zA-Z\s]'), '');
+    final sanitizedName = widget.product.name.replaceAll(RegExp(r'[^a-zA-Z0-9\s]'), '');
     _nameController = TextEditingController(text: sanitizedName);
     _priceController = TextEditingController(
       text: widget.product.price.toStringAsFixed(0),
@@ -114,7 +114,7 @@ class _EditProductPageState extends State<EditProductPage> {
                     controller: _nameController,
                     maxLength: 20,
                     inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')),
+                      FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9\s]')),
                     ],
                     validator: (v) {
                       if (v == null || v.trim().isEmpty) return 'Required';
