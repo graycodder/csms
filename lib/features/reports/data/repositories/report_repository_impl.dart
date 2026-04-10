@@ -218,7 +218,7 @@ class ReportRepositoryImpl implements ReportRepository {
             (paymentModeBreakdown[modeOther] ?? 0.0) + missingSubRevenue;
       }
 
-      // 3. Registration Fee Collected: Calculate purely from Customers Collection 
+      // 3. Registration Fee Collected: Calculate purely from Customers Collection
       // (Registration fees are tied to customers joined in this period)
       for (var c in newCustomers) {
         if (c.registrationFeePaidAmount > 0) {
@@ -242,42 +242,99 @@ class ReportRepositoryImpl implements ReportRepository {
       final activeStatusCustomers = customersInScope
           .where((c) => c.status.toLowerCase() == 'active')
           .toList();
-      final activeStatusCustomerIds = activeStatusCustomers
-          .map((c) => c.customerId)
-          .toSet();
 
-      // 3. Subscription pools (Snapshot as of statusRefPoint)
-      // Any subscription with status == 'active' is considered a member's current plan pool
-      final activeStatusSubs = allSubscriptions.where((s) {
-        final isStatusActive = s.status.toLowerCase() == 'active';
-        // Member must also be an 'active' status customer
-        return isStatusActive && activeStatusCustomerIds.contains(s.customerId);
-      }).toList();
+      // 3. Subscription pools
+      // (Removed reliance on current strictly 'active' status to ensure historical accuracy)
+      // ──────────────────────────────────────────────────────────────────────────
+      // EXPLICIT CALCULATION PATTERNS (Daily vs Monthly)
+      // ──────────────────────────────────────────────────────────────────────────
 
-      // CATEGORIZE THE POOL:
-      // Active: Plan is current (or starts in future) relative to statusRefPoint
-      final activeSubsAtEnd = activeStatusSubs.where((s) {
-        return !s.endDate.toLocal().isBefore(statusRefPoint);
-      }).toList();
+      List<SubscriptionModel> activeSubsAtEnd;
+      List<SubscriptionModel> expiringSoonSubs;
+      List<SubscriptionModel> expiredSubsAtEnd;
 
-      // Expired: Plan status is 'active' but date is in the past
-      final expiredSubsAtEnd = activeStatusSubs.where((s) {
-        final localEnd = s.endDate.toLocal();
-        if (filter == ReportFilter.daily) {
-          // Daily: Total expired people as of that day (Cumulative / Stock)
-          return localEnd.isBefore(statusRefPoint);
-        } else {
-          // Monthly: Only those who expired DURING the month (Period-specific / Flow)
-          return localEnd.isBefore(statusRefPoint) && !localEnd.isBefore(rangeFrom);
-        }
-      }).toList();
+      if (filter == ReportFilter.daily) {
+        // --- DAILY REPORT LOGIC ---
 
-      // Expiring Soon: Active plans ending in the next X days from statusRefPoint
-      // Matches Dashboard logic (threshold from shop settings)
-      final expiringSoonSubs = activeSubsAtEnd.where((s) {
-        final days = s.endDate.toLocal().difference(statusRefPoint).inDays;
-        return days >= 0 && days <= expiringThreshold;
-      }).toList();
+        // Active: Plans that were created on or before statusRefPoint, and end date is in the future
+        activeSubsAtEnd = allSubscriptions.where((s) {
+          final st = s.status.toLowerCase();
+          final isCurrentDay = rangeTo.isAfter(DateTime.now());
+          if (isCurrentDay) {
+            if (st != 'active') return false;
+          } else {
+            if (st != 'active' && st != 'renewed') return false;
+          }
+          if (s.createdAt.toLocal().isAfter(statusRefPoint)) return false;
+          return !s.endDate.toLocal().isBefore(statusRefPoint);
+        }).toList();
+
+        // Expiring Soon (Specific Date): Strictly active plans ending on this specific date
+        // (Just like the dashboard but strictly bounded to this day)
+        expiringSoonSubs = allSubscriptions.where((s) {
+          if (s.status.toLowerCase() != 'active') return false;
+          if (s.createdAt.toLocal().isAfter(statusRefPoint)) return false;
+          final localEnd = s.endDate.toLocal();
+
+          return !localEnd.isBefore(rangeFrom) && !localEnd.isAfter(rangeTo);
+        }).toList();
+
+        // Expired (Specific Date): All subscriptions whose EndDate fell exactly on this date
+        // Must be exactly 'active' and MUST mathematically be in the past to count as expired!
+        expiredSubsAtEnd = allSubscriptions.where((s) {
+          if (s.status.toLowerCase() != 'active') return false;
+
+          final localEnd = s.endDate.toLocal();
+          final now = DateTime.now();
+
+          bool isPastDate = localEnd.isBefore(now);
+          bool isInRange =
+              !localEnd.isBefore(rangeFrom) && !localEnd.isAfter(rangeTo);
+
+          return isPastDate && isInRange;
+        }).toList();
+      } else {
+        // --- MONTHLY REPORT LOGIC ---
+
+        // Active: Plans that were created on or before statusRefPoint, and end date is in the future
+        activeSubsAtEnd = allSubscriptions.where((s) {
+          final st = s.status.toLowerCase();
+          final isCurrentMonth = rangeTo.isAfter(DateTime.now());
+          if (isCurrentMonth) {
+            if (st != 'active') return false;
+          } else {
+            if (st != 'active' && st != 'renewed') return false;
+          }
+          if (s.createdAt.toLocal().isAfter(statusRefPoint)) return false;
+          return !s.endDate.toLocal().isBefore(statusRefPoint);
+        }).toList();
+
+        // Expiring Soon (Specific Month): Exact match to Dashboard's Logic
+        expiringSoonSubs = allSubscriptions.where((s) {
+          if (s.status.toLowerCase().trim() != 'active') return false;
+
+          final localEnd = s.endDate.toLocal();
+          final now = DateTime.now();
+
+          // Exactly replicates Dashboard: Must not have already passed, and difference is <= threshold
+          if (!localEnd.isBefore(now)) {
+            final days = localEnd.difference(now).inDays;
+            return days >= 0 && days <= expiringThreshold;
+          }
+          return false;
+        }).toList();
+
+        // Expired (Specific Month): All subscriptions whose EndDate fell EXACTLY within this month
+        expiredSubsAtEnd = allSubscriptions.where((s) {
+          if (s.status.toLowerCase() != 'active') return false;
+          final localEnd = s.endDate.toLocal();
+          final now = DateTime.now();
+          bool isPastDate = localEnd.isBefore(now);
+          bool isInRange =
+              !localEnd.isBefore(rangeFrom) && !localEnd.isAfter(rangeTo);
+          return isPastDate && isInRange;
+        }).toList();
+      }
 
       // 4. Counts
       final activeCount = activeStatusCustomers.length;
