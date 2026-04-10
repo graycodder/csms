@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:csms/core/theme/app_colors.dart';
 import 'package:csms/features/product/domain/entities/product_entity.dart';
@@ -75,6 +76,15 @@ class ProductItemCard extends StatelessWidget {
                     style: TextStyle(
                       color: isActive ? AppColors.textLight : AppColors.textLight.withOpacity(0.7),
                       fontSize: 13.sp,
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    'Created: ${DateFormat('dd MMM yyyy').format(product.createdAt)}',
+                    style: TextStyle(
+                      color: AppColors.textLight.withOpacity(0.5),
+                      fontSize: 11.sp,
+                      fontStyle: FontStyle.italic,
                     ),
                   ),
                 ],

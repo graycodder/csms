@@ -500,17 +500,6 @@ class _DashboardPageState extends State<DashboardPage> {
       padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Container(
         height: 45.h,
-        // decoration: BoxDecoration(
-        //   color: Colors.white,
-        //   borderRadius: BorderRadius.circular(16.r),
-        //   boxShadow: [
-        //     BoxShadow(
-        //       color: Colors.black.withOpacity(0.05),
-        //       blurRadius: 10.r,
-        //       offset: Offset(0, 4.h),
-        //     ),
-        //   ],
-        // ),
         child: TextField(
           controller: _searchController,
           focusNode: _searchFocusNode,
@@ -648,6 +637,10 @@ class _DashboardPageState extends State<DashboardPage> {
     final activeProducts = state.products
         .where((p) => p.status == 'active')
         .toList();
+    
+    // Sort by createdAt (oldest first - "first created at first")
+    activeProducts.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+
     if (activeProducts.length <= 1) {
       return const SizedBox.shrink();
     }
