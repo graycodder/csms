@@ -19,6 +19,7 @@ import 'package:csms/features/shop_subscription/presentation/bloc/shop_subscript
 import 'package:csms/core/utils/loading_overlay.dart';
 import 'package:csms/features/dashboard/presentation/widgets/customer_card.dart';
 import 'package:csms/features/customer/presentation/pages/customer_list_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -39,10 +40,28 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   void initState() {
     super.initState();
+    _loadSelectedProduct();
     _searchFocusNode = FocusNode();
     _searchController = TextEditingController();
     _scrollController = ScrollController()..addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) => _tryLoad());
+  }
+
+  Future<void> _loadSelectedProduct() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedId = prefs.getString('dashboard_selected_product_id');
+    if (savedId != null && mounted) {
+      if (_selectedProductId.isEmpty) {
+        setState(() {
+          _selectedProductId = savedId;
+        });
+      }
+    }
+  }
+
+  Future<void> _saveSelectedProduct(String id) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('dashboard_selected_product_id', id);
   }
 
   void _onScroll() {
@@ -143,14 +162,20 @@ class _DashboardPageState extends State<DashboardPage> {
               final activeProducts = state.products
                   .where((p) => p.status == 'active')
                   .toList();
+                  
+              // Ensure we sort by oldest first so index 0 always matches the UI visually
+              activeProducts.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+
               if (activeProducts.isNotEmpty) {
                 final isSelectedStillActive = activeProducts.any(
                   (p) => p.productId == _selectedProductId,
                 );
+                
                 if (_selectedProductId.isEmpty || !isSelectedStillActive) {
                   setState(() {
                     _selectedProductId = activeProducts.first.productId;
                   });
+                  _saveSelectedProduct(activeProducts.first.productId);
                 }
               }
             }
@@ -656,6 +681,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 _selectedProductId == product.productId,
                 onTap: () {
                   setState(() => _selectedProductId = product.productId);
+                  _saveSelectedProduct(product.productId);
                 },
               ),
             );
