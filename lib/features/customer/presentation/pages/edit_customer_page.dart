@@ -39,6 +39,7 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
   late String _selectedRegStatus;
   String _selectedPaymentMode = 'Cash';
   late String _selectedRegPaymentMode;
+  late TextEditingController _notesController;
 
   @override
   void initState() {
@@ -56,6 +57,7 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
     _selectedStatus = widget.customer.status;
     _selectedRegStatus = widget.customer.registrationFeeStatus;
     _selectedRegPaymentMode = widget.customer.registrationFeePaymentMode;
+    _notesController = TextEditingController(text: widget.customer.notes);
 
     // Auto-calculate status when numbers change
     _registrationFeeController.addListener(_updateRegStatus);
@@ -92,6 +94,7 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
     _phoneController.dispose();
     _registrationFeeController.dispose();
     _registrationFeePaidController.dispose();
+    _notesController.dispose();
     super.dispose();
   }
 
@@ -146,6 +149,7 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                 registrationFeePaidAmount: regPaid,
                 registrationFeeStatus: _selectedRegStatus,
                 registrationFeePaymentMode: _selectedRegPaymentMode,
+                notes: _notesController.text.trim(),
                 updatedAt: DateTime.now(),
               );
 
@@ -368,6 +372,16 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                       }
                       return null;
                     },
+                  ),
+                  SizedBox(height: 20.h),
+
+                  _buildLabel('Customer Notes'),
+                  TextFormField(
+                    controller: _notesController,
+                    maxLines: 3,
+                    decoration: const InputDecoration(
+                      hintText: 'Enter any additional notes about the customer',
+                    ),
                   ),
                   SizedBox(height: 20.h),
 

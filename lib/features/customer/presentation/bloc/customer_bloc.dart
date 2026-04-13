@@ -25,6 +25,7 @@ class AddCustomerWithSubscription extends CustomerEvent {
   final String productName;
   final String updatedByName;
   final String shopCategory;
+  final String? notes;
 
   const AddCustomerWithSubscription({
     required this.customer,
@@ -38,6 +39,7 @@ class AddCustomerWithSubscription extends CustomerEvent {
     required this.productName,
     required this.updatedByName,
     required this.shopCategory,
+    this.notes,
   });
 
   @override
@@ -52,6 +54,7 @@ class AddCustomerWithSubscription extends CustomerEvent {
     paymentMode,
     productName,
     updatedByName,
+    notes,
   ];
 }
 
@@ -81,6 +84,7 @@ class AddSubscription extends CustomerEvent {
   final String productName;
   final String updatedByName;
   final String shopCategory;
+  final String? notes;
 
   const AddSubscription({
     required this.shopId,
@@ -98,6 +102,7 @@ class AddSubscription extends CustomerEvent {
     required this.productName,
     required this.updatedByName,
     required this.shopCategory,
+    this.notes,
   });
 
   @override
@@ -116,6 +121,7 @@ class AddSubscription extends CustomerEvent {
     customerName,
     productName,
     updatedByName,
+    notes,
   ];
 }
 
@@ -191,6 +197,7 @@ class UpdateSubscription extends CustomerEvent {
   final String? paymentMode;
   final String? status;
   final CustomerEntity? customer; // Add optional customer entity
+  final String? notes;
 
   const UpdateSubscription({
     required this.subscriptionId,
@@ -208,6 +215,7 @@ class UpdateSubscription extends CustomerEvent {
     this.paymentMode,
     this.status,
     this.customer,
+    this.notes,
   });
 
   @override
@@ -227,6 +235,7 @@ class UpdateSubscription extends CustomerEvent {
     shopCategory,
     status,
     customer,
+    notes,
   ];
 }
 
@@ -296,6 +305,7 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
           paymentMode: event.paymentMode,
           productName: event.productName,
           isNewCustomer: true,
+          notes: event.notes,
         );
         await subResult.fold(
           (failure) async => emit(CustomerError(failure.message)),
@@ -416,6 +426,7 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
       paymentMode: event.paymentMode,
       updatedById: event.updatedById,
       status: event.status,
+      notes: event.notes,
     );
     await result.fold((failure) async => emit(CustomerError(failure.message)), (
       _,
@@ -452,6 +463,7 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
       paidAmount: event.paidAmount,
       paymentMode: event.paymentMode,
       productName: event.productName,
+      notes: event.notes,
     );
 
     await result.fold((failure) async => emit(CustomerError(failure.message)), (

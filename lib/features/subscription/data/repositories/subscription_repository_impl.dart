@@ -28,6 +28,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
     String? paymentMode,
     required String productName,
     bool isNewCustomer = false,
+    String? notes,
   }) async {
     try {
       final startDate = DateTime.now();
@@ -100,6 +101,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
         'paymentMode': paymentMode ?? 'Cash',
         'updatedById': updatedById,
         'ownerId': ownerId,
+        'notes': notes,
       };
 
       updates['subscription_logs/$shopId/$logId'] = {
@@ -450,6 +452,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
     String? paymentMode,
     required String updatedById,
     String? status,
+    String? notes,
   }) async {
     try {
       final subRef = _database
@@ -503,6 +506,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
         'status': status ?? data['status'],
         'updatedAt': ServerValue.timestamp,
         'updatedById': updatedById,
+        'notes': notes ?? data['notes'],
       };
 
       final shopId = data['shopId'] ?? '';

@@ -34,6 +34,7 @@ class EditSubscriptionPage extends StatefulWidget {
 class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
   late TextEditingController _planAmountController;
   late TextEditingController _paidAmountController;
+  late TextEditingController _notesController;
   late DateTime _selectedDate;
   final _formKey = GlobalKey<FormState>();
   final _df = DateFormat('MMM dd, yyyy');
@@ -52,12 +53,14 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
     _selectedDate = widget.subscription.endDate;
     _selectedStatus = widget.subscription.status;
     _selectedPaymentMode = widget.subscription.paymentMode;
+    _notesController = TextEditingController(text: widget.subscription.notes);
   }
 
   @override
   void dispose() {
     _planAmountController.dispose();
     _paidAmountController.dispose();
+    _notesController.dispose();
     super.dispose();
   }
 
@@ -353,6 +356,30 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
                   },
                 ),
 
+                SizedBox(height: 12.h),
+
+                Text(
+                  'Notes (Optional)',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14.sp,
+                  ),
+                ),
+                SizedBox(height: 5.h),
+                TextField(
+                  controller: _notesController,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    hintText: 'Notes about this period...',
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                      borderSide: const BorderSide(color: AppColors.border),
+                    ),
+                  ),
+                ),
+
                 SizedBox(height: 40.h),
 
                 SizedBox(
@@ -445,6 +472,9 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
                   customerName: widget.customerName,
                   shopCategory: widget.shopCategory,
                   status: _selectedStatus,
+                  notes: _notesController.text.trim().isEmpty
+                      ? null
+                      : _notesController.text.trim(),
                 ),
               );
             },

@@ -90,8 +90,15 @@ class CustomerDetailsPage extends StatelessWidget {
               return Stack(
                 children: [
                   Container(
-                    height: state.shop.settings.registrationFeeEnabled
+                    height:
+                        state.shop.settings.registrationFeeEnabled &&
+                            customer.notes.isEmpty
                         ? 325.h
+                        : state.shop.settings.registrationFeeEnabled &&
+                              customer.notes.isNotEmpty
+                        ? 420.h
+                        : customer.notes.isNotEmpty
+                        ? 370.h
                         : 280.h,
                     decoration: BoxDecoration(
                       color: AppColors.primary,
@@ -117,19 +124,22 @@ class CustomerDetailsPage extends StatelessWidget {
                                   .shop
                                   .settings
                                   .registrationFeeEnabled) ...[
-                                SizedBox(height: 10.h),
+                                SizedBox(height: 8.h),
                                 _buildRegistrationFeeCard(
                                   context,
                                   customer,
                                   uniqueSubs,
                                 ),
-                                SizedBox(height: 25.h),
+                                SizedBox(height: 13.h),
                               ],
-                              if (!state
-                                  .shop
-                                  .settings
-                                  .registrationFeeEnabled) ...[
-                                SizedBox(height: 45.h),
+                              if (!state.shop.settings.registrationFeeEnabled &&
+                                  customer.notes.isEmpty) ...[
+                                SizedBox(height: 35.h),
+                              ],
+                              if (customer.notes.isNotEmpty) ...[
+                                SizedBox(height: 8.h),
+                                _buildNotesCard(customer),
+                                SizedBox(height: 25.h),
                               ],
                               Row(
                                 mainAxisAlignment:
@@ -564,6 +574,30 @@ class CustomerDetailsPage extends StatelessWidget {
               ),
             ],
           ),
+          if (sub.notes != null && sub.notes!.isNotEmpty) ...[
+            Divider(height: 24.h, color: const Color(0xFFF0F0F0)),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.note_alt_outlined,
+                  color: AppColors.textLight,
+                  size: 14.sp,
+                ),
+                SizedBox(width: 8.w),
+                Expanded(
+                  child: Text(
+                    sub.notes!,
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: AppColors.textDark.withOpacity(0.8),
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );
@@ -1236,6 +1270,62 @@ class CustomerDetailsPage extends StatelessWidget {
           },
         );
       },
+    );
+  }
+
+  Widget _buildNotesCard(CustomerEntity customer) {
+    return Container(
+      padding: EdgeInsets.only(
+        top: 10.r,
+        left: 16.r,
+        right: 16.r,
+        bottom: 10.r,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10.r,
+            offset: Offset(0, 4.h),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.note_alt_outlined,
+                color: AppColors.primary,
+                size: 16.sp,
+              ),
+              SizedBox(width: 8.w),
+              Text(
+                'Customer Notes',
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textDark,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 5.h),
+          Text(
+            customer.notes,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 3,
+            style: TextStyle(
+              fontSize: 13.sp,
+              color: AppColors.textDark.withOpacity(0.8),
+              height: 1.4,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

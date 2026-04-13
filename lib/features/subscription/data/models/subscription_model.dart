@@ -22,6 +22,7 @@ class SubscriptionModel extends SubscriptionEntity {
     super.registrationFeePaid = 0.0,
     required super.updatedById,
     required super.ownerId,
+    super.notes,
   });
 
   factory SubscriptionModel.fromJson(Map<dynamic, dynamic> json, String id) {
@@ -56,6 +57,7 @@ class SubscriptionModel extends SubscriptionEntity {
           (json['registrationFeePaid'] as num? ?? 0.0).toDouble(),
       updatedById: json['updatedById'] ?? '',
       ownerId: json['ownerId'] ?? '',
+      notes: json['notes'],
     );
   }
 
@@ -97,6 +99,7 @@ class SubscriptionModel extends SubscriptionEntity {
       'registrationFeePaid': registrationFeePaid,
       'updatedById': updatedById,
       'ownerId': ownerId,
+      'notes': notes,
     };
   }
 }

@@ -18,6 +18,7 @@ class CustomerEntity extends Equatable {
   final double registrationFeePaidAmount;
   final String registrationFeeStatus;
   final String registrationFeePaymentMode;
+  final String notes;
 
   const CustomerEntity({
     required this.customerId,
@@ -36,6 +37,7 @@ class CustomerEntity extends Equatable {
     this.registrationFeePaidAmount = 0.0,
     this.registrationFeeStatus = 'unpaid',
     this.registrationFeePaymentMode = 'Cash',
+    this.notes = '',
   });
 
   CustomerEntity copyWith({
@@ -55,6 +57,7 @@ class CustomerEntity extends Equatable {
     double? registrationFeePaidAmount,
     String? registrationFeeStatus,
     String? registrationFeePaymentMode,
+    String? notes,
   }) {
     return CustomerEntity(
       customerId: customerId ?? this.customerId,
@@ -73,6 +76,7 @@ class CustomerEntity extends Equatable {
       registrationFeePaidAmount: registrationFeePaidAmount ?? this.registrationFeePaidAmount,
       registrationFeeStatus: registrationFeeStatus ?? this.registrationFeeStatus,
       registrationFeePaymentMode: registrationFeePaymentMode ?? this.registrationFeePaymentMode,
+      notes: notes ?? this.notes,
     );
   }
 
@@ -94,5 +98,6 @@ class CustomerEntity extends Equatable {
     registrationFeePaidAmount,
     registrationFeeStatus,
     registrationFeePaymentMode,
+    notes,
   ];
 }

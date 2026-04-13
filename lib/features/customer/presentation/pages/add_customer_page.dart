@@ -33,6 +33,8 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
   final _registrationFeeController = TextEditingController();
   final _validityController = TextEditingController();
   final _paidAmountController = TextEditingController();
+  final _notesController = TextEditingController();
+  final _subNotesController = TextEditingController();
   late String _customValidityUnit;
   String _selectedRegPaymentMode = 'Cash';
 
@@ -69,6 +71,8 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
     _registrationFeeController.dispose();
     _validityController.dispose();
     _paidAmountController.dispose();
+    _notesController.dispose();
+    _subNotesController.dispose();
     super.dispose();
   }
 
@@ -216,6 +220,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                         registrationFeePaidAmount: 0.0,
                         registrationFeeStatus: 'unpaid',
                         registrationFeePaymentMode: _selectedRegPaymentMode,
+                        notes: _notesController.text.trim(),
                       ),
                       productId: _selectedProduct!.productId,
                       validityValue:
@@ -235,6 +240,7 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                       productName: _selectedProduct!.name,
                       updatedByName: authState.name,
                       shopCategory: widget.shopCategory,
+                      notes: _subNotesController.text.trim().isEmpty ? null : _subNotesController.text.trim(),
                     ),
                   );
 
@@ -248,6 +254,8 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                   if (_selectedProduct?.validityType == 'flexible') {
                     _validityController.clear();
                   }
+                  _notesController.clear();
+                  _subNotesController.clear();
                 }
               },
               style: ElevatedButton.styleFrom(
@@ -467,8 +475,8 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                       ),
                       onChanged: (_) {
                         setState(() {
-                          _paidAmountController.text =
-                              _computedAmount.toStringAsFixed(0);
+                          _paidAmountController.text = _computedAmount
+                              .toStringAsFixed(0);
                         });
                       },
                       validator: (v) {
@@ -607,8 +615,8 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                               ),
                               onChanged: (_) {
                                 setState(() {
-                                  _paidAmountController.text =
-                                      _computedAmount.toStringAsFixed(0);
+                                  _paidAmountController.text = _computedAmount
+                                      .toStringAsFixed(0);
                                 });
                               },
                               validator: (v) {
@@ -794,6 +802,36 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
                             ],
                           ),
                         ],
+                        SizedBox(height: 16.h),
+                        _buildLabel('Customer Notes'),
+                        TextFormField(
+                          controller: _notesController,
+                          maxLines: 2,
+                          decoration: InputDecoration(
+                            hintText: 'Add summary or notes here...',
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12.w,
+                              vertical: 10.h,
+                            ),
+                            fillColor: Colors.white,
+                            filled: true,
+                          ),
+                        ),
+                        SizedBox(height: 16.h),
+                        _buildLabel('Initial Plan Notes'),
+                        TextFormField(
+                          controller: _subNotesController,
+                          maxLines: 2,
+                          decoration: InputDecoration(
+                            hintText: 'Notes for this specific plan...',
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12.w,
+                              vertical: 10.h,
+                            ),
+                            fillColor: Colors.white,
+                            filled: true,
+                          ),
+                        ),
                       ],
                     ),
                   ),

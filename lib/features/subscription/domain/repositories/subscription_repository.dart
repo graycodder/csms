@@ -18,6 +18,7 @@ abstract class SubscriptionRepository {
     String? paymentMode,
     required String productName,
     bool isNewCustomer = false,
+    String? notes,
   });
 
   Future<Either<Failure, void>> renewSubscription({
@@ -41,6 +42,7 @@ abstract class SubscriptionRepository {
     String? paymentMode,
     required String updatedById,
     String? status,
+    String? notes,
   });
 
   Stream<Either<Failure, List<SubscriptionEntity>>> getSubscriptions(

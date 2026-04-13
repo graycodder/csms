@@ -77,7 +77,10 @@ class _AddProductPageState extends State<AddProductPage> {
           } else if (state is ProductError) {
             LoadingOverlayHelper.hide();
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
             );
           }
         },
@@ -92,12 +95,16 @@ class _AddProductPageState extends State<AddProductPage> {
                   _buildLabel('Product Name *'),
                   TextFormField(
                     controller: _nameController,
+                    textCapitalization: TextCapitalization.words,
                     maxLength: 20,
                     inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9\s]')),
+                      FilteringTextInputFormatter.allow(
+                        RegExp(r'[a-zA-Z0-9\s]'),
+                      ),
                     ],
                     validator: (v) {
-                      if (v == null || v.trim().isEmpty) return 'Product name is required';
+                      if (v == null || v.trim().isEmpty)
+                        return 'Product name is required';
                       if (v.trim().length > 20) return 'Max 20 characters';
                       return null;
                     },
@@ -107,7 +114,7 @@ class _AddProductPageState extends State<AddProductPage> {
                     ),
                   ),
                   SizedBox(height: 24.h),
-                  
+
                   _buildLabel('Price Type'),
                   Row(
                     children: [
@@ -117,7 +124,7 @@ class _AddProductPageState extends State<AddProductPage> {
                     ],
                   ),
                   SizedBox(height: 24.h),
-                  
+
                   if (_priceType == 'fixed') ...[
                     _buildLabel('Price *'),
                     TextFormField(
@@ -129,7 +136,8 @@ class _AddProductPageState extends State<AddProductPage> {
                       ],
                       validator: (v) {
                         if (_priceType == 'fixed') {
-                          if (v == null || v.trim().isEmpty) return 'Price is required';
+                          if (v == null || v.trim().isEmpty)
+                            return 'Price is required';
                           final price = int.tryParse(v.trim()) ?? 0;
                           if (price <= 0) return 'Price must be > 0';
                           if (price > 100000) return 'Max price is 100,000';
@@ -142,7 +150,7 @@ class _AddProductPageState extends State<AddProductPage> {
                     ),
                     SizedBox(height: 24.h),
                   ],
-                  
+
                   _buildLabel('Validity Type'),
                   Row(
                     children: [
@@ -152,7 +160,7 @@ class _AddProductPageState extends State<AddProductPage> {
                     ],
                   ),
                   SizedBox(height: 24.h),
-                  
+
                   if (_validityType == 'fixed') ...[
                     _buildLabel('Validity Value *'),
                     Row(
@@ -167,7 +175,8 @@ class _AddProductPageState extends State<AddProductPage> {
                               FilteringTextInputFormatter.deny(RegExp(r'^0')),
                             ],
                             validator: (v) {
-                              if (v == null || v.trim().isEmpty) return 'Required';
+                              if (v == null || v.trim().isEmpty)
+                                return 'Required';
                               final val = int.tryParse(v.trim()) ?? 0;
                               if (val <= 0) return 'Must be > 0';
                               if (val > 5000) return 'Max 5000';
@@ -196,7 +205,8 @@ class _AddProductPageState extends State<AddProductPage> {
                                   return DropdownMenuItem<String>(
                                     value: value,
                                     child: Text(
-                                      value[0].toUpperCase() + value.substring(1),
+                                      value[0].toUpperCase() +
+                                          value.substring(1),
                                       style: TextStyle(fontSize: 14.sp),
                                     ),
                                   );
@@ -214,7 +224,7 @@ class _AddProductPageState extends State<AddProductPage> {
                     ),
                     SizedBox(height: 40.h),
                   ],
-                  
+
                   SizedBox(
                     width: double.infinity,
                     height: 56.h,
@@ -222,11 +232,17 @@ class _AddProductPageState extends State<AddProductPage> {
                       onPressed: _submitForm,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16.r),
+                        ),
                       ),
                       child: Text(
                         'Add Product',
-                        style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: Colors.white),
+                        style: TextStyle(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
@@ -250,29 +266,40 @@ class _AddProductPageState extends State<AddProductPage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
-        title: Text('Confirm New Product', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp)),
-        content: Text('Are you sure you want to add this new product?', style: TextStyle(fontSize: 14.sp)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        title: Text(
+          'Confirm New Product',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp),
+        ),
+        content: Text(
+          'Are you sure you want to add this new product?',
+          style: TextStyle(fontSize: 14.sp),
+        ),
         actions: [
           TextButton(
             onPressed: () {
               FocusManager.instance.primaryFocus?.unfocus();
               Navigator.pop(ctx);
             },
-            child: Text('Cancel', style: TextStyle(color: AppColors.textLight, fontSize: 14.sp)),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: AppColors.textLight, fontSize: 14.sp),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
               FocusManager.instance.primaryFocus?.unfocus();
               Navigator.pop(ctx);
               final name = _nameController.text.trim();
-              final price = _priceType == 'fixed' 
+              final price = _priceType == 'fixed'
                   ? (int.tryParse(_priceController.text.trim()) ?? 0)
                   : 0;
               final valdVal = _validityType == 'fixed'
                   ? (int.tryParse(_validityController.text.trim()) ?? 30)
                   : 0;
-              
+
               final newProduct = ProductEntity(
                 productId: '',
                 shopId: widget.shopId,
@@ -280,7 +307,9 @@ class _AddProductPageState extends State<AddProductPage> {
                 price: price.toDouble(),
                 validityValue: valdVal,
                 validityUnit: _validityUnit,
-                validityDays: _validityUnit == 'months' ? valdVal * 30 : valdVal,
+                validityDays: _validityUnit == 'months'
+                    ? valdVal * 30
+                    : valdVal,
                 createdAt: DateTime.now(),
                 updatedAt: DateTime.now(),
                 updatedById: widget.ownerId,
@@ -288,19 +317,23 @@ class _AddProductPageState extends State<AddProductPage> {
                 priceType: _priceType,
                 validityType: _validityType,
               );
-              
-              context.read<ProductBloc>().add(AddProduct(
-                ownerId: widget.ownerId,
-                product: newProduct,
-              ));
-              
+
+              context.read<ProductBloc>().add(
+                AddProduct(ownerId: widget.ownerId, product: newProduct),
+              );
+
               // Navigator.pop(context); // REMOVED: Wait for Bloc state to pop
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.r),
+              ),
             ),
-            child: Text('Confirm', style: TextStyle(color: Colors.white, fontSize: 14.sp)),
+            child: Text(
+              'Confirm',
+              style: TextStyle(color: Colors.white, fontSize: 14.sp),
+            ),
           ),
         ],
       ),

@@ -19,6 +19,7 @@ class SubscriptionEntity extends Equatable {
   final double balanceAmount;
   final String paymentStatus;
   final String paymentMode;
+  final String? notes;
   final String updatedById;
   final String ownerId;
 
@@ -42,6 +43,7 @@ class SubscriptionEntity extends Equatable {
     this.paymentMode = 'Cash',
     required this.updatedById,
     required this.ownerId,
+    this.notes,
   });
 
   @override
@@ -65,5 +67,6 @@ class SubscriptionEntity extends Equatable {
     paymentMode,
     updatedById,
     ownerId,
+    notes,
   ];
 }
