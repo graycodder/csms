@@ -452,9 +452,10 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
                   widget.subscription.paidAmount;
 
               final authState = context.read<AuthBloc>().state;
-              final name = authState is AuthAuthenticated
+              final updatedByName = authState is AuthAuthenticated &&
+                      authState.name.isNotEmpty
                   ? authState.name
-                  : 'Staff';
+                  : 'Admin';
 
               context.read<CustomerBloc>().add(
                 UpdateSubscription(
@@ -468,7 +469,7 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
                       : widget.subscription.updatedById,
                   ownerId: widget.subscription.ownerId,
                   shopId: widget.subscription.shopId,
-                  updatedByName: name,
+                  updatedByName: updatedByName,
                   customerName: widget.customerName,
                   shopCategory: widget.shopCategory,
                   status: _selectedStatus,

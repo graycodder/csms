@@ -190,9 +190,10 @@ class CustomerDetailsPage extends StatelessWidget {
                                                     : '',
                                                 updatedByName:
                                                     authState
-                                                        is AuthAuthenticated
+                                                            is AuthAuthenticated &&
+                                                        authState.name.isNotEmpty
                                                     ? authState.name
-                                                    : 'Staff',
+                                                    : 'Admin',
                                                 products: state.products,
                                                 shopCategory:
                                                     state.shop.category,
@@ -889,9 +890,11 @@ class CustomerDetailsPage extends StatelessWidget {
                           .read<ShopContextBloc>()
                           .state;
                       final authState = pageContext.read<AuthBloc>().state;
-                      final updatedByName = authState is AuthAuthenticated
-                          ? authState.name
-                          : 'Staff';
+                      final updatedByName =
+                          authState is AuthAuthenticated &&
+                                  authState.name.isNotEmpty
+                              ? authState.name
+                              : 'Admin';
                       final updatedById = authState is AuthAuthenticated
                           ? authState.userId
                           : sub.updatedById;
@@ -1198,9 +1201,10 @@ class CustomerDetailsPage extends StatelessWidget {
                           .read<ShopContextBloc>()
                           .state;
                       final authState = pageContext.read<AuthBloc>().state;
-                      final updatedByName = authState is AuthAuthenticated
+                      final updatedByName = authState is AuthAuthenticated &&
+                              authState.name.isNotEmpty
                           ? authState.name
-                          : 'Staff';
+                          : 'Admin';
                       final shopCategory = shopState is ShopSelected
                           ? shopState.selectedShop.category
                           : 'Other';
@@ -1217,6 +1221,14 @@ class CustomerDetailsPage extends StatelessWidget {
                                   : 'partial',
                               registrationFeePaymentMode: selectedPaymentMode,
                             ),
+                            updatedByName: updatedByName,
+                            updatedById: authState is AuthAuthenticated
+                                ? authState.userId
+                                : customer.updatedById,
+                            ownerId: customer.ownerId,
+                            shopId: customer.shopId,
+                            customerName: customer.name,
+                            shopCategory: shopCategory,
                           ),
                         );
                       } else {

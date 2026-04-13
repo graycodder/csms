@@ -61,11 +61,35 @@ class AddCustomerWithSubscription extends CustomerEvent {
 class UpdateCustomerInfo extends CustomerEvent {
   final CustomerEntity customer;
   final String? paymentMode;
+  final String updatedByName;
+  final String updatedById;
+  final String ownerId;
+  final String shopId;
+  final String customerName;
+  final String shopCategory;
 
-  const UpdateCustomerInfo({required this.customer, this.paymentMode});
+  const UpdateCustomerInfo({
+    required this.customer,
+    this.paymentMode,
+    required this.updatedByName,
+    required this.updatedById,
+    required this.ownerId,
+    required this.shopId,
+    required this.customerName,
+    required this.shopCategory,
+  });
 
   @override
-  List<Object?> get props => [customer, paymentMode];
+  List<Object?> get props => [
+    customer,
+    paymentMode,
+    updatedByName,
+    updatedById,
+    ownerId,
+    shopId,
+    customerName,
+    shopCategory,
+  ];
 }
 
 class AddSubscription extends CustomerEvent {

@@ -60,14 +60,30 @@ void main() {
     });
 
     blocTest<CustomerBloc, CustomerState>(
-      'emits [CustomerLoading, CustomerSuccess] when UpdateCustomerInfo is successful',
+      'emits [CustomerLoading, CustomerSuccess] when UpdateCustomerInfo is successful and triggers notification',
       build: () {
         when(() => mockCustomerRepository.updateCustomer(any(),
                 paymentMode: any(named: 'paymentMode')))
             .thenAnswer((_) async => const Right(null));
+        when(() => mockNotificationRepository.pushNotification(
+          ownerId: any(named: 'ownerId'),
+          shopId: any(named: 'shopId'),
+          title: any(named: 'title'),
+          body: any(named: 'body'),
+          type: any(named: 'type'),
+          updatedById: any(named: 'updatedById'),
+        )).thenAnswer((_) async => const Right(null));
         return customerBloc;
       },
-      act: (bloc) => bloc.add(UpdateCustomerInfo(customer: tCustomer)),
+      act: (bloc) => bloc.add(UpdateCustomerInfo(
+        customer: tCustomer,
+        updatedByName: 'Staff',
+        updatedById: 'admin1',
+        ownerId: 'owner1',
+        shopId: 'shop1',
+        customerName: 'John Doe',
+        shopCategory: 'Health and Fitness',
+      )),
       expect: () => [
         isA<CustomerLoading>(),
         isA<CustomerSuccess>(),
@@ -75,6 +91,14 @@ void main() {
       verify: (_) {
         verify(() => mockCustomerRepository.updateCustomer(tCustomer,
             paymentMode: any(named: 'paymentMode'))).called(1);
+        verify(() => mockNotificationRepository.pushNotification(
+          ownerId: 'owner1',
+          shopId: 'shop1',
+          title: 'Member Updated',
+          body: "John Doe's details have been updated by Staff",
+          type: 'edit',
+          updatedById: 'admin1',
+        )).called(1);
       },
     );
 
@@ -86,7 +110,15 @@ void main() {
             .thenAnswer((_) async => const Left(ServerFailure('Update Failed')));
         return customerBloc;
       },
-      act: (bloc) => bloc.add(UpdateCustomerInfo(customer: tCustomer)),
+      act: (bloc) => bloc.add(UpdateCustomerInfo(
+        customer: tCustomer,
+        updatedByName: 'Staff',
+        updatedById: 'admin1',
+        ownerId: 'owner1',
+        shopId: 'shop1',
+        customerName: 'John Doe',
+        shopCategory: 'Health and Fitness',
+      )),
       expect: () => [
         isA<CustomerLoading>(),
         isA<CustomerError>(),

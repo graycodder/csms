@@ -10,6 +10,8 @@ import 'package:csms/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:csms/features/subscription/domain/entities/subscription_entity.dart';
 import 'package:csms/core/utils/loading_overlay.dart';
 import 'package:csms/core/utils/terminology_helper.dart';
+import 'package:csms/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:csms/features/auth/presentation/bloc/auth_state.dart';
 
 class EditCustomerPage extends StatefulWidget {
   final CustomerEntity customer;
@@ -167,7 +169,8 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
               if (subs.isNotEmpty) {
                 // If there's an active subscription, use UpdateSubscription to sync everything
                 final sub = subs.first;
-                context.read<CustomerBloc>().add(
+                    final authState = context.read<AuthBloc>().state;
+                    context.read<CustomerBloc>().add(
                   UpdateSubscription(
                     subscriptionId: sub.subscriptionId,
                     endDate: sub.endDate,
@@ -176,10 +179,15 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                     registrationFeePaid: regPaid,
                     paidAmount: sub.paidAmount,
                     paymentMode: sub.paymentMode,
-                    updatedById: widget.customer.updatedById,
+                    updatedById: authState is AuthAuthenticated
+                        ? authState.userId
+                        : widget.customer.updatedById,
                     ownerId: widget.customer.ownerId,
                     shopId: widget.customer.shopId,
-                    updatedByName: 'Staff',
+                    updatedByName: authState is AuthAuthenticated &&
+                            authState.name.isNotEmpty
+                        ? authState.name
+                        : 'Admin',
                     customerName: updated.name,
                     shopCategory: widget.shopCategory,
                     status: sub.status,
@@ -189,10 +197,23 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                 );
               } else {
                 // Standard update
+                final authState = context.read<AuthBloc>().state;
+                final updatedByName = authState is AuthAuthenticated &&
+                        authState.name.isNotEmpty
+                    ? authState.name
+                    : 'Admin';
                 context.read<CustomerBloc>().add(
                   UpdateCustomerInfo(
                     customer: updated,
                     paymentMode: _selectedPaymentMode,
+                    updatedByName: updatedByName,
+                    updatedById: authState is AuthAuthenticated
+                        ? authState.userId
+                        : widget.customer.updatedById,
+                    ownerId: widget.customer.ownerId,
+                    shopId: widget.customer.shopId,
+                    customerName: updated.name,
+                    shopCategory: widget.shopCategory,
                   ),
                 );
               }
