@@ -30,6 +30,7 @@ abstract class SubscriptionRepository {
     double? price,
     double? paidAmount,
     String? paymentMode,
+    String? notes,
   });
 
   Future<Either<Failure, void>> updateSubscription({

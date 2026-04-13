@@ -52,6 +52,7 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
   late TextEditingController _priceController;
   late TextEditingController _validityController;
   final _paidAmountController = TextEditingController();
+  final _notesController = TextEditingController();
   String _selectedPaymentMode = 'Cash';
 
   @override
@@ -80,6 +81,7 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
     _priceController.dispose();
     _validityController.dispose();
     _paidAmountController.dispose();
+    _notesController.dispose();
     super.dispose();
   }
 
@@ -277,6 +279,7 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
             updatedByName: authState.name,
             customerName: widget.customerName,
             shopCategory: widget.shopCategory,
+            notes: _notesController.text.trim(),
           ),
         );
       }
@@ -696,6 +699,23 @@ class _RenewSubscriptionPageState extends State<RenewSubscriptionPage> {
                     }
                     return const SizedBox.shrink();
                   },
+                ),
+
+                SizedBox(height: 24.h),
+                Text(
+                  'Notes (Optional)',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15.sp,
+                  ),
+                ),
+                SizedBox(height: 12.h),
+                TextField(
+                  controller: _notesController,
+                  maxLines: 2,
+                  decoration: const InputDecoration(
+                    hintText: 'Add notes for this renewal...',
+                  ),
                 ),
 
                 // New end date preview

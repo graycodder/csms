@@ -472,9 +472,7 @@ class _EditSubscriptionPageState extends State<EditSubscriptionPage> {
                   customerName: widget.customerName,
                   shopCategory: widget.shopCategory,
                   status: _selectedStatus,
-                  notes: _notesController.text.trim().isEmpty
-                      ? null
-                      : _notesController.text.trim(),
+                  notes: _notesController.text.trim(),
                 ),
               );
             },

@@ -182,6 +182,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
     double? price,
     double? paidAmount,
     String? paymentMode,
+    String? notes,
   }) async {
     try {
       // 1. Get current subscription to find current endDate and other details
@@ -248,6 +249,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
         'updatedAt': ServerValue.timestamp,
         'updatedById': updatedById,
         'ownerId': ownerId,
+        'notes': notes,
       };
 
       updates['subscription_logs/$shopId/$logId'] = {

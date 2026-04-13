@@ -146,6 +146,7 @@ class RenewCustomerSubscription extends CustomerEvent {
   final String updatedByName;
   final String customerName;
   final String shopCategory;
+  final String? notes;
 
   const RenewCustomerSubscription({
     required this.subscriptionId,
@@ -161,6 +162,7 @@ class RenewCustomerSubscription extends CustomerEvent {
     this.price,
     this.paidAmount,
     this.paymentMode,
+    this.notes,
   });
 
   @override
@@ -178,6 +180,7 @@ class RenewCustomerSubscription extends CustomerEvent {
     updatedByName,
     customerName,
     shopCategory,
+    notes,
   ];
 }
 
@@ -373,6 +376,7 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
       paidAmount: event.paidAmount,
       paymentMode: event.paymentMode,
       productName: event.productName,
+      notes: event.notes,
     );
     await result.fold((failure) async => emit(CustomerError(failure.message)), (
       _,
