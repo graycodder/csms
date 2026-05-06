@@ -12,6 +12,7 @@ import 'package:csms/core/utils/loading_overlay.dart';
 import 'package:csms/core/utils/terminology_helper.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_state.dart';
+import 'package:csms/core/widgets/web_sidebar.dart';
 
 class EditCustomerPageWeb extends StatefulWidget {
   final CustomerEntity customer;
@@ -235,312 +236,385 @@ class _EditCustomerPageWebState extends State<EditCustomerPageWeb> {
 
   @override
   Widget build(BuildContext context) {
+    final term = TerminologyHelper.getTerminology(widget.shopCategory);
+
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leadingWidth: 48,
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
-        ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Edit ${TerminologyHelper.getTerminology(widget.shopCategory).customerLabel}',
-              style: TextStyle(
-                color: AppColors.textDark,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-            Text(
-              'Update ${TerminologyHelper.getTerminology(widget.shopCategory).customerLabel.toLowerCase()} details',
-              style: TextStyle(
-                color: AppColors.textLight.withOpacity(0.8),
-                fontSize: 13,
-                fontWeight: FontWeight.normal,
-              ),
-            ),
-          ],
-        ),
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(1.0),
-          child: Container(color: AppColors.border, height: 1.0),
-        ),
-      ),
-      body: BlocConsumer<CustomerBloc, CustomerState>(
-        listener: (context, state) {
-          if (state is CustomerLoading) {
-            LoadingOverlayHelper.show(context);
-          } else if (state is CustomerSuccess) {
-            LoadingOverlayHelper.hide();
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  '${TerminologyHelper.getTerminology(widget.shopCategory).customerLabel} updated successfully!',
-                ),
-                backgroundColor: Colors.green,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-            Navigator.pop(context);
-          } else if (state is CustomerError) {
-            LoadingOverlayHelper.hide();
-            if (state.message.contains('already used')) {
-              showDialog(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  title: Text(
-                    'Number Already Used',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  content: Text(state.message, style: TextStyle(fontSize: 14)),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(ctx),
-                      child: Text(
-                        'OK',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
+      backgroundColor: const Color(0xFFF0F2F5),
+      body: Row(
+        children: [
+          const WebSidebar(selectedIndex: 2),
+          Expanded(
+            child: BlocConsumer<CustomerBloc, CustomerState>(
+              listener: (context, state) {
+                if (state is CustomerLoading) {
+                  LoadingOverlayHelper.show(context);
+                } else if (state is CustomerSuccess) {
+                  LoadingOverlayHelper.hide();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        '${term.customerLabel} updated successfully!',
+                      ),
+                      backgroundColor: Colors.green,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                  Navigator.pop(context);
+                } else if (state is CustomerError) {
+                  LoadingOverlayHelper.hide();
+                  if (state.message.contains('already used')) {
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        title: const Text(
+                          'Number Already Used',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        content: Text(
+                          state.message,
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx),
+                            child: const Text(
+                              'OK',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(state.message),
+                        backgroundColor: Colors.red,
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                }
+              },
+              builder: (context, state) {
+                return Column(
+                  children: [
+                    _buildHeader(term),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 32,
+                          horizontal: 40,
+                        ),
+                        child: Center(
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(maxWidth: 800.w),
+                            child: Form(
+                              key: _formKey,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildLabel('${term.customerLabel} Name *'),
+                                  TextFormField(
+                                    controller: _nameController,
+                                    textCapitalization:
+                                        TextCapitalization.words,
+                                    maxLength: 20,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(
+                                        RegExp(r'[a-zA-Z0-9\s]'),
+                                      ),
+                                    ],
+                                    decoration: InputDecoration(
+                                      hintText:
+                                          'Enter ${term.customerLabel.toLowerCase()} name',
+                                      prefixIcon: const Icon(
+                                        Icons.person_outline,
+                                      ),
+                                      counterText: '',
+                                    ),
+                                    validator: (v) {
+                                      if (v == null || v.trim().isEmpty) {
+                                        return 'Name is required';
+                                      }
+                                      if (v.length > 20)
+                                        return 'Maximum 20 characters';
+                                      if (RegExp(
+                                        r'[!@#<>?":_`~;[\]\\|=+)(*&^%/-]',
+                                      ).hasMatch(v)) {
+                                        return 'Special characters not allowed';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                  const SizedBox(height: 20),
+
+                                  _buildLabel('Phone Number *'),
+                                  TextFormField(
+                                    controller: _phoneController,
+                                    keyboardType: TextInputType.number,
+                                    maxLength: 10,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly,
+                                    ],
+                                    decoration: const InputDecoration(
+                                      hintText: 'Enter 10-digit phone number',
+                                      prefixIcon: Icon(Icons.phone_outlined),
+                                      counterText: '',
+                                    ),
+                                    validator: (v) {
+                                      if (v == null || v.isEmpty) {
+                                        return 'Phone is required';
+                                      }
+                                      if (v.length != 10) {
+                                        return 'Must be exactly 10 digits';
+                                      }
+                                      if (!RegExp(r'^[0-9]+$').hasMatch(v)) {
+                                        return 'Numbers only';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                  const SizedBox(height: 20),
+
+                                  _buildLabel('Customer Notes'),
+                                  TextFormField(
+                                    controller: _notesController,
+                                    maxLines: 3,
+                                    decoration: const InputDecoration(
+                                      hintText:
+                                          'Enter any additional notes about the customer',
+                                    ),
+                                  ),
+                                  const SizedBox(height: 20),
+
+                                  // Customer Status
+                                  _buildLabel('Account Status'),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: _statusButton(
+                                          label: 'Active',
+                                          isActive:
+                                              _selectedStatus.toLowerCase() ==
+                                              'active',
+                                          onPressed: () => setState(
+                                            () => _selectedStatus = 'active',
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: _statusButton(
+                                          label: 'Inactive',
+                                          isActive:
+                                              _selectedStatus.toLowerCase() ==
+                                              'inactive',
+                                          onPressed: () => setState(
+                                            () => _selectedStatus = 'inactive',
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 20),
+
+                                  // Registration Fee
+                                  if (widget.registrationFeeEnabled) ...[
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              _buildLabel('Total Reg Fee'),
+                                              TextFormField(
+                                                controller:
+                                                    _registrationFeeController,
+                                                keyboardType:
+                                                    const TextInputType.numberWithOptions(
+                                                      decimal: true,
+                                                    ),
+                                                inputFormatters: [
+                                                  FilteringTextInputFormatter.allow(
+                                                    RegExp(r'^\d*\.?\d*'),
+                                                  ),
+                                                ],
+                                                decoration:
+                                                    const InputDecoration(
+                                                      hintText: 'Total',
+                                                      prefixIcon: Icon(
+                                                        Icons.currency_rupee,
+                                                      ),
+                                                    ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              _buildLabel('Amount Paid'),
+                                              TextFormField(
+                                                controller:
+                                                    _registrationFeePaidController,
+                                                keyboardType:
+                                                    const TextInputType.numberWithOptions(
+                                                      decimal: true,
+                                                    ),
+                                                inputFormatters: [
+                                                  FilteringTextInputFormatter.allow(
+                                                    RegExp(r'^\d*\.?\d*'),
+                                                  ),
+                                                ],
+                                                decoration:
+                                                    const InputDecoration(
+                                                      hintText: 'Paid',
+                                                      prefixIcon: Icon(
+                                                        Icons.currency_rupee,
+                                                      ),
+                                                    ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 20),
+                                    _buildLabel('Payment Mode'),
+                                    DropdownButtonFormField<String>(
+                                      value: _selectedRegPaymentMode,
+                                      decoration: const InputDecoration(
+                                        prefixIcon: Icon(
+                                          Icons.payment_outlined,
+                                        ),
+                                      ),
+                                      items:
+                                          [
+                                            'Cash',
+                                            'UPI',
+                                            'Card',
+                                            'Bank Transfer',
+                                          ].map((m) {
+                                            return DropdownMenuItem(
+                                              value: m,
+                                              child: Text(m),
+                                            );
+                                          }).toList(),
+                                      onChanged: (v) {
+                                        if (v != null) {
+                                          setState(
+                                            () => _selectedRegPaymentMode = v,
+                                          );
+                                        }
+                                      },
+                                    ),
+                                    const SizedBox(height: 32),
+                                  ],
+                                  SizedBox(
+                                    width: double.infinity,
+                                    height: 52,
+                                    child: ElevatedButton(
+                                      onPressed: _submit,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppColors.primary,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                      ),
+                                      child: const Text(
+                                        'Save Changes',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 20),
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ],
-                ),
-              );
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('${state.message}'),
-                  backgroundColor: Colors.red,
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
-            }
-          }
-        },
-        builder: (context, state) {
-          return Center(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 800.w),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 24,
-                ),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildLabel(
-                        '${TerminologyHelper.getTerminology(widget.shopCategory).customerLabel} Name *',
-                      ),
-                      TextFormField(
-                        controller: _nameController,
-                        textCapitalization: TextCapitalization.words,
-                        maxLength: 20,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(
-                            RegExp(r'[a-zA-Z0-9\s]'),
-                          ),
-                        ],
-                        decoration: InputDecoration(
-                          hintText:
-                              'Enter ${TerminologyHelper.getTerminology(widget.shopCategory).customerLabel.toLowerCase()} name',
-                          prefixIcon: const Icon(Icons.person_outline),
-                          counterText: '',
-                        ),
-                        validator: (v) {
-                          if (v == null || v.trim().isEmpty) {
-                            return 'Name is required';
-                          }
-                          if (v.length > 20) return 'Maximum 20 characters';
-                          if (RegExp(
-                            r'[!@#<>?":_`~;[\]\\|=+)(*&^%/-]',
-                          ).hasMatch(v)) {
-                            return 'Special characters not allowed';
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 20),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-                      _buildLabel('Phone Number *'),
-                      TextFormField(
-                        controller: _phoneController,
-                        keyboardType: TextInputType.number,
-                        maxLength: 10,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
-                        decoration: const InputDecoration(
-                          hintText: 'Enter 10-digit phone number',
-                          prefixIcon: Icon(Icons.phone_outlined),
-                          counterText: '',
-                        ),
-                        validator: (v) {
-                          if (v == null || v.isEmpty)
-                            return 'Phone is required';
-                          if (v.length != 10)
-                            return 'Must be exactly 10 digits';
-                          if (!RegExp(r'^[0-9]+$').hasMatch(v)) {
-                            return 'Numbers only';
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 20),
-
-                      _buildLabel('Customer Notes'),
-                      TextFormField(
-                        controller: _notesController,
-                        maxLines: 3,
-                        decoration: const InputDecoration(
-                          hintText:
-                              'Enter any additional notes about the customer',
-                        ),
-                      ),
-                      SizedBox(height: 20),
-
-                      // Customer Status
-                      _buildLabel('Account Status'),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _statusButton(
-                              label: 'Active',
-                              isActive:
-                                  _selectedStatus.toLowerCase() == 'active',
-                              onPressed: () =>
-                                  setState(() => _selectedStatus = 'active'),
-                            ),
-                          ),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: _statusButton(
-                              label: 'Inactive',
-                              isActive:
-                                  _selectedStatus.toLowerCase() == 'inactive',
-                              onPressed: () =>
-                                  setState(() => _selectedStatus = 'inactive'),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 20),
-
-                      // Registration Fee
-                      if (widget.registrationFeeEnabled) ...[
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _buildLabel('Total Reg Fee'),
-                                  TextFormField(
-                                    controller: _registrationFeeController,
-                                    keyboardType:
-                                        const TextInputType.numberWithOptions(
-                                          decimal: true,
-                                        ),
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.allow(
-                                        RegExp(r'^\d*\.?\d*'),
-                                      ),
-                                    ],
-                                    decoration: const InputDecoration(
-                                      hintText: 'Total',
-                                      prefixIcon: Icon(Icons.currency_rupee),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _buildLabel('Amount Paid'),
-                                  TextFormField(
-                                    controller: _registrationFeePaidController,
-                                    keyboardType:
-                                        const TextInputType.numberWithOptions(
-                                          decimal: true,
-                                        ),
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.allow(
-                                        RegExp(r'^\d*\.?\d*'),
-                                      ),
-                                    ],
-                                    decoration: const InputDecoration(
-                                      hintText: 'Paid',
-                                      prefixIcon: Icon(Icons.currency_rupee),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 20),
-                        _buildLabel('Payment Mode'),
-                        DropdownButtonFormField<String>(
-                          value: _selectedRegPaymentMode,
-                          decoration: const InputDecoration(
-                            prefixIcon: Icon(Icons.payment_outlined),
-                          ),
-                          items: ['Cash', 'UPI', 'Card', 'Bank Transfer'].map((
-                            m,
-                          ) {
-                            return DropdownMenuItem(value: m, child: Text(m));
-                          }).toList(),
-                          onChanged: (v) {
-                            if (v != null) {
-                              setState(() => _selectedRegPaymentMode = v);
-                            }
-                          },
-                        ),
-                        SizedBox(height: 32),
-                      ],
-                      SizedBox(
-                        width: double.infinity,
-                        height: 52,
-                        child: ElevatedButton(
-                          onPressed: _submit,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: Text(
-                            'Save Changes',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                    ],
-                  ),
-                ),
+  Widget _buildHeader(BusinessTerminology term) {
+    return Container(
+      height: 120,
+      padding: const EdgeInsets.symmetric(horizontal: 40),
+      decoration: const BoxDecoration(
+        color: AppColors.primary,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(24),
+          bottomRight: Radius.circular(24),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          InkWell(
+            onTap: () => Navigator.pop(context),
+            borderRadius: BorderRadius.circular(24),
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.arrow_back,
+                color: Colors.white,
+                size: 24,
               ),
             ),
-          );
-        },
+          ),
+          const SizedBox(width: 24),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Edit ${term.customerLabel}',
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              Text(
+                'Update ${term.customerLabel.toLowerCase()} details',
+                style: TextStyle(fontSize: 12, color: Colors.white70),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

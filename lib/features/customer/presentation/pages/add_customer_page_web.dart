@@ -1,6 +1,7 @@
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
+import 'package:csms/core/widgets/web_sidebar.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:csms/core/theme/app_colors.dart';
@@ -12,7 +13,6 @@ import 'package:csms/features/shop/presentation/bloc/shop_context_bloc.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_state.dart';
 import 'package:csms/core/utils/terminology_helper.dart';
-import 'package:csms/features/reports/presentation/pages/report_page.dart';
 
 class AddCustomerPageWeb extends StatefulWidget {
   final List<ProductEntity> products;
@@ -147,6 +147,7 @@ class _AddCustomerPageWebState extends State<AddCustomerPageWeb> {
   @override
   Widget build(BuildContext context) {
     final shopState = context.watch<ShopContextBloc>().state;
+    // ignore: unused_local_variable
     String shopName = 'Shop Name';
     bool regFeeEnabled = false;
     if (shopState is ShopSelected) {
@@ -209,11 +210,11 @@ class _AddCustomerPageWebState extends State<AddCustomerPageWeb> {
         builder: (context, state) {
           return Row(
             children: [
-              _buildSidebar(shopName),
+              const WebSidebar(selectedIndex: 2),
               Expanded(
                 child: Column(
                   children: [
-                    _buildHeader(),
+                    _buildHeader(context),
                     Expanded(
                       child: SingleChildScrollView(
                         padding: const EdgeInsets.symmetric(
@@ -320,10 +321,12 @@ class _AddCustomerPageWebState extends State<AddCustomerPageWeb> {
                                             _computedAmount.toStringAsFixed(0);
                                       }),
                                       validator: (v) {
-                                        if (v == null || v.trim().isEmpty)
+                                        if (v == null || v.trim().isEmpty) {
                                           return 'Price is required';
-                                        if ((double.tryParse(v) ?? 0) <= 0)
+                                        }
+                                        if ((double.tryParse(v) ?? 0) <= 0) {
                                           return 'Must be > 0';
+                                        }
                                         return null;
                                       },
                                     ),
@@ -396,12 +399,13 @@ class _AddCustomerPageWebState extends State<AddCustomerPageWeb> {
                                                             ),
                                                           ],
                                                           onChanged: (v) {
-                                                            if (v != null)
+                                                            if (v != null) {
                                                               setState(
                                                                 () =>
                                                                     _customValidityUnit =
                                                                         v,
                                                               );
+                                                            }
                                                           },
                                                         ),
                                                   ),
@@ -497,133 +501,87 @@ class _AddCustomerPageWebState extends State<AddCustomerPageWeb> {
     );
   }
 
-  Widget _buildSidebar(String shopName) {
-    return Container(
-      width: 250,
-      color: Colors.white,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          shopName,
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const Text(
-                          'Shop Management',
-                          style: TextStyle(fontSize: 14, color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                  ),
-                  _sidebarItem(
-                    0,
-                    Icons.home_outlined,
-                    'Dashboard',
-                    onTap: () => Navigator.popUntil(context, (r) => r.isFirst),
-                  ),
-                  _sidebarItem(
-                    1,
-                    Icons.bar_chart_outlined,
-                    'Reports',
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const ReportPage()),
-                    ),
-                  ),
-                  _sidebarItem(
-                    2,
-                    Icons.people_outline,
-                    '${widget.term.customerLabel}s',
-                    isSelected: true,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildHeader() {
+  //   return Container(
+  //     padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+  //     decoration: const BoxDecoration(
+  //       color: Colors.white,
+  //       border: Border(bottom: BorderSide(color: AppColors.border)),
+  //     ),
+  //     child: Row(
+  //       children: [
+  //         IconButton(
+  //           onPressed: () => Navigator.pop(context),
+  //           icon: const Icon(Icons.arrow_back, color: Colors.black),
+  //         ),
+  //         const SizedBox(width: 16),
+  //         Column(
+  //           crossAxisAlignment: CrossAxisAlignment.start,
+  //           children: [
+  //             Text(
+  //               'Add ${widget.term.customerLabel}',
+  //               style: const TextStyle(
+  //                 fontSize: 20,
+  //                 fontWeight: FontWeight.bold,
+  //               ),
+  //             ),
+  //             Text(
+  //               'Fill in ${widget.term.customerLabel.toLowerCase()} details',
+  //               style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+  //             ),
+  //           ],
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
-  Widget _sidebarItem(
-    int index,
-    IconData icon,
-    String title, {
-    bool isSelected = false,
-    VoidCallback? onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFF1F5FE) : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? AppColors.primary : Colors.grey,
-              size: 20,
-            ),
-            const SizedBox(width: 12),
-            Text(
-              title,
-              style: TextStyle(
-                color: isSelected ? AppColors.primary : Colors.grey[700],
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                fontSize: 14,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+      height: 120,
+      padding: const EdgeInsets.symmetric(horizontal: 40),
       decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(bottom: BorderSide(color: AppColors.border)),
+        color: AppColors.primary,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(24),
+          bottomRight: Radius.circular(24),
+        ),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
+          InkWell(
+            onTap: () => Navigator.pop(context),
+            borderRadius: BorderRadius.circular(24),
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.arrow_back,
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 24),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
                 'Add ${widget.term.customerLabel}',
                 style: const TextStyle(
-                  fontSize: 20,
+                  fontSize: 24,
                   fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
               Text(
                 'Fill in ${widget.term.customerLabel.toLowerCase()} details',
-                style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                style: TextStyle(fontSize: 12, color: Colors.white70),
               ),
             ],
           ),

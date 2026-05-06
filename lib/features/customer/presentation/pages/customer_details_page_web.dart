@@ -9,6 +9,7 @@ import 'package:csms/features/subscription/presentation/pages/edit_subscription_
 import 'package:csms/features/subscription/presentation/pages/add_subscription_page.dart';
 import 'package:csms/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:csms/features/customer/domain/entities/customer_entity.dart';
+import 'package:csms/core/widgets/web_sidebar.dart';
 import 'package:csms/features/subscription/domain/entities/subscription_entity.dart';
 import 'package:csms/features/product/domain/entities/product_entity.dart';
 import 'package:csms/features/customer/presentation/bloc/customer_bloc.dart';
@@ -32,7 +33,7 @@ class CustomerDetailsPageWeb extends StatelessWidget {
       backgroundColor: AppColors.background,
       body: Row(
         children: [
-          _buildSidebar(context),
+          const WebSidebar(selectedIndex: 2),
           Expanded(
             child: BlocListener<CustomerBloc, CustomerState>(
               listener: (context, state) {
@@ -339,116 +340,6 @@ class CustomerDetailsPageWeb extends StatelessWidget {
     );
   }
 
-  Widget _buildSidebar(BuildContext context) {
-    return Container(
-      width: 250,
-      color: Colors.white,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          BlocBuilder<ShopContextBloc, ShopContextState>(
-            builder: (context, state) {
-              final shopName = state is ShopSelected
-                  ? state.selectedShop.shopName
-                  : 'Shop Details';
-              return Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      shopName,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Executive Portal',
-                      style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-          const SizedBox(height: 16),
-          _sidebarItem(
-            context,
-            Icons.home_outlined,
-            'Dashboard',
-            onTap: () => Navigator.popUntil(context, (r) => r.isFirst),
-          ),
-          _sidebarItem(
-            context,
-            Icons.people_outline,
-            'Customers',
-            isSelected: true,
-            onTap: () => Navigator.pop(context),
-          ),
-          // const Spacer(),
-          // const Divider(height: 1),
-          // Padding(
-          //   padding: const EdgeInsets.all(24.0),
-          //   child: Column(
-          //     crossAxisAlignment: CrossAxisAlignment.start,
-          //     children: [
-          //       Text(
-          //         'Current Shop',
-          //         style: TextStyle(fontSize: 10, color: Colors.grey),
-          //       ),
-          //       SizedBox(height: 4),
-          //       Text(
-          //         shopName,
-          //         style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-          //       ),
-          //     ],
-          //   ),
-          // ),
-        ],
-      ),
-    );
-  }
-
-  Widget _sidebarItem(
-    BuildContext context,
-    IconData icon,
-    String title, {
-    bool isSelected = false,
-    VoidCallback? onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFF1F5FE) : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? const Color(0xFF1E56F0) : Colors.grey,
-              size: 20,
-            ),
-            const SizedBox(width: 12),
-            Text(
-              title,
-              style: TextStyle(
-                color: isSelected ? const Color(0xFF1E56F0) : Colors.grey[700],
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                fontSize: 14,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   String _fmt(DateTime d) {
     const months = [
