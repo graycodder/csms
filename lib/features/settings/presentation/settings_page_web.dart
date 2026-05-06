@@ -6,7 +6,6 @@ import 'package:csms/features/product/presentation/pages/product_management_page
 import 'package:csms/features/product/presentation/bloc/product_bloc.dart';
 import 'package:csms/features/staff/presentation/pages/staff_management_page.dart';
 import 'package:csms/features/staff/presentation/bloc/staff_bloc.dart';
-import 'package:csms/core/presentation/pages/webview_page.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_state.dart';
 import 'package:csms/features/profile/presentation/pages/profile_page.dart';
@@ -14,6 +13,7 @@ import 'package:csms/features/shop_subscription/presentation/pages/shop_subscrip
 import 'package:csms/injection_container.dart' as di;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:csms/core/widgets/web_sidebar.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsPageWeb extends StatelessWidget {
   const SettingsPageWeb({super.key});
@@ -200,14 +200,9 @@ class SettingsPageWeb extends StatelessWidget {
         iconColor: const Color(0xFFEF6C00),
         title: 'Terms & Conditions',
         subtitle: 'View terms of service',
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => const WebViewPage(
-              title: 'Terms & Conditions',
-              url: 'https://csms-saas-platform.web.app/legal/terms',
-            ),
-          ),
+        onTap: () => launchUrl(
+          Uri.parse('https://csms-saas-platform.web.app/legal/terms'),
+          mode: LaunchMode.externalApplication,
         ),
       ),
       _SettingItemWeb(
@@ -216,14 +211,9 @@ class SettingsPageWeb extends StatelessWidget {
         iconColor: const Color(0xFF3D5AFE),
         title: 'Privacy Policy',
         subtitle: 'View privacy policy',
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => const WebViewPage(
-              title: 'Privacy Policy',
-              url: 'https://csms-saas-platform.web.app/legal/privacy',
-            ),
-          ),
+        onTap: () => launchUrl(
+          Uri.parse('https://csms-saas-platform.web.app/legal/privacy'),
+          mode: LaunchMode.externalApplication,
         ),
       ),
     ];
