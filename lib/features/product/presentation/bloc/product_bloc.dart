@@ -58,6 +58,13 @@ class ProductLoaded extends ProductState {
   List<Object?> get props => [products];
 }
 
+class ProductActionSuccess extends ProductState {
+  final String message;
+  const ProductActionSuccess(this.message);
+  @override
+  List<Object?> get props => [message];
+}
+
 class ProductError extends ProductState {
   final String message;
   const ProductError(this.message);
@@ -102,8 +109,10 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   ) async {
     emit(ProductOperationInProgress());
     final result = await repository.addProduct(event.product);
-    result.fold((failure) => emit(ProductError(failure.message)), (_) => null);
-    // No need to manually load, stream will update
+    result.fold(
+      (failure) => emit(ProductError(failure.message)),
+      (_) => emit(const ProductActionSuccess('Product added successfully!')),
+    );
   }
 
   Future<void> _onUpdateProduct(
@@ -112,7 +121,9 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   ) async {
     emit(ProductOperationInProgress());
     final result = await repository.updateProduct(event.product);
-    result.fold((failure) => emit(ProductError(failure.message)), (_) => null);
-    // No need to manually load, stream will update
+    result.fold(
+      (failure) => emit(ProductError(failure.message)),
+      (_) => emit(const ProductActionSuccess('Product updated successfully!')),
+    );
   }
 }

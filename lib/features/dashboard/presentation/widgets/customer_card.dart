@@ -145,44 +145,42 @@ class CustomerCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  child: Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          customer.name,
-                          // customer.name[0].toUpperCase() + customer.name.substring(1).toLowerCase(),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF1A1A1A),
-                          ),
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    customer.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF1A1A1A),
+                    ),
                   ),
                 ),
-                SizedBox(width: 8.w),
-                if (sub != null)
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 10.w,
-                      vertical: 4.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: bgColor,
-                      borderRadius: BorderRadius.circular(10.r),
-                    ),
-                    child: Text(
-                      daysLeft >= 0 ? '$daysLeft days left' : 'Expired',
-                      style: TextStyle(
-                        color: statusColor,
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.bold,
+                if (sub != null) ...[
+                  SizedBox(width: 8.w),
+                  Flexible(
+                    flex: 0,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10.w,
+                        vertical: 4.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: bgColor,
+                        borderRadius: BorderRadius.circular(10.r),
+                      ),
+                      child: Text(
+                        daysLeft >= 0 ? '$daysLeft d' : 'Expired',
+                        style: TextStyle(
+                          color: statusColor,
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
                       ),
                     ),
                   ),
+                ],
               ],
             ),
             SizedBox(height: 4.h),
@@ -190,21 +188,27 @@ class CustomerCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                InkWell(
-                  onTap: () =>
-                      AppLauncherUtils.makePhoneCall(customer.mobileNumber),
-                  child: Row(
-                    children: [
-                      Icon(Icons.call, size: 14.sp, color: Colors.grey[400]),
-                      SizedBox(width: 4.w),
-                      Text(
-                        customer.mobileNumber,
-                        style: TextStyle(
-                          color: Colors.grey[400],
-                          fontSize: 13.sp,
+                Expanded(
+                  child: InkWell(
+                    onTap: () =>
+                        AppLauncherUtils.makePhoneCall(customer.mobileNumber),
+                    child: Row(
+                      children: [
+                        Icon(Icons.call, size: 14.sp, color: Colors.grey[400]),
+                        SizedBox(width: 4.w),
+                        Expanded(
+                          child: Text(
+                            customer.mobileNumber,
+                            style: TextStyle(
+                              color: Colors.grey[400],
+                              fontSize: 13.sp,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
 
@@ -247,10 +251,11 @@ class CustomerCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     sub != null
-                        ? 'Expires: ${formatDate(sub.endDate)}'
+                        ? 'Exp: ${formatDate(sub.endDate)}'
                         : 'No active subscription',
                     style: TextStyle(color: Colors.grey[500], fontSize: 13.sp),
                     overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
                 ),
                 // const Spacer(),

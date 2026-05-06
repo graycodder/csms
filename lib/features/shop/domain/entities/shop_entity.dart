@@ -100,17 +100,43 @@ class ShopEntity extends Equatable {
     required this.updatedById,
   });
 
+  ShopEntity copyWith({
+    String? shopId,
+    String? ownerId,
+    String? shopName,
+    String? shopAddress,
+    String? category,
+    String? phone,
+    ShopSettings? settings,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    String? updatedById,
+  }) {
+    return ShopEntity(
+      shopId: shopId ?? this.shopId,
+      ownerId: ownerId ?? this.ownerId,
+      shopName: shopName ?? this.shopName,
+      shopAddress: shopAddress ?? this.shopAddress,
+      category: category ?? this.category,
+      phone: phone ?? this.phone,
+      settings: settings ?? this.settings,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      updatedById: updatedById ?? this.updatedById,
+    );
+  }
+
   @override
   List<Object?> get props => [
-    shopId,
-    ownerId,
-    shopName,
-    shopAddress,
-    category,
-    phone,
-    settings,
-    createdAt,
-    updatedAt,
-    updatedById,
-    ];
+        shopId,
+        ownerId,
+        shopName,
+        shopAddress,
+        category,
+        phone,
+        settings,
+        createdAt,
+        updatedAt,
+        updatedById,
+      ];
 }

@@ -63,9 +63,10 @@ class ShopContextLoaded extends ShopContextState {
 class ShopSelected extends ShopContextState {
   final ShopEntity selectedShop;
   final List<ShopEntity> shops;
-  const ShopSelected(this.selectedShop, this.shops);
+  final String? actionSuccessMessage;
+  const ShopSelected(this.selectedShop, this.shops, {this.actionSuccessMessage});
   @override
-  List<Object?> get props => [selectedShop, shops];
+  List<Object?> get props => [selectedShop, shops, actionSuccessMessage];
 }
 
 class ShopContextEmpty extends ShopContextState {}
@@ -158,11 +159,9 @@ class ShopContextBloc extends Bloc<ShopContextEvent, ShopContextState> {
     result.fold(
       (failure) => emit(ShopContextError(failure.message)),
       (_) {
-        // Emit the updated shop explicitly so that UI listeners (e.g. ShopEditPage)
-        // receive a state change and can close their LoadingOverlay.
         if (state is ShopSelected) {
           final curState = state as ShopSelected;
-          emit(ShopSelected(event.shop, curState.shops));
+          emit(ShopSelected(event.shop, curState.shops, actionSuccessMessage: 'Business information updated successfully!'));
         } else if (state is ShopContextLoaded) {
           final curState = state as ShopContextLoaded;
           emit(ShopContextLoaded(curState.shops.map((s) => s.shopId == event.shop.shopId ? event.shop : s).toList()));

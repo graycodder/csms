@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -13,6 +14,7 @@ import 'package:csms/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:csms/features/auth/presentation/pages/onboarding_page.dart';
 import 'package:csms/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:csms/core/utils/loading_overlay.dart';
+import 'package:csms/features/auth/presentation/pages/login_page_web.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -68,6 +70,10 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (kIsWeb || MediaQuery.of(context).size.width > 600) {
+      return const LoginPageWeb();
+    }
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: AppColors.primary,
@@ -110,7 +116,9 @@ class _LoginPageState extends State<LoginPage> {
                     // ── Bottom white card ─────────────────────────────────
                     Container(
                       width: double.infinity,
-                      height: MediaQuery.of(context).size.height * 0.9,
+                      constraints: BoxConstraints(
+                        minHeight: MediaQuery.of(context).size.height * 0.9,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.only(

@@ -1,0 +1,228 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:csms/core/theme/app_colors.dart';
+import 'package:csms/features/shop/domain/entities/shop_entity.dart';
+
+class ShopEditCardWeb extends StatefulWidget {
+  final ShopEntity shop;
+  final Function(String name, String shopAddress, String category, String phone)
+  onSave;
+  final VoidCallback onCancel;
+
+  const ShopEditCardWeb({
+    super.key,
+    required this.shop,
+    required this.onSave,
+    required this.onCancel,
+  });
+
+  @override
+  State<ShopEditCardWeb> createState() => _ShopEditCardWebState();
+}
+
+class _ShopEditCardWebState extends State<ShopEditCardWeb> {
+  final _formKey = GlobalKey<FormState>();
+  late TextEditingController _nameController;
+  late TextEditingController _addressController;
+  late TextEditingController _categoryController;
+  late TextEditingController _phoneController;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.shop.shopName);
+    _addressController = TextEditingController(text: widget.shop.shopAddress);
+    _categoryController = TextEditingController(text: widget.shop.category);
+    _phoneController = TextEditingController(text: widget.shop.phone ?? '');
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _addressController.dispose();
+    _categoryController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border.withOpacity(0.5)),
+      ),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildEditField(
+              title: 'Business Name',
+              controller: _nameController,
+              maxLength: 20,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9\s]')),
+              ],
+              validator: (v) {
+                if (v == null || v.trim().isEmpty) return 'Required';
+                if (v.length > 20) return 'Max 20 characters';
+                return null;
+              },
+            ),
+            const SizedBox(height: 24),
+            _buildEditField(
+              title: 'Business Address',
+              controller: _addressController,
+              maxLength: 40,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9\s,.-]')),
+              ],
+              validator: (v) {
+                if (v == null || v.trim().isEmpty) return 'Required';
+                if (v.length > 40) return 'Max 40 characters';
+                return null;
+              },
+            ),
+            const SizedBox(height: 24),
+            _buildEditField(
+              title: 'Category',
+              controller: _categoryController,
+              maxLength: 20,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9\s]')),
+              ],
+              validator: (v) {
+                if (v == null || v.trim().isEmpty) return 'Required';
+                if (v.length > 20) return 'Max 20 characters';
+                return null;
+              },
+            ),
+            const SizedBox(height: 24),
+            _buildEditField(
+              title: 'Contact Phone',
+              controller: _phoneController,
+              maxLength: 10,
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              validator: (v) {
+                if (v == null || v.isEmpty) return 'Required';
+                if (v.length != 10) return 'Must be 10 digits';
+                return null;
+              },
+            ),
+            const SizedBox(height: 40),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: widget.onCancel,
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      minimumSize: const Size(double.infinity, 56),
+                      side: const BorderSide(color: AppColors.border),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      'Cancel',
+                      style: TextStyle(
+                        color: AppColors.textLight,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState?.validate() ?? false) {
+                        widget.onSave(
+                          _nameController.text.trim(),
+                          _addressController.text.trim(),
+                          _categoryController.text.trim(),
+                          _phoneController.text.trim(),
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      minimumSize: const Size(double.infinity, 56),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      'Save Changes',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEditField({
+    required String title,
+    required TextEditingController controller,
+    int? maxLength,
+    List<TextInputFormatter>? inputFormatters,
+    String? Function(String?)? validator,
+    TextInputType? keyboardType,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            color: AppColors.textLight,
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          textCapitalization: TextCapitalization.words,
+          maxLength: maxLength,
+          inputFormatters: inputFormatters,
+          validator: validator,
+          keyboardType: keyboardType,
+          style: const TextStyle(fontSize: 16, color: AppColors.textDark),
+          decoration: InputDecoration(
+            counterText: '',
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: AppColors.border),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: AppColors.border),
+            ),
+            errorStyle: const TextStyle(fontSize: 12),
+          ),
+        ),
+      ],
+    );
+  }
+}
