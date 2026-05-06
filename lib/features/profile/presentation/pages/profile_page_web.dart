@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:csms/core/theme/app_colors.dart';
-import 'package:csms/features/shop/presentation/bloc/shop_context_bloc.dart';
+import 'package:csms/core/widgets/web_sidebar.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../bloc/profile_bloc.dart';
 import '../bloc/profile_state.dart';
@@ -20,7 +20,7 @@ class ProfilePageWeb extends StatelessWidget {
       backgroundColor: const Color(0xFFF0F2F5),
       body: Row(
         children: [
-          _buildSidebar(context),
+          const WebSidebar(selectedIndex: -1),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -47,128 +47,6 @@ class ProfilePageWeb extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSidebar(BuildContext context) {
-    return Container(
-      width: 250,
-      color: Colors.white,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          BlocBuilder<ShopContextBloc, ShopContextState>(
-            builder: (context, state) {
-              final shopName = state is ShopSelected
-                  ? state.selectedShop.shopName
-                  : 'Shop Details';
-              return Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      shopName,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Shop Management',
-                      style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-          const SizedBox(height: 16),
-          _sidebarItem(
-            context,
-            Icons.home_outlined,
-            'Dashboard',
-            onTap: () => Navigator.popUntil(context, (r) => r.isFirst),
-          ),
-          _sidebarItem(context, Icons.bar_chart_outlined, 'Reports'),
-          _sidebarItem(context, Icons.people_outline, 'Customers'),
-          // const Spacer(),
-          // const Divider(height: 1),
-          // BlocBuilder<ShopContextBloc, ShopContextState>(
-          //   builder: (context, state) {
-          //     final shopName = state is ShopSelected
-          //         ? state.selectedShop.shopName
-          //         : 'Shop Details';
-          //     return Padding(
-          //       padding: const EdgeInsets.all(24.0),
-          //       child: Column(
-          //         crossAxisAlignment: CrossAxisAlignment.start,
-          //         children: [
-          //           Text(
-          //             'Current Shop',
-          //             style: TextStyle(fontSize: 10, color: Colors.grey[500]),
-          //           ),
-          //           const SizedBox(height: 4),
-          //           Text(
-          //             shopName,
-          //             style: const TextStyle(
-          //               fontSize: 14,
-          //               fontWeight: FontWeight.bold,
-          //             ),
-          //             overflow: TextOverflow.ellipsis,
-          //           ),
-          //           const SizedBox(height: 2),
-          //           Text(
-          //             'ID: 1',
-          //             style: TextStyle(fontSize: 10, color: Colors.grey[100]),
-          //           ),
-          //         ],
-          //       ),
-          //     );
-          //   },
-          // ),
-        ],
-      ),
-    );
-  }
-
-  Widget _sidebarItem(
-    BuildContext context,
-    IconData icon,
-    String title, {
-    bool isSelected = false,
-    VoidCallback? onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withOpacity(0.08) : null,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? AppColors.primary : Colors.grey[600],
-              size: 20,
-            ),
-            const SizedBox(width: 16),
-            Text(
-              title,
-              style: TextStyle(
-                color: isSelected ? AppColors.primary : Colors.grey[800],
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                fontSize: 14,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -258,11 +136,8 @@ class ProfilePageWeb extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // _buildAboutSection(p),
                     const SizedBox(height: 40),
                     _buildContactSection(p),
-                    //const SizedBox(height: 40),
-                    // _buildStatisticsSection(),
                   ],
                 ),
               ),

@@ -9,12 +9,11 @@ import 'package:csms/features/staff/presentation/bloc/staff_bloc.dart';
 import 'package:csms/core/presentation/pages/webview_page.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:csms/features/auth/presentation/bloc/auth_state.dart';
-import 'package:csms/features/auth/presentation/bloc/auth_event.dart';
 import 'package:csms/features/profile/presentation/pages/profile_page.dart';
 import 'package:csms/features/shop_subscription/presentation/pages/shop_subscription_page.dart';
 import 'package:csms/injection_container.dart' as di;
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:csms/features/shop/presentation/bloc/shop_context_bloc.dart';
+import 'package:csms/core/widgets/web_sidebar.dart';
 
 class SettingsPageWeb extends StatelessWidget {
   const SettingsPageWeb({super.key});
@@ -25,7 +24,7 @@ class SettingsPageWeb extends StatelessWidget {
       backgroundColor: const Color(0xFFF0F2F5),
       body: Row(
         children: [
-          _buildSidebar(context),
+          const WebSidebar(selectedIndex: 3),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -49,132 +48,6 @@ class SettingsPageWeb extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSidebar(BuildContext context) {
-    return Container(
-      width: 250,
-      color: Colors.white,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          BlocBuilder<ShopContextBloc, ShopContextState>(
-            builder: (context, state) {
-              final shopName = state is ShopSelected
-                  ? state.selectedShop.shopName
-                  : 'Shop Details';
-              return Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      shopName,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Shop Management',
-                      style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-          const SizedBox(height: 16),
-          _sidebarItem(
-            context,
-            0,
-            Icons.home_outlined,
-            'Dashboard',
-            onTap: () => Navigator.popUntil(context, (r) => r.isFirst),
-          ),
-          _sidebarItem(context, 1, Icons.bar_chart_outlined, 'Reports'),
-          _sidebarItem(context, 2, Icons.people_outline, 'Customers'),
-          // const Spacer(),
-          // const Divider(height: 1),
-          // BlocBuilder<ShopContextBloc, ShopContextState>(
-          //   builder: (context, state) {
-          //     final shopName = state is ShopSelected
-          //         ? state.selectedShop.shopName
-          //         : 'Shop Details';
-          //     return Padding(
-          //       padding: const EdgeInsets.all(24.0),
-          //       child: Column(
-          //         crossAxisAlignment: CrossAxisAlignment.start,
-          //         children: [
-          //           Text(
-          //             'Current Shop',
-          //             style: TextStyle(fontSize: 10, color: Colors.grey[500]),
-          //           ),
-          //           const SizedBox(height: 4),
-          //           Text(
-          //             shopName,
-          //             style: const TextStyle(
-          //               fontSize: 14,
-          //               fontWeight: FontWeight.bold,
-          //             ),
-          //             overflow: TextOverflow.ellipsis,
-          //           ),
-          //           const SizedBox(height: 2),
-          //           Text(
-          //             'ID: 1',
-          //             style: TextStyle(fontSize: 10, color: Colors.grey[500]),
-          //           ),
-          //         ],
-          //       ),
-          //     );
-          //   },
-          // ),
-        ],
-      ),
-    );
-  }
-
-  Widget _sidebarItem(
-    BuildContext context,
-    int index,
-    IconData icon,
-    String title, {
-    bool isSelected = false,
-    VoidCallback? onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primary.withOpacity(0.08)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? AppColors.primary : Colors.grey[600],
-              size: 20,
-            ),
-            const SizedBox(width: 16),
-            Text(
-              title,
-              style: TextStyle(
-                color: isSelected ? AppColors.primary : Colors.grey[800],
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                fontSize: 14,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -309,24 +182,6 @@ class SettingsPageWeb extends StatelessWidget {
             ),
           ),
         ),
-        // Add Business Reports and Subscriptions if needed, but the screenshot didn't explicitly show them
-        // We will include them for feature parity but keep the icon colors matching the design where possible
-        // _SettingItemWeb(
-        //   icon: Icons.bar_chart_outlined,
-        //   iconBg: const Color(0xFFE3F2FD),
-        //   iconColor: const Color(0xFF0D47A1),
-        //   title: 'Business Reports',
-        //   subtitle: 'View performance & analytics',
-        //   onTap: () => Navigator.push(
-        //     context,
-        //     MaterialPageRoute(
-        //       builder: (_) => BlocProvider(
-        //         create: (_) => di.sl<ReportBloc>(),
-        //         child: const ReportPage(),
-        //       ),
-        //     ),
-        //   ),
-        // ),
         _SettingItemWeb(
           icon: Icons.card_membership_outlined,
           iconBg: const Color(0xFFFCE4EC),
@@ -371,15 +226,6 @@ class SettingsPageWeb extends StatelessWidget {
           ),
         ),
       ),
-      // _SettingItemWeb(
-      //   icon: Icons.logout,
-      //   iconBg: const Color(0xFFFFEBEE),
-      //   iconColor: const Color(0xFFE53935),
-      //   title: 'Log Out',
-      //   subtitle: 'Sign out of your account',
-      //   titleColor: const Color(0xFFE53935),
-      //   onTap: () => _confirmLogout(context),
-      // ),
     ];
 
     return Container(
@@ -432,7 +278,7 @@ class SettingsPageWeb extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: item.titleColor ?? Colors.black87,
+                          color: Colors.black87,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -456,29 +302,6 @@ class SettingsPageWeb extends StatelessWidget {
             color: Color(0xFFF0F0F0),
           ),
       ],
-    );
-  }
-
-  void _confirmLogout(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Confirm Logout'),
-        content: const Text('Are you sure you want to log out?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              context.read<AuthBloc>().add(SignOutRequested());
-            },
-            child: const Text('Log Out', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
     );
   }
 
@@ -511,7 +334,6 @@ class _SettingItemWeb {
   final Color iconColor;
   final String title;
   final String subtitle;
-  final Color? titleColor;
   final VoidCallback onTap;
 
   const _SettingItemWeb({
@@ -520,7 +342,6 @@ class _SettingItemWeb {
     required this.iconColor,
     required this.title,
     required this.subtitle,
-    this.titleColor,
     required this.onTap,
   });
 }

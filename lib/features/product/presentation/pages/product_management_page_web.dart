@@ -10,6 +10,7 @@ import 'package:csms/features/product/presentation/pages/add_product_page.dart';
 import 'package:csms/features/product/presentation/pages/edit_product_page.dart';
 import 'package:csms/core/utils/loading_overlay.dart';
 import 'package:intl/intl.dart';
+import 'package:csms/core/widgets/web_sidebar.dart';
 
 class ProductManagementPageWeb extends StatefulWidget {
   const ProductManagementPageWeb({super.key});
@@ -56,7 +57,7 @@ class _ProductManagementPageWebState extends State<ProductManagementPageWeb> {
       backgroundColor: const Color(0xFFF0F2F5),
       body: Row(
         children: [
-          _buildSidebar(context),
+          const WebSidebar(selectedIndex: 3),
           Expanded(
             child: Column(
               children: [
@@ -162,132 +163,6 @@ class _ProductManagementPageWebState extends State<ProductManagementPageWeb> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSidebar(BuildContext context) {
-    return Container(
-      width: 250,
-      color: Colors.white,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          BlocBuilder<ShopContextBloc, ShopContextState>(
-            builder: (context, state) {
-              final shopName = state is ShopSelected
-                  ? state.selectedShop.shopName
-                  : 'Shop Details';
-              return Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      shopName,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Shop Management',
-                      style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-          const SizedBox(height: 16),
-          _sidebarItem(
-            context,
-            0,
-            Icons.home_outlined,
-            'Dashboard',
-            onTap: () => Navigator.popUntil(context, (r) => r.isFirst),
-          ),
-          _sidebarItem(context, 1, Icons.bar_chart_outlined, 'Reports'),
-          _sidebarItem(context, 2, Icons.people_outline, 'Customers'),
-          // const Spacer(),
-          // const Divider(height: 1),
-          // BlocBuilder<ShopContextBloc, ShopContextState>(
-          //   builder: (context, state) {
-          //     final shopName = state is ShopSelected
-          //         ? state.selectedShop.shopName
-          //         : 'Shop Details';
-          //     return Padding(
-          //       padding: const EdgeInsets.all(24.0),
-          //       child: Column(
-          //         crossAxisAlignment: CrossAxisAlignment.start,
-          //         children: [
-          //           Text(
-          //             'Current Shop',
-          //             style: TextStyle(fontSize: 10, color: Colors.grey[500]),
-          //           ),
-          //           const SizedBox(height: 4),
-          //           Text(
-          //             shopName,
-          //             style: const TextStyle(
-          //               fontSize: 14,
-          //               fontWeight: FontWeight.bold,
-          //             ),
-          //             overflow: TextOverflow.ellipsis,
-          //           ),
-          //           const SizedBox(height: 2),
-          //           Text(
-          //             'ID: 1',
-          //             style: TextStyle(fontSize: 10, color: Colors.grey[500]),
-          //           ),
-          //         ],
-          //       ),
-          //     );
-          //   },
-          // ),
-        ],
-      ),
-    );
-  }
-
-  Widget _sidebarItem(
-    BuildContext context,
-    int index,
-    IconData icon,
-    String title, {
-    bool isSelected = false,
-    VoidCallback? onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primary.withOpacity(0.08)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? AppColors.primary : Colors.grey[600],
-              size: 20,
-            ),
-            const SizedBox(width: 16),
-            Text(
-              title,
-              style: TextStyle(
-                color: isSelected ? AppColors.primary : Colors.grey[800],
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                fontSize: 14,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -578,145 +453,6 @@ class _ProductManagementPageWebState extends State<ProductManagementPageWeb> {
         ),
       ),
     );
-    // return Container(
-    //   margin: const EdgeInsets.only(bottom: 16),
-    //   padding: const EdgeInsets.all(24),
-    //   decoration: BoxDecoration(
-    //     color: Colors.white,
-    //     borderRadius: BorderRadius.circular(16),
-    //     border: Border.all(color: Colors.grey.withOpacity(0.1)),
-    //   ),
-    //   child: Row(
-    //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    //     children: [
-    //       Column(
-    //         crossAxisAlignment: CrossAxisAlignment.start,
-    //         children: [
-    //           Text(
-    //             p.name,
-    //             style: TextStyle(
-    //               fontSize: 16,
-    //               fontWeight: FontWeight.bold,
-    //               color: isInactive ? Colors.grey : Colors.black87,
-    //               decoration: isInactive ? TextDecoration.lineThrough : null,
-    //             ),
-    //           ),
-    //           const SizedBox(height: 8),
-    //           Text(
-    //             'Price: ${p.price}',
-    //             style: TextStyle(fontSize: 13, color: Colors.grey[500]),
-    //           ),
-    //         ],
-    //       ),
-    //       Row(
-    //         children: [
-    //           IconButton(
-    //             onPressed: () {
-    //               final ownerId = _ownerId(context);
-    //               if (ownerId != null) {
-    //                 Navigator.push(
-    //                   context,
-    //                   MaterialPageRoute(
-    //                     builder: (context) =>
-    //                         EditProductPage(product: p, ownerId: ownerId),
-    //                   ),
-    //                 );
-    //               }
-    //             },
-    //             icon: const Icon(
-    //               Icons.edit_outlined,
-    //               color: AppColors.primary,
-    //               size: 20,
-    //             ),
-    //             tooltip: 'Edit',
-    //           ),
-    //           const SizedBox(width: 8),
-    //           IconButton(
-    //             onPressed: () {
-    //               final ownerId = _ownerId(context);
-    //               if (ownerId != null) {
-    //                 final newStatus = isInactive ? 'active' : 'inactive';
-    //                 showDialog(
-    //                   context: context,
-    //                   builder: (dialogContext) => AlertDialog(
-    //                     shape: RoundedRectangleBorder(
-    //                       borderRadius: BorderRadius.circular(16),
-    //                     ),
-    //                     title: Text(
-    //                       isInactive
-    //                           ? 'Activate Product?'
-    //                           : 'Deactivate Product?',
-    //                       style: const TextStyle(
-    //                         fontSize: 18,
-    //                         fontWeight: FontWeight.bold,
-    //                       ),
-    //                     ),
-    //                     content: Text(
-    //                       'Are you sure you want to ${isInactive ? 'activate' : 'deactivate'} "${p.name}"?',
-    //                     ),
-    //                     actions: [
-    //                       TextButton(
-    //                         onPressed: () => Navigator.pop(dialogContext),
-    //                         child: const Text(
-    //                           'Cancel',
-    //                           style: TextStyle(color: Colors.grey),
-    //                         ),
-    //                       ),
-    //                       TextButton(
-    //                         onPressed: () {
-    //                           final productBloc = context.read<ProductBloc>();
-    //                           Navigator.pop(dialogContext);
-
-    //                           final updatedProduct = ProductEntity(
-    //                             productId: p.productId,
-    //                             shopId: p.shopId,
-    //                             name: p.name,
-    //                             price: p.price,
-    //                             validityValue: p.validityValue,
-    //                             validityUnit: p.validityUnit,
-    //                             validityDays: p.validityDays,
-    //                             createdAt: p.createdAt,
-    //                             updatedAt: DateTime.now(),
-    //                             updatedById: ownerId,
-    //                             ownerId: p.ownerId,
-    //                             status: newStatus,
-    //                           );
-    //                           productBloc.add(
-    //                             UpdateProduct(
-    //                               ownerId: ownerId,
-    //                               product: updatedProduct,
-    //                             ),
-    //                           );
-    //                         },
-    //                         child: Text(
-    //                           isInactive ? 'Activate' : 'Deactivate',
-    //                           style: TextStyle(
-    //                             color: isInactive
-    //                                 ? const Color(0xFF10B981)
-    //                                 : Colors.redAccent,
-    //                             fontWeight: FontWeight.bold,
-    //                           ),
-    //                         ),
-    //                       ),
-    //                     ],
-    //                   ),
-    //                 );
-    //               }
-    //             },
-    //             icon: Icon(
-    //               isInactive ? Icons.restore : Icons.delete_outline,
-    //               color: isInactive
-    //                   ? const Color(0xFF10B981)
-    //                   : Colors.redAccent,
-    //               size: 20,
-    //             ),
-    //             tooltip: isInactive ? 'Activate' : 'Deactivate',
-    //           ),
-    //         ],
-    //       ),
-    //     ],
-    //   ),
-    // );
   }
 
   Widget _buildEmptyState() {

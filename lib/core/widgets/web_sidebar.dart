@@ -5,7 +5,7 @@ import 'package:csms/core/utils/terminology_helper.dart';
 import 'package:csms/features/shop/presentation/bloc/shop_context_bloc.dart';
 import 'package:csms/features/reports/presentation/pages/report_page.dart';
 import 'package:csms/features/customer/presentation/pages/customer_list_page.dart';
-import 'package:csms/features/shop/presentation/pages/shop_management_page.dart';
+import 'package:csms/features/settings/presentation/settings_page_web.dart';
 
 class WebSidebar extends StatelessWidget {
   final int selectedIndex;
@@ -122,7 +122,7 @@ class WebSidebar extends StatelessWidget {
                 context,
                 3,
                 Icons.settings_outlined,
-                'Shop Settings',
+                'Settings',
                 isSelected: selectedIndex == 3,
                 onTap: () {
                   if (selectedIndex != 3) {
@@ -130,14 +130,14 @@ class WebSidebar extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => const ShopManagementPage(),
+                          builder: (_) => const SettingsPageWeb(),
                         ),
                       );
                     } else {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => const ShopManagementPage(),
+                          builder: (_) => const SettingsPageWeb(),
                         ),
                       );
                     }

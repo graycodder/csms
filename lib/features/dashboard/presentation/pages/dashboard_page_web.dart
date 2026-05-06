@@ -7,13 +7,11 @@ import 'package:csms/features/shop/presentation/bloc/shop_context_bloc.dart';
 import 'package:csms/features/customer/presentation/bloc/customer_bloc.dart';
 import 'package:csms/features/customer/domain/entities/customer_entity.dart';
 import 'package:csms/features/customer/presentation/pages/add_customer_page.dart';
-import 'package:csms/features/customer/presentation/pages/customer_list_page.dart';
 import 'package:csms/core/utils/terminology_helper.dart';
 import 'package:csms/injection_container.dart' as di;
 import 'package:csms/core/theme/app_colors.dart';
 import 'package:csms/core/utils/date_utils.dart';
 import 'package:csms/core/utils/loading_overlay.dart';
-import 'package:csms/features/reports/presentation/pages/report_page.dart';
 import 'package:csms/features/settings/presentation/settings_page_web.dart';
 import 'package:csms/features/notifications/presentation/pages/notifications_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -36,7 +34,6 @@ class _DashboardPageWebState extends State<DashboardPageWeb> {
   late FocusNode _searchFocusNode;
   late TextEditingController _searchController;
   late ScrollController _scrollController;
-  int _selectedNavIndex = 0;
 
   @override
   void initState() {
@@ -228,7 +225,6 @@ class _DashboardPageWebState extends State<DashboardPageWeb> {
       ),
     );
   }
-
 
   Widget _buildHeader(DashboardLoaded state) {
     return Container(

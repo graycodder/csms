@@ -98,8 +98,6 @@ class ShopSubscriptionHistoryPageMobile extends StatelessWidget {
   }
 
   Widget _buildLogCard(ShopSubscriptionLogEntity log) {
-    final bool isAssigned = log.action.toLowerCase() == 'assigned';
-    
     return Container(
       padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(

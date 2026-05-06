@@ -9,6 +9,7 @@ import 'package:csms/features/staff/presentation/bloc/staff_bloc.dart';
 import 'package:csms/features/staff/presentation/pages/add_staff_page.dart';
 import 'package:csms/features/staff/presentation/pages/edit_staff_page.dart';
 import 'package:csms/core/utils/loading_overlay.dart';
+import 'package:csms/core/widgets/web_sidebar.dart';
 
 class StaffManagementPageWeb extends StatefulWidget {
   const StaffManagementPageWeb({super.key});
@@ -46,7 +47,7 @@ class _StaffManagementPageWebState extends State<StaffManagementPageWeb> {
       backgroundColor: const Color(0xFFF0F2F5),
       body: Row(
         children: [
-          _buildSidebar(context),
+          const WebSidebar(selectedIndex: 3),
           Expanded(
             child: Column(
               children: [
@@ -165,132 +166,6 @@ class _StaffManagementPageWebState extends State<StaffManagementPageWeb> {
     );
   }
 
-  Widget _buildSidebar(BuildContext context) {
-    return Container(
-      width: 250,
-      color: Colors.white,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          BlocBuilder<ShopContextBloc, ShopContextState>(
-            builder: (context, state) {
-              final shopName = state is ShopSelected
-                  ? state.selectedShop.shopName
-                  : 'Shop Details';
-              return Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      shopName,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Shop Management',
-                      style: TextStyle(fontSize: 12, color: Colors.grey[500]),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-          const SizedBox(height: 16),
-          _sidebarItem(
-            context,
-            0,
-            Icons.grid_view_outlined,
-            'Dashboard',
-            onTap: () => Navigator.popUntil(context, (r) => r.isFirst),
-          ),
-          _sidebarItem(context, 1, Icons.bar_chart_outlined, 'Reports'),
-          _sidebarItem(context, 2, Icons.people_outline, 'Customers'),
-          // const Spacer(),
-          // const Divider(height: 1),
-          // BlocBuilder<ShopContextBloc, ShopContextState>(
-          //   builder: (context, state) {
-          //     final shopName = state is ShopSelected
-          //         ? state.selectedShop.shopName
-          //         : 'Shop Details';
-          //     return Padding(
-          //       padding: const EdgeInsets.all(24.0),
-          //       child: Column(
-          //         crossAxisAlignment: CrossAxisAlignment.start,
-          //         children: [
-          //           Text(
-          //             'Current Shop',
-          //             style: TextStyle(fontSize: 10, color: Colors.grey[500]),
-          //           ),
-          //           const SizedBox(height: 4),
-          //           Text(
-          //             shopName,
-          //             style: const TextStyle(
-          //               fontSize: 14,
-          //               fontWeight: FontWeight.bold,
-          //             ),
-          //             overflow: TextOverflow.ellipsis,
-          //           ),
-          //           const SizedBox(height: 2),
-          //           Text(
-          //             'ID: 1',
-          //             style: TextStyle(fontSize: 10, color: Colors.grey[500]),
-          //           ),
-          //         ],
-          //       ),
-          //     );
-          //   },
-          // ),
-        ],
-      ),
-    );
-  }
-
-  Widget _sidebarItem(
-    BuildContext context,
-    int index,
-    IconData icon,
-    String title, {
-    bool isSelected = false,
-    VoidCallback? onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primary.withOpacity(0.08)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? AppColors.primary : Colors.grey[600],
-              size: 20,
-            ),
-            const SizedBox(width: 16),
-            Text(
-              title,
-              style: TextStyle(
-                color: isSelected ? AppColors.primary : Colors.grey[800],
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                fontSize: 14,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildHeader(BuildContext context) {
     return Container(
       height: 120,
@@ -396,27 +271,6 @@ class _StaffManagementPageWebState extends State<StaffManagementPageWeb> {
                       ),
                     ),
                   ),
-                  // if (staff.role == 'admin') ...[
-                  //   const SizedBox(width: 8),
-                  //   Container(
-                  //     padding: const EdgeInsets.symmetric(
-                  //       horizontal: 8,
-                  //       vertical: 2,
-                  //     ),
-                  //     decoration: BoxDecoration(
-                  //       color: Colors.blue.withOpacity(0.1),
-                  //       borderRadius: BorderRadius.circular(8),
-                  //     ),
-                  //     child: const Text(
-                  //       'Admin',
-                  //       style: TextStyle(
-                  //         color: Colors.blue,
-                  //         fontSize: 10,
-                  //         fontWeight: FontWeight.bold,
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ],
                 ],
               ),
               const SizedBox(height: 8),

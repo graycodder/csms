@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:csms/features/shop_subscription/domain/entities/shop_subscription_entity.dart';
-import 'package:csms/features/shop/presentation/bloc/shop_context_bloc.dart';
-import 'package:csms/features/reports/presentation/pages/report_page.dart';
 import 'shop_subscription_history_page.dart';
+import 'package:csms/core/widgets/web_sidebar.dart';
 
 class ShopSubscriptionPageWeb extends StatefulWidget {
   final ShopSubscriptionEntity subscription;
@@ -22,17 +20,8 @@ class ShopSubscriptionPageWeb extends StatefulWidget {
 }
 
 class _ShopSubscriptionPageWebState extends State<ShopSubscriptionPageWeb> {
-  final int _selectedNavIndex =
-      4; // Settings/Subscription often categorized here
-
   @override
   Widget build(BuildContext context) {
-    final shopState = context.watch<ShopContextBloc>().state;
-    String shopName = 'Downtown Boutique';
-    if (shopState is ShopSelected) {
-      shopName = shopState.selectedShop.shopName;
-    }
-
     final active = widget.subscription.activePlan;
     final now = DateTime.now();
     final isExpired =
@@ -42,7 +31,7 @@ class _ShopSubscriptionPageWebState extends State<ShopSubscriptionPageWeb> {
 
     return Row(
       children: [
-        _buildSidebar(shopName),
+        const WebSidebar(selectedIndex: 3),
         Expanded(
           child: Column(
             children: [
@@ -61,125 +50,6 @@ class _ShopSubscriptionPageWebState extends State<ShopSubscriptionPageWeb> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildSidebar(String shopName) {
-    return Container(
-      width: 250,
-      color: Colors.white,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  shopName,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  'Shop Management',
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          _sidebarItem(
-            0,
-            Icons.home_outlined,
-            'Dashboard',
-            onTap: () {
-              Navigator.popUntil(context, (route) => route.isFirst);
-            },
-          ),
-          _sidebarItem(
-            1,
-            Icons.bar_chart_outlined,
-            'Reports',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ReportPage()),
-              );
-            },
-          ),
-          _sidebarItem(2, Icons.people_outline, 'Customers'),
-          // const Spacer(),
-          // const Divider(height: 1),
-          // Padding(
-          //   padding: const EdgeInsets.all(24.0),
-          //   child: Column(
-          //     crossAxisAlignment: CrossAxisAlignment.start,
-          //     children: [
-          //       const Text(
-          //         'Current Shop',
-          //         style: TextStyle(fontSize: 10, color: Colors.grey),
-          //       ),
-          //       const SizedBox(height: 4),
-          //       Text(
-          //         shopName,
-          //         style: const TextStyle(
-          //           fontSize: 14,
-          //           fontWeight: FontWeight.bold,
-          //         ),
-          //         overflow: TextOverflow.ellipsis,
-          //       ),
-          //       const SizedBox(height: 2),
-          //       const Text(
-          //         'ID: 1',
-          //         style: TextStyle(fontSize: 10, color: Colors.grey),
-          //       ),
-          //     ],
-          //   ),
-          // ),
-        ],
-      ),
-    );
-  }
-
-  Widget _sidebarItem(
-    int index,
-    IconData icon,
-    String title, {
-    VoidCallback? onTap,
-  }) {
-    final isSelected = _selectedNavIndex == index;
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFF1F5FE) : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? const Color(0xFF1E56F0) : Colors.grey,
-              size: 20,
-            ),
-            const SizedBox(width: 12),
-            Text(
-              title,
-              style: TextStyle(
-                color: isSelected ? const Color(0xFF1E56F0) : Colors.grey[700],
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 

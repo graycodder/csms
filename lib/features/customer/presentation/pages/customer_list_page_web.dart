@@ -1,12 +1,9 @@
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:csms/features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'package:csms/features/customer/domain/entities/customer_entity.dart';
 import 'package:csms/core/utils/terminology_helper.dart';
-import 'package:csms/features/shop/presentation/bloc/shop_context_bloc.dart';
-import 'package:csms/features/reports/presentation/pages/report_page.dart';
 import 'package:csms/core/theme/app_colors.dart';
 import 'package:csms/core/utils/date_utils.dart';
 import 'package:csms/features/customer/presentation/pages/customer_details_page.dart';
@@ -29,7 +26,6 @@ class CustomerListPageWeb extends StatefulWidget {
 }
 
 class _CustomerListPageWebState extends State<CustomerListPageWeb> {
-  final int _selectedNavIndex = 2; // Customers
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
 
@@ -43,12 +39,6 @@ class _CustomerListPageWebState extends State<CustomerListPageWeb> {
 
   @override
   Widget build(BuildContext context) {
-    final shopState = context.watch<ShopContextBloc>().state;
-    String shopName = 'Downtown Boutique';
-    if (shopState is ShopSelected) {
-      shopName = shopState.selectedShop.shopName;
-    }
-
     List<CustomerEntity> filteredCustomers = List.from(widget.state.customers);
     if (_searchQuery.isNotEmpty) {
       filteredCustomers = filteredCustomers.where((c) {
@@ -97,7 +87,6 @@ class _CustomerListPageWebState extends State<CustomerListPageWeb> {
       ),
     );
   }
-
 
   Widget _buildHeader(int count) {
     return Container(
@@ -175,63 +164,6 @@ class _CustomerListPageWebState extends State<CustomerListPageWeb> {
       ),
     );
   }
-
-  // Widget _buildSearchAndFilters() {
-  //   return Container(
-  //     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-  //     decoration: BoxDecoration(
-  //       color: Colors.white,
-  //       borderRadius: BorderRadius.circular(16),
-  //       boxShadow: [
-  //         BoxShadow(
-  //           color: Colors.black.withOpacity(0.03),
-  //           blurRadius: 10,
-  //           offset: Offset(0, 4),
-  //         ),
-  //       ],
-  //     ),
-  //     child: Row(
-  //       children: [
-  //         const Icon(Icons.search, color: Colors.grey, size: 25),
-  //         const SizedBox(width: 12),
-  //         Expanded(
-  //           child: TextField(
-  //             controller: _searchController,
-  //             onChanged: (value) =>
-  //                 setState(() => _searchQuery = value.toLowerCase().trim()),
-  //             decoration: InputDecoration(
-  //               hintText: 'Search by name, phone, or ID...',
-  //               hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
-  //               border: InputBorder.none,
-  //             ),
-  //           ),
-  //         ),
-  //         const SizedBox(width: 16),
-  //         _filterBadge('Active'),
-  //         const SizedBox(width: 8),
-  //         _filterBadge('Expiring'),
-  //       ],
-  //     ),
-  //   );
-  // }
-
-  // Widget _filterBadge(String label) {
-  //   return Container(
-  //     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-  //     decoration: BoxDecoration(
-  //       color: const Color(0xFFF3F4F6),
-  //       borderRadius: BorderRadius.circular(8),
-  //     ),
-  //     child: Text(
-  //       label,
-  //       style: const TextStyle(
-  //         fontSize: 12,
-  //         fontWeight: FontWeight.w600,
-  //         color: Color(0xFF374151),
-  //       ),
-  //     ),
-  //   );
-  // }
 
   Widget _buildCustomerList(List<CustomerEntity> customers) {
     if (customers.isEmpty) {
