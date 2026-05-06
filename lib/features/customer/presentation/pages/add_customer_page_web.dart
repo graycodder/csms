@@ -142,7 +142,6 @@ class _AddCustomerPageWebState extends State<AddCustomerPageWeb> {
   }
 
   String _fmt(DateTime d) => DateFormat('MMM dd, yyyy').format(d);
-  String _fmtInput(DateTime d) => DateFormat('dd/MM/yyyy').format(d);
 
   @override
   Widget build(BuildContext context) {
@@ -245,10 +244,27 @@ class _AddCustomerPageWebState extends State<AddCustomerPageWeb> {
                                               controller: _nameController,
                                               hint: 'Enter name',
                                               icon: Icons.person_outline,
-                                              validator: (v) =>
-                                                  v?.isEmpty ?? true
-                                                  ? 'Name is required'
-                                                  : null,
+                                              maxLength: 20,
+                                              inputFormatters: [
+                                                FilteringTextInputFormatter.allow(
+                                                  RegExp(r'[a-zA-Z0-9\s]'),
+                                                ),
+                                              ],
+                                              validator: (v) {
+                                                if (v == null ||
+                                                    v.trim().isEmpty) {
+                                                  return 'Name is required';
+                                                }
+                                                if (v.length > 20) {
+                                                  return 'Maximum 20 characters';
+                                                }
+                                                if (RegExp(
+                                                  r'[!@#<>?":_`~;[\]\\|=+)(*&^%/-]',
+                                                ).hasMatch(v)) {
+                                                  return 'Special characters not allowed';
+                                                }
+                                                return null;
+                                              },
                                             ),
                                           ],
                                         ),
@@ -265,9 +281,21 @@ class _AddCustomerPageWebState extends State<AddCustomerPageWeb> {
                                               hint: 'Enter 10-digit number',
                                               icon: Icons.phone_outlined,
                                               keyboardType: TextInputType.phone,
-                                              validator: (v) => v?.length != 10
-                                                  ? 'Enter valid 10-digit number'
-                                                  : null,
+                                              maxLength: 10,
+                                              validator: (v) {
+                                                if (v == null || v.isEmpty) {
+                                                  return 'Phone is required';
+                                                }
+                                                if (v.length != 10) {
+                                                  return 'Must be exactly 10 digits';
+                                                }
+                                                if (!RegExp(
+                                                  r'^[0-9]+$',
+                                                ).hasMatch(v)) {
+                                                  return 'Numbers only';
+                                                }
+                                                return null;
+                                              },
                                               inputFormatters: [
                                                 FilteringTextInputFormatter
                                                     .digitsOnly,
@@ -305,6 +333,9 @@ class _AddCustomerPageWebState extends State<AddCustomerPageWeb> {
                                         });
                                       }
                                     },
+                                    validator: (v) => v == null
+                                        ? 'Please select a product'
+                                        : null,
                                   ),
                                   const SizedBox(height: 24),
 
@@ -316,6 +347,12 @@ class _AddCustomerPageWebState extends State<AddCustomerPageWeb> {
                                       hint: 'Enter price',
                                       icon: Icons.currency_rupee,
                                       keyboardType: TextInputType.number,
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.digitsOnly,
+                                        FilteringTextInputFormatter.deny(
+                                          RegExp(r'^0'),
+                                        ),
+                                      ],
                                       onChanged: (_) => setState(() {
                                         _paidAmountController.text =
                                             _computedAmount.toStringAsFixed(0);
@@ -324,8 +361,10 @@ class _AddCustomerPageWebState extends State<AddCustomerPageWeb> {
                                         if (v == null || v.trim().isEmpty) {
                                           return 'Price is required';
                                         }
-                                        if ((double.tryParse(v) ?? 0) <= 0) {
-                                          return 'Must be > 0';
+                                        final p =
+                                            double.tryParse(v.trim()) ?? 0;
+                                        if (p <= 0) {
+                                          return 'Price must be greater than 0';
                                         }
                                         return null;
                                       },
@@ -333,118 +372,104 @@ class _AddCustomerPageWebState extends State<AddCustomerPageWeb> {
                                     const SizedBox(height: 24),
                                   ],
 
-                                  Row(
+                                  Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                      _buildFieldLabel('Plan Validity *'),
+                                      if (_selectedProduct?.validityType ==
+                                          'flexible')
+                                        Row(
                                           children: [
-                                            _buildFieldLabel('Start Date *'),
-                                            _buildDatePickerField(),
-                                          ],
-                                        ),
-                                      ),
-                                      const SizedBox(width: 24),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            _buildFieldLabel('Plan Validity *'),
-                                            if (_selectedProduct
-                                                    ?.validityType ==
-                                                'flexible')
-                                              Row(
-                                                children: [
-                                                  Expanded(
-                                                    flex: 2,
-                                                    child: _buildTextField(
-                                                      controller:
-                                                          _validityController,
-                                                      hint: 'Value',
-                                                      icon:
-                                                          Icons.timer_outlined,
-                                                      keyboardType:
-                                                          TextInputType.number,
-                                                      onChanged: (_) =>
-                                                          setState(() {}),
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 12),
-                                                  Expanded(
-                                                    flex: 3,
-                                                    child:
-                                                        _buildDropdownField<
-                                                          String
-                                                        >(
-                                                          value:
-                                                              _customValidityUnit,
-                                                          icon:
-                                                              Icons.unfold_more,
-                                                          items: const [
-                                                            DropdownMenuItem(
-                                                              value: 'days',
-                                                              child: Text(
-                                                                'Days',
-                                                              ),
-                                                            ),
-                                                            DropdownMenuItem(
-                                                              value: 'months',
-                                                              child: Text(
-                                                                'Months',
-                                                              ),
-                                                            ),
-                                                          ],
-                                                          onChanged: (v) {
-                                                            if (v != null) {
-                                                              setState(
-                                                                () =>
-                                                                    _customValidityUnit =
-                                                                        v,
-                                                              );
-                                                            }
-                                                          },
-                                                        ),
+                                            Expanded(
+                                              flex: 2,
+                                              child: _buildTextField(
+                                                controller: _validityController,
+                                                hint: 'Value',
+                                                icon: Icons.timer_outlined,
+                                                keyboardType:
+                                                    TextInputType.number,
+                                                inputFormatters: [
+                                                  FilteringTextInputFormatter
+                                                      .digitsOnly,
+                                                  FilteringTextInputFormatter.deny(
+                                                    RegExp(r'^0'),
                                                   ),
                                                 ],
-                                              )
-                                            else
-                                              Container(
-                                                width: double.infinity,
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      horizontal: 16,
-                                                      vertical: 16,
-                                                    ),
-                                                decoration: BoxDecoration(
-                                                  color: Colors.white,
-                                                  borderRadius:
-                                                      BorderRadius.circular(12),
-                                                  border: Border.all(
-                                                    color: const Color(
-                                                      0xFFE5E7EB,
-                                                    ),
-                                                  ),
-                                                ),
-                                                child: Text(
-                                                  _selectedProduct != null
-                                                      ? '${_selectedProduct!.validityValue} ${_selectedProduct!.validityUnit}'
-                                                      : 'Select product',
-                                                  style: const TextStyle(
-                                                    fontSize: 16,
-                                                  ),
-                                                ),
+                                                onChanged: (_) =>
+                                                    setState(() {}),
+                                                validator: (v) {
+                                                  if (v == null ||
+                                                      v.trim().isEmpty) {
+                                                    return 'Required';
+                                                  }
+                                                  final val =
+                                                      int.tryParse(v.trim()) ??
+                                                      0;
+                                                  if (val <= 0) {
+                                                    return 'Must be > 0';
+                                                  }
+                                                  return null;
+                                                },
                                               ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              flex: 3,
+                                              child: _buildDropdownField<String>(
+                                                value: _customValidityUnit,
+                                                icon: Icons.unfold_more,
+                                                items: const [
+                                                  DropdownMenuItem(
+                                                    value: 'days',
+                                                    child: Text('Days'),
+                                                  ),
+                                                  DropdownMenuItem(
+                                                    value: 'months',
+                                                    child: Text('Months'),
+                                                  ),
+                                                ],
+                                                onChanged: (v) {
+                                                  if (v != null) {
+                                                    setState(
+                                                      () =>
+                                                          _customValidityUnit =
+                                                              v,
+                                                    );
+                                                  }
+                                                },
+                                              ),
+                                            ),
                                           ],
+                                        )
+                                      else
+                                        Container(
+                                          width: double.infinity,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 16,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                            border: Border.all(
+                                              color: const Color(0xFFE5E7EB),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            _selectedProduct != null
+                                                ? '${_selectedProduct!.validityValue} ${_selectedProduct!.validityUnit}'
+                                                : 'Select product',
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                            ),
+                                          ),
                                         ),
-                                      ),
                                     ],
                                   ),
                                   const SizedBox(height: 24),
-
                                   if (regFeeEnabled) ...[
                                     _buildFieldLabel('Registration Fee *'),
                                     _buildTextField(
@@ -452,10 +477,26 @@ class _AddCustomerPageWebState extends State<AddCustomerPageWeb> {
                                       hint: '0',
                                       icon: Icons.currency_rupee,
                                       keyboardType: TextInputType.number,
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.allow(
+                                          RegExp(r'^\d*\.?\d*'),
+                                        ),
+                                      ],
                                       onChanged: (_) => setState(() {
                                         _paidAmountController.text =
                                             _computedAmount.toStringAsFixed(0);
                                       }),
+                                      validator: (v) {
+                                        if (v == null || v.trim().isEmpty) {
+                                          return 'Registration fee is required';
+                                        }
+                                        final fee =
+                                            double.tryParse(v.trim()) ?? 0;
+                                        if (fee <= 0) {
+                                          return 'Fee must be greater than 0';
+                                        }
+                                        return null;
+                                      },
                                     ),
                                     const SizedBox(height: 24),
                                   ],
@@ -500,41 +541,6 @@ class _AddCustomerPageWebState extends State<AddCustomerPageWeb> {
       ),
     );
   }
-
-  // Widget _buildHeader() {
-  //   return Container(
-  //     padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
-  //     decoration: const BoxDecoration(
-  //       color: Colors.white,
-  //       border: Border(bottom: BorderSide(color: AppColors.border)),
-  //     ),
-  //     child: Row(
-  //       children: [
-  //         IconButton(
-  //           onPressed: () => Navigator.pop(context),
-  //           icon: const Icon(Icons.arrow_back, color: Colors.black),
-  //         ),
-  //         const SizedBox(width: 16),
-  //         Column(
-  //           crossAxisAlignment: CrossAxisAlignment.start,
-  //           children: [
-  //             Text(
-  //               'Add ${widget.term.customerLabel}',
-  //               style: const TextStyle(
-  //                 fontSize: 20,
-  //                 fontWeight: FontWeight.bold,
-  //               ),
-  //             ),
-  //             Text(
-  //               'Fill in ${widget.term.customerLabel.toLowerCase()} details',
-  //               style: TextStyle(fontSize: 14, color: Colors.grey[500]),
-  //             ),
-  //           ],
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 
   Widget _buildHeader(BuildContext context) {
     return Container(
@@ -610,6 +616,7 @@ class _AddCustomerPageWebState extends State<AddCustomerPageWeb> {
     required IconData icon,
     TextInputType? keyboardType,
     int? maxLines = 1,
+    int? maxLength,
     String? Function(String?)? validator,
     List<TextInputFormatter>? inputFormatters,
     void Function(String)? onChanged,
@@ -618,10 +625,12 @@ class _AddCustomerPageWebState extends State<AddCustomerPageWeb> {
       controller: controller,
       keyboardType: keyboardType,
       maxLines: maxLines,
+      maxLength: maxLength,
       validator: validator,
       inputFormatters: inputFormatters,
       onChanged: onChanged,
       decoration: InputDecoration(
+        counterText: '',
         hintText: hint,
         prefixIcon: Icon(icon, size: 20, color: Colors.grey),
         filled: true,
@@ -651,11 +660,13 @@ class _AddCustomerPageWebState extends State<AddCustomerPageWeb> {
     required IconData icon,
     required List<DropdownMenuItem<T>> items,
     required void Function(T?) onChanged,
+    String? Function(T?)? validator,
   }) {
     return DropdownButtonFormField<T>(
       value: value,
       items: items,
       onChanged: onChanged,
+      validator: validator,
       decoration: InputDecoration(
         prefixIcon: Icon(icon, size: 20, color: Colors.grey),
         filled: true,
@@ -675,41 +686,6 @@ class _AddCustomerPageWebState extends State<AddCustomerPageWeb> {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.primary, width: 2),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDatePickerField() {
-    return InkWell(
-      onTap: () async {
-        final d = await showDatePicker(
-          context: context,
-          initialDate: _startDate,
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2100),
-        );
-        if (d != null) setState(() => _startDate = d);
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Row(
-          children: [
-            const Icon(
-              Icons.calendar_today_outlined,
-              size: 20,
-              color: Colors.grey,
-            ),
-            const SizedBox(width: 12),
-            Text(_fmtInput(_startDate), style: const TextStyle(fontSize: 16)),
-            const Spacer(),
-            const Icon(Icons.calendar_month, size: 20, color: Colors.black),
-          ],
         ),
       ),
     );
@@ -771,7 +747,21 @@ class _AddCustomerPageWebState extends State<AddCustomerPageWeb> {
                       hint: '0',
                       icon: Icons.currency_rupee,
                       keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       onChanged: (_) => setState(() {}),
+                      validator: (v) {
+                        if (v == null || v.trim().isEmpty) {
+                          return 'Required';
+                        }
+                        final paid = double.tryParse(v.trim()) ?? 0;
+                        if (paid <= 0) {
+                          return 'Must be > 0';
+                        }
+                        if (paid > _computedAmount) {
+                          return 'Cannot exceed ₹${_computedAmount.toStringAsFixed(0)}';
+                        }
+                        return null;
+                      },
                     ),
                   ],
                 ),
