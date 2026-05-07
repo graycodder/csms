@@ -4,9 +4,6 @@ import 'package:csms/core/theme/app_colors.dart';
 import 'package:csms/features/reports/domain/entities/report_entity.dart';
 import 'package:csms/features/reports/presentation/pages/daily_report_page.dart';
 import 'package:csms/features/reports/presentation/pages/monthly_report_page.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:csms/features/reports/presentation/bloc/report_bloc.dart';
-import 'package:csms/injection_container.dart';
 
 class ReportPageMobile extends StatefulWidget {
   const ReportPageMobile({super.key});
@@ -37,10 +34,8 @@ class _ReportPageMobileState extends State<ReportPageMobile>
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => sl<ReportBloc>(),
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF8F9FA),
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8F9FA),
         body: Column(
           children: [
             _buildHeader(context),
@@ -55,7 +50,6 @@ class _ReportPageMobileState extends State<ReportPageMobile>
             ),
           ],
         ),
-      ),
     );
   }
 

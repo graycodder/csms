@@ -458,22 +458,68 @@ class _ProductManagementPageWebState extends State<ProductManagementPageWeb> {
   Widget _buildEmptyState() {
     return Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey[300]),
           const SizedBox(height: 16),
-          const Text(
-            'No products yet',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey,
+
+          Padding(
+            padding: EdgeInsetsGeometry.all(20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Your Products',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                TextButton.icon(
+                  onPressed: () {
+                    final shopId = _shopId(context);
+                    final ownerId = _ownerId(context);
+                    if (shopId != null && ownerId != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              AddProductPage(shopId: shopId, ownerId: ownerId),
+                        ),
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.add, size: 16),
+                  label: const Text('Add Product'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Click "+ Add Product" to get started',
-            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+          Center(
+            child: Column(
+              children: [
+                const SizedBox(height: 200),
+                Icon(
+                  Icons.inventory_2_outlined,
+                  size: 64,
+                  color: Colors.grey[300],
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'No products yet',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Click "+ Add Product" to get started',
+                  style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                ),
+              ],
+            ),
           ),
         ],
       ),

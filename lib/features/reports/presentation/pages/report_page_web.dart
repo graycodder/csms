@@ -4,7 +4,6 @@ import 'package:csms/core/theme/app_colors.dart';
 import 'package:csms/features/reports/domain/entities/report_entity.dart';
 import 'package:csms/features/reports/presentation/bloc/report_bloc.dart';
 import 'package:csms/features/shop/presentation/bloc/shop_context_bloc.dart';
-import 'package:csms/injection_container.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:csms/core/utils/terminology_helper.dart';
 import 'package:csms/core/widgets/web_sidebar.dart';
@@ -36,6 +35,11 @@ class _ReportPageWebState extends State<ReportPageWeb>
         _triggerFilter();
       }
     });
+
+    // Initial load
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _triggerFilter();
+    });
   }
 
   @override
@@ -58,126 +62,95 @@ class _ReportPageWebState extends State<ReportPageWeb>
       );
     }
   }
-
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) {
-        final bloc = sl<ReportBloc>();
-        final shopState = context.read<ShopContextBloc>().state;
-        if (shopState is ShopSelected) {
-          bloc.add(
-            LoadReport(
-              shopId: shopState.selectedShop.shopId,
-              ownerId: shopState.selectedShop.ownerId,
-              filter: _currentFilter,
-              referenceDate: _referenceDate,
-            ),
-          );
+    return BlocListener<ReportBloc, ReportState>(
+      listener: (context, state) {
+        if (state is ReportLoading) {
+          // LoadingOverlayHelper.show(context);
         }
-        return bloc;
       },
-      child: BlocListener<ReportBloc, ReportState>(
-        listener: (context, state) {
-          if (state is ReportLoading) {
-            // LoadingOverlayHelper.show(context); // Optional on web, might be better to use inline loader
-          } else {
-            // LoadingOverlayHelper.hide();
-          }
-        },
-        child: Builder(
-          builder: (context) {
-            return Scaffold(
-              backgroundColor: const Color(0xFFF0F2F5),
-              body: Row(
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF0F2F5),
+        body: Row(
+          children: [
+            const WebSidebar(selectedIndex: 1),
+            Expanded(
+              child: Column(
                 children: [
-                  const WebSidebar(selectedIndex: 1),
+                  _buildHeader(context),
                   Expanded(
-                    child: Column(
-                      children: [
-                        _buildHeader(context),
-                        Expanded(
-                          child: BlocBuilder<ReportBloc, ReportState>(
-                            builder: (context, state) {
-                              if (state is ReportLoading &&
-                                  state.report == null) {
-                                return const Center(
-                                  child: CircularProgressIndicator(),
-                                );
-                              } else if (state is ReportError) {
-                                return Center(
-                                  child: SelectableText(
-                                    'Error: ${state.message}',
-                                    style: const TextStyle(color: Colors.red),
-                                  ),
-                                );
-                              } else if (state is ReportLoaded ||
-                                  (state is ReportLoading &&
-                                      state.report != null)) {
-                                final report = state is ReportLoaded
-                                    ? state.report
-                                    : (state as ReportLoading).report!;
-                                return BlocBuilder<
-                                  ShopContextBloc,
-                                  ShopContextState
-                                >(
-                                  builder: (context, shopState) {
-                                    final term = shopState is ShopSelected
-                                        ? TerminologyHelper.getTerminology(
-                                            shopState.selectedShop.category,
-                                          )
-                                        : TerminologyHelper.getTerminology(
-                                            'default',
-                                          );
-                                    final isRegEnabled =
-                                        shopState is ShopSelected &&
-                                        shopState
-                                            .selectedShop
-                                            .settings
-                                            .registrationFeeEnabled;
+                    child: BlocBuilder<ReportBloc, ReportState>(
+                      builder: (context, state) {
+                        if (state is ReportLoading && state.report == null) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        } else if (state is ReportError) {
+                          return Center(
+                            child: SelectableText(
+                              'Error: ${state.message}',
+                              style: const TextStyle(color: Colors.red),
+                            ),
+                          );
+                        } else if (state is ReportLoaded ||
+                            (state is ReportLoading && state.report != null)) {
+                          final report =
+                              state is ReportLoaded
+                                  ? state.report
+                                  : (state as ReportLoading).report!;
+                          return BlocBuilder<ShopContextBloc, ShopContextState>(
+                            builder: (context, shopState) {
+                              final term =
+                                  shopState is ShopSelected
+                                      ? TerminologyHelper.getTerminology(
+                                        shopState.selectedShop.category,
+                                      )
+                                      : TerminologyHelper.getTerminology(
+                                        'default',
+                                      );
+                              final isRegEnabled =
+                                  shopState is ShopSelected &&
+                                  shopState
+                                      .selectedShop
+                                      .settings
+                                      .registrationFeeEnabled;
 
-                                    return SingleChildScrollView(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 40,
-                                        vertical: 32,
+                              return SingleChildScrollView(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 40,
+                                  vertical: 32,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    if (_currentFilter == ReportFilter.daily)
+                                      _buildDailyView(
+                                        report,
+                                        term,
+                                        isRegEnabled,
+                                      )
+                                    else
+                                      _buildMonthlyView(
+                                        report,
+                                        term,
+                                        isRegEnabled,
                                       ),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          if (_currentFilter ==
-                                              ReportFilter.daily)
-                                            _buildDailyView(
-                                              report,
-                                              term,
-                                              isRegEnabled,
-                                            )
-                                          else
-                                            _buildMonthlyView(
-                                              report,
-                                              term,
-                                              isRegEnabled,
-                                            ),
-                                          const SizedBox(height: 40),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                );
-                              }
-                              return const Center(
-                                child: Text('No data available'),
+                                    const SizedBox(height: 40),
+                                  ],
+                                ),
                               );
                             },
-                          ),
-                        ),
-                      ],
+                          );
+                        }
+                        return const Center(child: Text('No data available'));
+                      },
                     ),
                   ),
                 ],
               ),
-            );
-          },
+            ),
+          ],
         ),
       ),
     );
