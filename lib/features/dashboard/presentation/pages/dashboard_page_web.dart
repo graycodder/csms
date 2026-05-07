@@ -19,6 +19,7 @@ import 'package:intl/intl.dart';
 import 'package:csms/features/customer/presentation/pages/customer_details_page.dart';
 import 'package:csms/features/notifications/presentation/bloc/notification_bloc.dart';
 import 'package:csms/core/widgets/web_sidebar.dart';
+import 'package:csms/features/shop_subscription/presentation/bloc/shop_subscription_bloc.dart';
 
 class DashboardPageWeb extends StatefulWidget {
   const DashboardPageWeb({super.key});
@@ -89,6 +90,7 @@ class _DashboardPageWebState extends State<DashboardPageWeb> {
     super.dispose();
   }
 
+
   void _tryLoad({bool forced = false}) {
     final shopState = context.read<ShopContextBloc>().state;
     final authState = context.read<AuthBloc>().state;
@@ -105,6 +107,9 @@ class _DashboardPageWebState extends State<DashboardPageWeb> {
             currentShopId,
             shopState.selectedShop.category,
           ),
+        );
+        context.read<ShopSubscriptionBloc>().add(
+          ListenToShopSubscriptionStatus(currentShopId),
         );
       }
     }
