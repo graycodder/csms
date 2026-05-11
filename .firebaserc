@@ -1,6 +1,7 @@
 {
   "projects": {
-    "default": "csms-b03e1"
+    "default": "csms-b03e1",
+    "staging": "csms-staging-179d8"
   },
   "targets": {},
   "etags": {}
