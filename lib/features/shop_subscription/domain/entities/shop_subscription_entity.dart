@@ -1,20 +1,24 @@
 import 'package:equatable/equatable.dart';
+import 'shop_subscription_log_entity.dart';
+
 
 class ShopSubscriptionEntity extends Equatable {
   final String shopId;
   final String shopName;
   final ActivePlanEntity? activePlan;
   final List<QueuedPlanEntity> queuedPlans;
+  final List<ShopSubscriptionLogEntity> history;
 
   const ShopSubscriptionEntity({
     required this.shopId,
     required this.shopName,
     this.activePlan,
     this.queuedPlans = const [],
+    this.history = const [],
   });
 
   @override
-  List<Object?> get props => [shopId, shopName, activePlan, queuedPlans];
+  List<Object?> get props => [shopId, shopName, activePlan, queuedPlans, history];
 }
 
 class ActivePlanEntity extends Equatable {

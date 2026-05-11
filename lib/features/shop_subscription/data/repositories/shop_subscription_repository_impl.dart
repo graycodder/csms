@@ -107,20 +107,19 @@ class ShopSubscriptionRepositoryImpl implements ShopSubscriptionRepository {
   Future<Either<Failure, List<ShopSubscriptionLogEntity>>>
   getShopSubscriptionHistory(String shopId, String ownerId) async {
     try {
-      // Query root shop_subscription_logs and filter by shopId
-      final query = _database
+      // Fetch the entire shop subscription node to get both active and history
+      final snapshot = await _database
           .ref()
-          .child('shop_subscription_logs')
-          .orderByChild('shopId')
-          .equalTo(shopId);
+          .child('shop_subscriptions')
+          .child(shopId)
+          .get();
 
-      final snapshot = await query.get();
       final logs = <ShopSubscriptionLogEntity>[];
 
       if (snapshot.exists) {
-        final data = snapshot.value as Map<dynamic, dynamic>;
+        final data = Map<dynamic, dynamic>.from(snapshot.value as Map);
 
-        // Fetch all plans once to avoid repeated network calls in the loop
+        // Fetch all plans once for price lookup
         final plansSnapshot = await _database
             .ref()
             .child('subscription_plans')
@@ -129,23 +128,76 @@ class ShopSubscriptionRepositoryImpl implements ShopSubscriptionRepository {
             ? Map<dynamic, dynamic>.from(plansSnapshot.value as Map)
             : {};
 
-        data.forEach((key, value) {
-          final logData = Map<String, dynamic>.from(value as Map);
-
-          // Lookup plan price if planId exists
-          if (logData['planId'] != null) {
-            final planId = logData['planId'];
-            final planInfo = plansData[planId];
-            if (planInfo != null) {
-              final planMap = Map<dynamic, dynamic>.from(planInfo as Map);
-              logData['price'] = planMap['price'] ?? 0.0;
-            }
+        // 1. Process Active Plan (if it exists)
+        if (data['active'] != null) {
+          final activeData = Map<String, dynamic>.from(data['active'] as Map);
+          final planId = activeData['planId'];
+          
+          // Lookup price for active plan
+          if (planId != null && plansData[planId] != null) {
+            final planMap = Map<dynamic, dynamic>.from(plansData[planId] as Map);
+            activeData['price'] = planMap['price'] ?? 0.0;
           }
 
-          logs.add(ShopSubscriptionLogModel.fromJson(logData, key.toString()));
-        });
+          logs.add(ShopSubscriptionLogModel.fromJson(
+            {
+              ...activeData,
+              'action': 'active', // Mark as current active plan
+              'timestamp': activeData['startDate'] ?? DateTime.now().millisecondsSinceEpoch,
+              'shopId': shopId,
+            },
+            'current_active',
+          ));
+        }
+
+        // 2. Process Queued Plans (if they exist)
+        if (data['queued'] != null) {
+          final queuedData = Map<dynamic, dynamic>.from(data['queued'] as Map);
+          queuedData.forEach((key, value) {
+            final logData = Map<String, dynamic>.from(value as Map);
+            final planId = logData['planId'];
+
+            // Lookup price for queued plan
+            if (planId != null && plansData[planId] != null) {
+              final planMap = Map<dynamic, dynamic>.from(plansData[planId] as Map);
+              logData['price'] = planMap['price'] ?? 0.0;
+            }
+
+            logs.add(ShopSubscriptionLogModel.fromJson(
+              {
+                ...logData,
+                'action': 'queued',
+                'status': 'queued',
+                'timestamp': DateTime.now().millisecondsSinceEpoch + 1000, // Slightly in future to keep above active
+                'shopId': shopId,
+              },
+              key.toString(),
+            ));
+          });
+        }
+
+        // 3. Process History Logs (if they exist)
+        if (data['history'] != null) {
+          final historyData = Map<dynamic, dynamic>.from(data['history'] as Map);
+          historyData.forEach((key, value) {
+            final logData = Map<String, dynamic>.from(value as Map);
+
+            // Lookup price for history plan
+            if (logData['planId'] != null) {
+              final planId = logData['planId'];
+              final planInfo = plansData[planId];
+              if (planInfo != null) {
+                final planMap = Map<dynamic, dynamic>.from(planInfo as Map);
+                logData['price'] = planMap['price'] ?? 0.0;
+              }
+            }
+
+            logs.add(ShopSubscriptionLogModel.fromJson(logData, key.toString()));
+          });
+        }
       }
 
+      // Sort by timestamp descending
       logs.sort((a, b) => b.timestamp.compareTo(a.timestamp));
       return Right(logs);
     } catch (e) {

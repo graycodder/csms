@@ -1,4 +1,6 @@
 import 'package:csms/features/shop_subscription/domain/entities/shop_subscription_entity.dart';
+import 'shop_subscription_log_model.dart';
+
 
 class ShopSubscriptionModel extends ShopSubscriptionEntity {
   const ShopSubscriptionModel({
@@ -6,6 +8,7 @@ class ShopSubscriptionModel extends ShopSubscriptionEntity {
     required super.shopName,
     super.activePlan,
     super.queuedPlans = const [],
+    super.history = const [],
   });
 
   factory ShopSubscriptionModel.fromJson(Map<dynamic, dynamic> json, String id) {
@@ -18,6 +21,11 @@ class ShopSubscriptionModel extends ShopSubscriptionEntity {
       queuedPlans: json['queued'] != null
           ? (json['queued'] as Map<dynamic, dynamic>).entries.map((e) {
               return QueuedPlanModel.fromJson(Map<String, dynamic>.from(e.value as Map), e.key.toString());
+            }).toList()
+          : [],
+      history: json['history'] != null
+          ? (json['history'] as Map<dynamic, dynamic>).entries.map((e) {
+              return ShopSubscriptionLogModel.fromJson(Map<String, dynamic>.from(e.value as Map), e.key.toString());
             }).toList()
           : [],
     );
